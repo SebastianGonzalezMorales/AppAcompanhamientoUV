@@ -34,7 +34,7 @@ function AprendeSobreSaludMental({ navigation }) {
               { color: '#FFFFFF', marginTop: -10 } // Ajusta el margen superior
             ]}
           >
-            Salud Mental
+            Salud mental
           </Text>
         }
         
