@@ -24,7 +24,7 @@ const RedesSociales = ({ navigation }) => {
       <View style={{ flex: 1, backgroundColor: 'white', borderTopLeftRadius: 20, borderTopRightRadius: 20, overflow: 'hidden' }}>
         <ScrollView contentContainerStyle={{ padding: 20 }}>
           {/* Sección Vida Estudiantil y Apoyo */}
-          <Text style={GlobalStyle.titleWhite}>Vida Estudiantil y Apoyo</Text>
+          <Text style={GlobalStyle.titleWhite}>Vida estudiantil y apoyo</Text>
           <View style={GlobalStyle.storiesContainer}>
             <TouchableOpacity onPress={() => openInstagram('https://www.instagram.com/daeuvalpo/')}>
               <View style={GlobalStyle.outerContainer}>
@@ -62,7 +62,7 @@ const RedesSociales = ({ navigation }) => {
 
           {/* Secciones adicionales */}
           {/* Sección Institucional y Universitario */}
-          <Text style={GlobalStyle.titleWhite}>Institucional y Universitario</Text>
+          <Text style={GlobalStyle.titleWhite}>Institucional y universitario</Text>
           <View style={GlobalStyle.storiesContainer}>
             <TouchableOpacity onPress={() => openInstagram('https://www.instagram.com/uvalpochile/')}>
               <View style={GlobalStyle.outerContainer}>
@@ -83,7 +83,7 @@ const RedesSociales = ({ navigation }) => {
           </View>
 
           {/* Sección Deporte y Recreación */}
-          <Text style={GlobalStyle.titleWhite}>Deporte y Recreación</Text>
+          <Text style={GlobalStyle.titleWhite}>Deporte y recreación</Text>
           <View style={GlobalStyle.storiesContainer}>
             <TouchableOpacity onPress={() => openInstagram('https://www.instagram.com/deportesyrecreacionuv/?hl=es')}>
               <View style={GlobalStyle.outerContainer}>
@@ -96,7 +96,7 @@ const RedesSociales = ({ navigation }) => {
           </View>
 
           {/* Sección Ciencia y Conocimiento */}
-          <Text style={GlobalStyle.titleWhite}>Ciencia y Conocimiento</Text>
+          <Text style={GlobalStyle.titleWhite}>Ciencia y conocimiento</Text>
           <View style={GlobalStyle.storiesContainer}>
             <TouchableOpacity onPress={() => openInstagram('https://www.instagram.com/cienciaabiertauv/')}>
               <View style={GlobalStyle.outerContainer}>

@@ -156,8 +156,8 @@ function Baes({ navigation }) {
             {expandedSections.seis && (
               <View style={styles.infoBox}>
                 <Text style={styles.infoText}>
-                  A comienzos de marzo, entrega tu Certificado de Alumno Regular UV 2024 a la Secretaría de
-                  la Asistente Social para solicitar la reactivación de tu BAES.
+                  A comienzos de marzo, entrega tu certificado de alumno regular UV 2024 a la secretaría de
+                  la asistente social para solicitar la reactivación de tu BAES.
                 </Text>
               </View>
             )}

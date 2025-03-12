@@ -45,7 +45,7 @@ function AreaDeporteyRecreacion({ navigation }) {
           Servicios y apoyo estudiantil
         </Text>
         <Text style={[GlobalStyle.text, { textAlign: 'justify', color: '#FFFFFF' }]}>
-          Área Deporte y Recreación
+          Unidad de deporte y recreación
         </Text>
       </View>
 
@@ -110,7 +110,7 @@ function AreaDeporteyRecreacion({ navigation }) {
             onPress={() => Linking.openURL('mailto:areadeportes@uv.cl')}
           >
             <MaterialCommunityIcons name="email" size={20} color="#FFF" />
-            <Text style={styles.buttonText}>Enviar Correo</Text>
+            <Text style={styles.buttonText}>Enviar correo</Text>
           </TouchableOpacity>
         </View>
       </View>

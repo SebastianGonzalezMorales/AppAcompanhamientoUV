@@ -125,7 +125,7 @@ function Conectados({ navigation }) {
           onPress={() => navigation.navigate('Conectados')} // Reemplaza 'ApoyoUV' con el nombre de la ruta
         >
           <MaterialCommunityIcons name="arrow-right-circle" size={20} color="#FFF" />
-          <Text style={styles.buttonText}>Ir a Contactarse con apoyo UV</Text>
+          <Text style={styles.buttonText}>Ir a "Contactarse con apoyo UV"</Text>
         </TouchableOpacity> 
           </View>
       </View>

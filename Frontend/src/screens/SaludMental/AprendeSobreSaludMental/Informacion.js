@@ -37,7 +37,7 @@ function Informacion({ navigation }) {
   <ScrollView>
     {/* Botón para Salud Mental */}
     <SettingsButton
-      text="Salud Mental"
+      text="Salud mental"
       onPress={() => navigation.navigate('InfoSaludMental')}
     />
 
@@ -53,9 +53,9 @@ function Informacion({ navigation }) {
       onPress={() => navigation.navigate('Depresion')}
     />
 
-    {/* Botón para Burnout Académico */}
+    {/* Botón para Burnout académico */}
     <SettingsButton
-      text="Burnout Académico"
+      text="Burnout académico"
       onPress={() => navigation.navigate('Burnout')}
     />
 

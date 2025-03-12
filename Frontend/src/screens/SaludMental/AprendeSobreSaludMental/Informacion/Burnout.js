@@ -47,7 +47,7 @@ function Burnout({ navigation }) {
         
         {/* Descripción debajo del título */}
         <Text style={[GlobalStyle.text, { textAlign: 'justify' }]}>
-          Burnout Académico
+          Burnout académico
         </Text>
       </View>
 

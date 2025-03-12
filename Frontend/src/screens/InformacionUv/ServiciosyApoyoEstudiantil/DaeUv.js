@@ -89,7 +89,7 @@ function DaeUv({ navigation }) {
         </TouchableOpacity>
         <TouchableOpacity style={styles.emailButton} onPress={handleEmail}>
           <MaterialCommunityIcons name="email" size={20} color="#FFF" />
-          <Text style={styles.emailButtonText}>Enviar Correo</Text>
+          <Text style={styles.emailButtonText}>Enviar correo</Text>
         </TouchableOpacity>
  
       </View>

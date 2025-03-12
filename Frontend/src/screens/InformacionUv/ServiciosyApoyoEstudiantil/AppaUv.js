@@ -84,7 +84,7 @@ function AppaUv({ navigation }) {
           onPress={() => Linking.openURL('mailto:appauv@uv.cl')}
         >
           <MaterialCommunityIcons name="email" size={20} color="#FFF" />
-          <Text style={styles.buttonText}>Enviar Correo</Text>
+          <Text style={styles.buttonText}>Enviar correo</Text>
         </TouchableOpacity>
 
       </View>

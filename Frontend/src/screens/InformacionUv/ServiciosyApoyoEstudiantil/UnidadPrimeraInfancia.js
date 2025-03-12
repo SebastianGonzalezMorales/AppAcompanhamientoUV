@@ -46,7 +46,7 @@ function UnidadPrimeraInfancia({ navigation }) {
           Servicios y apoyo estudiantil
         </Text>
         <Text style={[GlobalStyle.text, { textAlign: 'justify', color: '#FFFFFF' }]}>
-          Unidad de Primera Infancia
+          Unidad de primera infancia
         </Text>
       </View>
 
@@ -101,7 +101,7 @@ function UnidadPrimeraInfancia({ navigation }) {
             onPress={() => Linking.openURL('mailto:programa.infancia@uv.cl')}
           >
             <Icon name="email" size={20} color="white" style={{ marginRight: 15 }} />
-            <Text style={{ color: 'white', fontSize: 16 }}>Enviar Correo</Text>
+            <Text style={{ color: 'white', fontSize: 16 }}>Enviar correo</Text>
           </TouchableOpacity>
         </View>
       </View>

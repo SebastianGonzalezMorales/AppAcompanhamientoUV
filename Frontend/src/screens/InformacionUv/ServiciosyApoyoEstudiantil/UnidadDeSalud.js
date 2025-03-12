@@ -47,7 +47,7 @@ function UnidadDeSalud({ navigation }) {
           Servicios y apoyo estudiantil
         </Text>
         <Text style={[GlobalStyle.text, { textAlign: 'justify', color: '#FFFFFF' }]}>
-          Unidad de Salud
+          Unidad de salud
         </Text>
       </View>
 
@@ -119,7 +119,7 @@ function UnidadDeSalud({ navigation }) {
             onPress={() => Linking.openURL('mailto:unidad.salud@uv.cl')}
           >
             <MaterialCommunityIcons name="email" size={20} color="#FFF" />
-            <Text style={styles.buttonText}>Enviar Correo</Text>
+            <Text style={styles.buttonText}>Enviar correo</Text>
           </TouchableOpacity>
         </View>
       </View>

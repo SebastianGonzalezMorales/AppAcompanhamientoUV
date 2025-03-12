@@ -80,7 +80,7 @@ function AprendeSobreSaludMental({ navigation }) {
               onPress={() => navigation.navigate('ConsejosDeEstudiantes')}
             />
             <SettingsButton
-              text="Redes de Apoyo"
+              text="Redes de apoyo"
               onPress={() => navigation.navigate('RedesDeApoyo')}
               backgroundColor="#FFE0B2" // Naranja claro y cálido
               textColor="#FF762C"       // Naranja oscuro para texto

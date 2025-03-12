@@ -20,8 +20,8 @@ const { width, height } = Dimensions.get('window');
 // Datos de los videos de los estudiantes
 const studentVideos = [
   { id: 1, videoId: 'wxOigZE8ADs', title: 'Preocupaciones y ansiedad' },
-  { id: 2, videoId: 'VKHqSbcW674', title: 'Vida Universitaria' },
-  { id: 3, videoId: 'yqzZljKwTzU', title: 'Vida Universitaria' },
+  { id: 2, videoId: 'VKHqSbcW674', title: 'Vida universitaria' },
+  { id: 3, videoId: 'yqzZljKwTzU', title: 'Vida universitaria' },
 ];
 
 function ConsejosEstudiantes({ navigation }) {

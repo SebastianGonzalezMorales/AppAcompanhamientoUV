@@ -115,7 +115,7 @@ function Conectados({ navigation }) {
   onPress={sendEmail}
 >
   <Icon name="email" size={20} color="white" style={{ marginRight: 8 }} />
-  <Text style={{ color: 'white', fontSize: 16 }}>Enviar Correo</Text>
+  <Text style={{ color: 'white', fontSize: 16 }}>Enviar correo</Text>
 </TouchableOpacity>
 
   const callNumbers = [
@@ -285,7 +285,7 @@ Quedo atento.`;
   onPress={sendEmail}
 >
   <Icon name="email" size={20} color="white" style={{ marginRight: 8 }} />
-  <Text style={{ color: 'white', fontSize: 16 }}>Enviar Correo</Text>
+  <Text style={{ color: 'white', fontSize: 16 }}>Enviar correo</Text>
 </TouchableOpacity>
 
       </View>

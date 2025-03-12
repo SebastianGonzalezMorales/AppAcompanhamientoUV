@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { SafeAreaView, Text, ScrollView, View, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import GlobalStyle from '../../../assets/styles/GlobalStyle';
 import BackButton from '../../../components/buttons/BackButton';
-import SettingsButton from '../../../components/buttons/SettingsButton';
+import SupportButton from '../../../components/buttons/SupportButton';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 function AreaDeAtencionArancelaria({ navigation }) {
@@ -23,19 +23,22 @@ function AreaDeAtencionArancelaria({ navigation }) {
   
   return (
     <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
+      {/* Encabezado */}
       <View style={{ height: 260, padding: 15 }}>
         <BackButton onPress={() => navigation.goBack()} />
         <Text style={GlobalStyle.welcomeText}>Espacio UV</Text>
-        <Text style={[GlobalStyle.subtitleMenu, { color: '#FFFFFF' }]}>Accede a Servicios y apoyo estudiantil</Text>
+        <Text style={[GlobalStyle.subtitleMenu, { color: '#FFFFFF' }]}>Accede a servicios y apoyo estudiantil</Text>
         <Text style={[GlobalStyle.text, { textAlign: 'justify', color: '#FFFFFF' }]}>
-          Áreas de la Unidad de Atención Arancelaria
+          Unidad de atención arancelaria
         </Text>
       </View>
 
+      {/* Contenido principal */}
       <View style={GlobalStyle.rowTwo}>
         <ScrollView>
+
           {/* Botón 1: Arancel */}
-          <SettingsButton
+          <SupportButton
             text="Arancel"
             onPress={() => toggleSection('arancel')}
             isExpanded={expandedSections.arancel}
@@ -43,7 +46,9 @@ function AreaDeAtencionArancelaria({ navigation }) {
           {expandedSections.arancel && (
             <View style={styles.infoBox}>
               <Text style={styles.infoText}>
-                Timbre de fusas, repactaciones, solicitud de certificados, saldos de arancel, problemas emisión de boletas, ajustes de cuentas, devoluciones, solicitudes de descuento por pronto pago.
+                Timbre de fusas, repactaciones, solicitud de certificados, saldos de arancel, 
+                problemas emisión de boletas, ajustes de cuentas, devoluciones, solicitudes 
+                de descuento por pronto pago.
               </Text>
               <TouchableOpacity
                 style={styles.callButton}
@@ -69,9 +74,9 @@ function AreaDeAtencionArancelaria({ navigation }) {
             </View>
           )}
 
-          {/* Botón 2: Beneficios Estudiantiles */}
-          <SettingsButton
-            text="Beneficios Estudiantiles"
+          {/* Botón 2: Beneficios estudiantiles */}
+          <SupportButton
+            text="Beneficios estudiantiles"
             onPress={() => toggleSection('beneficios')}
             isExpanded={expandedSections.beneficios}
           />
@@ -98,8 +103,8 @@ function AreaDeAtencionArancelaria({ navigation }) {
           )}
 
           {/* Botón 3: CAE */}
-          <SettingsButton
-            text="Crédito con Aval del Estado (CAE)"
+          <SupportButton
+            text="Crédito con aval del estado (CAE)"
             onPress={() => toggleSection('cae')}
             isExpanded={expandedSections.cae}
           />
@@ -126,7 +131,7 @@ function AreaDeAtencionArancelaria({ navigation }) {
           )}
 
           {/* Botón 4: Pagarés */}
-          <SettingsButton
+          <SupportButton
             text="Pagarés"
             onPress={() => toggleSection('pagares')}
             isExpanded={expandedSections.pagares}
@@ -154,7 +159,7 @@ function AreaDeAtencionArancelaria({ navigation }) {
           )}
 
           {/* Botón 5: Cobranzas */}
-          <SettingsButton
+          <SupportButton
             text="Cobranzas"
             onPress={() => toggleSection('cobranzas')}
             isExpanded={expandedSections.cobranzas}
@@ -180,6 +185,7 @@ function AreaDeAtencionArancelaria({ navigation }) {
               </TouchableOpacity>
             </View>
           )}
+
         </ScrollView>
       </View>
     </SafeAreaView>

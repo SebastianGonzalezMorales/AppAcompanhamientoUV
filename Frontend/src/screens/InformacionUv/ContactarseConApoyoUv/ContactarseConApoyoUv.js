@@ -55,7 +55,7 @@ function MenuUv({ navigation }) {
         <ScrollView contentContainerStyle={{ padding: 20 }}>
           <View style={{ marginTop: 10 }}>
             <SettingsButton
-              text="Asistente Social"
+              text="Asistente social"
               onPress={() => navigation.navigate('AsistenteSocial')}
             />
             <SettingsButton

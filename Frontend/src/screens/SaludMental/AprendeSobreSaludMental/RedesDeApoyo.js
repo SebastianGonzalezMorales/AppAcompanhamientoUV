@@ -39,7 +39,7 @@ function RedesDeApoyo({ navigation }) {
 
             {/* Botón 1: Fono Prevención del Suicidio */}
             <SupportButton
-              text="Fono Prevención del Suicidio - MINSAL"
+              text="Fono prevención del suicidio - MINSAL"
               onPress={() => toggleSection('uno')}
               isExpanded={expandedSections.uno}
             />
@@ -62,7 +62,7 @@ function RedesDeApoyo({ navigation }) {
 
             {/* Botón 2: Salud Responde */}
             <SupportButton
-              text="Salud Responde - MINSAL"
+              text="Salud responde - MINSAL"
               onPress={() => toggleSection('dos')}
               isExpanded={expandedSections.dos}
             />
@@ -88,7 +88,7 @@ function RedesDeApoyo({ navigation }) {
 
             {/* Botón 3: Hablemos de todo */}
             <SupportButton
-              text="Hablemos de Todo - INJUV"
+              text="Hablemos de todo - INJUV"
               onPress={() => toggleSection('tres')}
               isExpanded={expandedSections.tres}
             />
@@ -111,7 +111,7 @@ function RedesDeApoyo({ navigation }) {
 
             {/* Botón 4: Fono Drogas y Alcohol */}
             <SupportButton
-              text="Fono Drogas y Alcohol"
+              text="Fono drogas y alcohol"
               onPress={() => toggleSection('cuatro')}
               isExpanded={expandedSections.cuatro}
             />
@@ -137,7 +137,7 @@ function RedesDeApoyo({ navigation }) {
 
             {/* Botón 5: Violencia contra las Mujeres */}
             <SupportButton
-              text="Fono Orientación y Ayuda Violencia contra las Mujeres"
+              text="Fono orientación y ayuda violencia contra las mujeres"
               onPress={() => toggleSection('cinco')}
               isExpanded={expandedSections.cinco}
             />

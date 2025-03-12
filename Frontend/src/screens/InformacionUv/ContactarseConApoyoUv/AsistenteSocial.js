@@ -160,7 +160,7 @@ function AsistenteSocial({ navigation }) {
             { textAlign: 'justify', color: '#FFFFFF' },
           ]}
         >
-          Asistente Social
+          Asistente social
         </Text>
         <Text
           style={[

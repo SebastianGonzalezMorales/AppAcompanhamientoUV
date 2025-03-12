@@ -86,7 +86,7 @@ function UserProfile({ navigation }) {
     <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
       {/* Header Section */}
       <View style={{ height: 310, alignItems: 'center' }}>
-        <Text style={[GlobalStyle.welcomeText, { marginRight: 30 }]}>Mi Perfil</Text>
+        <Text style={[GlobalStyle.welcomeText, { marginRight: 30 }]}>Mi perfil</Text>
         <Icon name="user-circle" size={100} color="#000" style={{ marginTop: 20 }} />
 
         {/* Mensaje motivacional */}

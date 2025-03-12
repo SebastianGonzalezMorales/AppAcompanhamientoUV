@@ -114,7 +114,7 @@ console.log('Error @handlePasswordRecovery:', error.response || error.message);
 
         {/* Input and buttons */}
         <View style={AuthStyle.rowTwo}>
-          <Text style={AuthStyle.title}>Recuperar Contraseña</Text>
+          <Text style={AuthStyle.title}>Recuperar contraseña</Text>
           <View style={AuthStyle.inputContainer}>
             <MaterialCommunityIcons
               name="email-outline"
