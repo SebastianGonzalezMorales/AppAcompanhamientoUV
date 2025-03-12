@@ -169,7 +169,7 @@ const DepressionTestForm = ({ navigation }) => {
           <View style={FormStyle.tableSubContainer}>
             <View style={FormStyle.tableHeader}>
               <Text style={FormStyle.tableHeaderTitle}>
-                Clasificación del Test
+                Clasificación del test
               </Text>
             </View>
 

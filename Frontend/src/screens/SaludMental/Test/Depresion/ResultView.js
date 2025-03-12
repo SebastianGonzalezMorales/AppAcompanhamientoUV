@@ -89,7 +89,7 @@ const ResultView = ({ route, navigation }) => {
 
         <View style={FormStyle.tableSubContainer}>
           <View style={FormStyle.tableHeader}>
-            <Text style={FormStyle.tableHeaderTitle}>Clasificación del Test</Text>
+            <Text style={FormStyle.tableHeaderTitle}>Clasificación del test</Text>
           </View>
           <View style={FormStyle.tableRowOdd}>
             <Text style={FormStyle.tableText}>Normal</Text>

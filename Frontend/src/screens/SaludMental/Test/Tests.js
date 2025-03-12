@@ -33,7 +33,7 @@ import {
      
          */}
      <View style={{ height: height * 0.5, padding: 10 }}>
-          <Text style={GlobalStyle.welcomeText}>Salud Mental </Text>
+          <Text style={GlobalStyle.welcomeText}>Salud mental </Text>
           <Text style={GlobalStyle.subtitle}>Tests psicológicos</Text>
         <Text style={[GlobalStyle.text, { textAlign: 'justify' }]}>
          A continuación, podrás realizar diferentes tests psicológicos para conocer mejor tu bienestar emocional y recibir orientación sobre tu estado de ánimo.
