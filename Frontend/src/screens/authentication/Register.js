@@ -495,7 +495,7 @@ const Register = ({ navigation }) => {
             />
             <TextInput
               onChangeText={setFullName}
-              placeholder="Nombre y Apellido"
+              placeholder="Nombre y apellido"
               placeholderTextColor="#92959f"
               selectionColor="#5da5a9"
               style={AuthStyle.input}

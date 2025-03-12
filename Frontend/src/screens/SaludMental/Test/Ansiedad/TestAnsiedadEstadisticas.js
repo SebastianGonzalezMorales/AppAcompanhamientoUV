@@ -92,7 +92,7 @@ const TestAnsiedadEstadisticas = ({ navigation }) => {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <MaterialCommunityIcons name="arrow-left" color="#666a72" size={30} />
         </TouchableOpacity>
-        <Text style={[ModalStyle.modalTitle, { flex: 1, textAlign: 'center' }]}>Historial de Tests Realizados</Text>
+        <Text style={[ModalStyle.modalTitle, { flex: 1, textAlign: 'center' }]}>Historial de tests realizados</Text>
       </View>
 
       {/* Dropdown */}
