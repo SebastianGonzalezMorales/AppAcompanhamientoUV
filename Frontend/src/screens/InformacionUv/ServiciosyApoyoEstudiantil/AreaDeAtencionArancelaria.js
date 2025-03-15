@@ -55,21 +55,21 @@ function AreaDeAtencionArancelaria({ navigation }) {
                 onPress={() => Linking.openURL('tel:997430082')}
               >
                 <MaterialCommunityIcons name="phone" size={18} color="#FFF" />
-                <Text style={styles.callButtonText}>Llamar al 9 9743 0082</Text>
+                <Text style={styles.callButtonText}>Llamar a N.°1</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.callButton}
                 onPress={() => Linking.openURL('tel:968316653')}
               >
                 <MaterialCommunityIcons name="phone" size={18} color="#FFF" />
-                <Text style={styles.callButtonText}>Llamar al 9 6831 6653</Text>
+                <Text style={styles.callButtonText}>Llamar a N.°2</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.emailButton}
                 onPress={() => Linking.openURL('mailto:unidad.aranceles@uv.cl')}
               >
                 <MaterialCommunityIcons name="email" size={20} color="#FFF" />
-                <Text style={styles.emailButtonText}>unidad.aranceles@uv.cl</Text>
+                <Text style={styles.emailButtonText}>Enviar correo</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -90,14 +90,14 @@ function AreaDeAtencionArancelaria({ navigation }) {
                 onPress={() => Linking.openURL('tel:971383317')}
               >
                 <MaterialCommunityIcons name="phone" size={18} color="#FFF" />
-                <Text style={styles.callButtonText}>Llamar al 9 7138 3317</Text>
+                <Text style={styles.callButtonText}>Llamar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.emailButton}
                 onPress={() => Linking.openURL('mailto:gestion.beneficios@uv.cl')}
               >
                 <MaterialCommunityIcons name="email" size={20} color="#FFF" />
-                <Text style={styles.emailButtonText}>gestion.beneficios@uv.cl</Text>
+                <Text style={styles.emailButtonText}>Enviar correo</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -118,14 +118,14 @@ function AreaDeAtencionArancelaria({ navigation }) {
                 onPress={() => Linking.openURL('tel:971383317')}
               >
                 <MaterialCommunityIcons name="phone" size={18} color="#FFF" />
-                <Text style={styles.callButtonText}>Llamar al 9 7138 3317</Text>
+                <Text style={styles.callButtonText}>Llamar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.emailButton}
                 onPress={() => Linking.openURL('mailto:gestion.cae@uv.cl')}
               >
                 <MaterialCommunityIcons name="email" size={20} color="#FFF" />
-                <Text style={styles.emailButtonText}>gestion.cae@uv.cl</Text>
+                <Text style={styles.emailButtonText}>Enviar correo</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -146,14 +146,14 @@ function AreaDeAtencionArancelaria({ navigation }) {
                 onPress={() => Linking.openURL('tel:997321722')}
               >
                 <MaterialCommunityIcons name="phone" size={18} color="#FFF" />
-                <Text style={styles.callButtonText}>Llamar al 9 9732 1722</Text>
+                <Text style={styles.callButtonText}>Llamar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.emailButton}
                 onPress={() => Linking.openURL('mailto:pagares@uv.cl')}
               >
                 <MaterialCommunityIcons name="email" size={20} color="#FFF" />
-                <Text style={styles.emailButtonText}>pagares@uv.cl</Text>
+                <Text style={styles.emailButtonText}>Enviar correo</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -174,14 +174,14 @@ function AreaDeAtencionArancelaria({ navigation }) {
                 onPress={() => Linking.openURL('tel:968310393')}
               >
                 <MaterialCommunityIcons name="phone" size={18} color="#FFF" />
-                <Text style={styles.callButtonText}>Llamar al 9 6831 0393</Text>
+                <Text style={styles.callButtonText}>Llamar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.emailButton}
                 onPress={() => Linking.openURL('mailto:cobranzas@uv.cl')}
               >
                 <MaterialCommunityIcons name="email" size={20} color="#FFF" />
-                <Text style={styles.emailButtonText}>cobranzas@uv.cl</Text>
+                <Text style={styles.emailButtonText}>Enviar correo</Text>
               </TouchableOpacity>
             </View>
           )}

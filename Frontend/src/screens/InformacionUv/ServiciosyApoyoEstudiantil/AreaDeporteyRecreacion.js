@@ -101,7 +101,7 @@ function AreaDeporteyRecreacion({ navigation }) {
             onPress={() => Linking.openURL('tel:322508488')}
           >
             <MaterialCommunityIcons name="phone" size={20} color="#FFF" />
-            <Text style={styles.buttonText}>Llamar al 32-2508488</Text>
+            <Text style={styles.buttonText}>Llamar</Text>
           </TouchableOpacity>
 
           {/* Botón de correo */}
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    width: '80%',
+    width: '40%',
     marginVertical: 10,
   },
   emailButton: {

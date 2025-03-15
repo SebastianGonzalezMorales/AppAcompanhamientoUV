@@ -102,7 +102,7 @@ function UnidadDeSalud({ navigation }) {
             onPress={() => Linking.openURL('tel:322507158')}
           >
             <MaterialCommunityIcons name="phone" size={20} color="#FFF" />
-            <Text style={styles.buttonText}>Llamar al 32-2507158</Text>
+            <Text style={styles.buttonText}>Llamar a N.°1</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -110,7 +110,7 @@ function UnidadDeSalud({ navigation }) {
             onPress={() => Linking.openURL('tel:322507186')}
           >
             <MaterialCommunityIcons name="phone" size={20} color="#FFF" />
-            <Text style={styles.buttonText}>Llamar al 32-2507186</Text>
+            <Text style={styles.buttonText}>Llamar a N.°2</Text>
           </TouchableOpacity>
 
           {/* Botón de correo */}
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginVertical: 10,
-    width: '80%',
+    width: '60%',
     justifyContent: 'center',
     marginTop: 5
   },

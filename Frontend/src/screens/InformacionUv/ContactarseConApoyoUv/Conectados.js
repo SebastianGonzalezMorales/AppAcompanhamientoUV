@@ -149,7 +149,7 @@ function Conectados({ navigation }) {
   };
 
   const sendEmail = () => {
-    const email = 'dae@uv.cl';
+    const email = 'dae@uv.cl, conectadosuv@uv.cl';
     const subject = '[Apoyo emocional - AppAcompañamientoUv]';
     const body = `Hola,
     

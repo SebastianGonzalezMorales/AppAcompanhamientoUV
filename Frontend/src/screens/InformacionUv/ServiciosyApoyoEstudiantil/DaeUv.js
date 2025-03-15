@@ -81,11 +81,11 @@ function DaeUv({ navigation }) {
         </Text>
         <TouchableOpacity style={styles.callButton} onPress={handleCall}>
           <MaterialCommunityIcons name="phone" size={18} color="#FFF" />
-          <Text style={styles.callButtonText}>Llamar al {phoneNumber}</Text>
+          <Text style={styles.callButtonText}>Llamar a N.°1</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.callButton} onPress={handleCall}>
           <MaterialCommunityIcons name="phone" size={18} color="#FFF" />
-          <Text style={styles.callButtonText}>Llamar al {phoneNumberOne}</Text>
+          <Text style={styles.callButtonText}>Llamar a N.°2</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.emailButton} onPress={handleEmail}>
           <MaterialCommunityIcons name="email" size={20} color="#FFF" />

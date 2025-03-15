@@ -75,7 +75,7 @@ function AppaUv({ navigation }) {
           onPress={() => Linking.openURL('tel:322500000')}
         >
           <MaterialCommunityIcons name="phone" size={20} color="#FFF" />
-          <Text style={styles.buttonText}>Llamar al 32250 0000</Text>
+          <Text style={styles.buttonText}>Llamar</Text>
         </TouchableOpacity>
 
         {/* Botón de correo */}

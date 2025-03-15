@@ -117,7 +117,7 @@ function UvInclusiva({ navigation }) {
           onPress={() => Linking.openURL('tel:322995601')}
         >
           <MaterialCommunityIcons name="phone" size={20} color="#FFF" />
-          <Text style={styles.buttonText}>Llamar al 32-2995601</Text>
+          <Text style={styles.buttonText}>Llamar</Text>
         </TouchableOpacity>
 
         {/* Botón de correo */}
@@ -126,7 +126,7 @@ function UvInclusiva({ navigation }) {
           onPress={() => Linking.openURL('mailto:uv.inclusiva@uv.cl')}
         >
           <MaterialCommunityIcons name="email" size={20} color="#FFF" />
-          <Text style={styles.buttonText}>uv.inclusiva@uv.cl</Text>
+          <Text style={styles.buttonText}>Enviar correo</Text>
         </TouchableOpacity>
       </View>
       </View>
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginVertical: 10,
-    width: '80%',
+    width: '40%',
     justifyContent: 'center',
   },
   emailButton: {
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginVertical: 10,
-    width: '80%',
+    width: '50%',
     justifyContent: 'center',
   },
   buttonText: {
