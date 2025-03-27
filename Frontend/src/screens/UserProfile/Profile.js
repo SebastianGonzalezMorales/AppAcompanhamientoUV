@@ -1,5 +1,5 @@
 import {
- SafeAreaView, Text, View,
+ SafeAreaView, Text, View, Alert
 } from 'react-native';
 import React, { useState, useContext, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native'; // Importar useFocusEffect
@@ -77,6 +77,17 @@ function UserProfile({ navigation }) {
     try {
       await logout();
       navigation.replace('Login');
+            // Mostrar alerta de éxito
+            Alert.alert(
+              "Cierre de sesión exitoso",
+              "¡Has cerrado sesión correctamente!",
+              [
+                {
+                  text: "OK",
+                  onPress: () => console.log("Usuario presionó OK al cierre de sesión exitoso")
+                }
+              ]
+            );
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     }

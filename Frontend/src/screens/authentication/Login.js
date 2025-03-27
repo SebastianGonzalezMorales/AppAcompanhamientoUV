@@ -1,12 +1,10 @@
 // react imports
-import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, Text, TextInput, TouchableOpacity, View, Alert } from 'react-native';
 import React, { useState, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Svg, { Circle } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import axios from 'axios';
-import { Alert } from 'react-native';
-
 
 import { AuthContext } from '../../context/AuthContext';
 

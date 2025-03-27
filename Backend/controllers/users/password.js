@@ -2,6 +2,7 @@ const User = require('../../models/user');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer'); // Servicio de correos
+const crypto = require('crypto');
 
 // Asignar la clave secreta desde las variables de entorno
 const secret = process.env.SECRET;
@@ -16,11 +17,20 @@ const forgotPassword = async (req, res) => {
   const normalizedEmail = email.toLowerCase();
 
   try {
-    const user = await User.findOne({ email: normalizedEmail });
-    if (!user) {
-      return res.status(404).json({ success: false, code: 'USER_NOT_FOUND', message: 'No se encontró una cuenta asociada a este correo. Por favor, verifica e intenta nuevamente.' });
-    }
+    // Calcular el hash del email
+    const emailHash = crypto.createHash('sha256')
+      .update(normalizedEmail)
+      .digest('hex');
 
+    // Buscar usando emailHash en lugar de email
+    const user = await User.findOne({ emailHash: emailHash });
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        code: 'USER_NOT_FOUND', 
+        message: 'No se encontró una cuenta asociada a este correo. Por favor, verifica e intenta nuevamente.' 
+      });
+    }
     const firstName = user.name.split(' ')[0];
     const resetToken = jwt.sign({ userId: user._id, email: user.email }, secret, { expiresIn: '1h' });
 
@@ -254,8 +264,13 @@ const getResetPasswordToken = async (req, res) => {
   }
 
   try {
-    // Busca al usuario por correo electrónico
-    const user = await User.findOne({ email: email });
+    // Genera el hash del email (igual que en el pre('save'))
+    const hashedEmail = crypto.createHash('sha256')
+      .update(email.toLowerCase())
+      .digest('hex');
+
+    // Busca al usuario usando el emailHash
+    const user = await User.findOne({ emailHash: hashedEmail });
 
     if (!user) {
       return res.status(404).send({ message: "Usuario no encontrado" });

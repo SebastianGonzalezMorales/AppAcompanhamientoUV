@@ -22,7 +22,7 @@ const loginUser = async (req, res) => {
             .digest('hex');
 
         // Verifica si existe un usuario temporal pendiente de verificación
-        const tempUser = await TempUser.findOne({ email: normalizedEmail });
+        const tempUser = await TempUser.findOne({ emailHash: hashedEmail });
         if (tempUser) {
             return res.status(403).json({ 
                 success: false, 
@@ -310,10 +310,27 @@ const verifyEmail = async (req, res) => {
     }
 };
 
+
+let revokedTokens = [];
+
 const logoutUser = (req, res) => {
-    const token = req.headers['authorization'].split(' ')[1];
-    revokedTokens.push(token);
-    res.status(200).json({ success: true, message: "El usuario cerró sesión exitosamente" });
+    try {
+        const authHeader = req.headers['authorization'];
+        if (!authHeader) {
+            return res.status(400).json({ success: false, message: "No se proporcionó un token" });
+        }
+
+        const token = authHeader.split(' ')[1];
+        revokedTokens.push(token);
+
+        return res.status(200).json({ 
+            success: true, 
+            message: "El usuario cerró sesión exitosamente" 
+        });
+    } catch (error) {
+        console.error('Error en logoutUser:', error);
+        return res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    }
 };
 
 module.exports = { loginUser, registerUser, verifyEmail, logoutUser };

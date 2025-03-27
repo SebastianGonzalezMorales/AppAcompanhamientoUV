@@ -1,5 +1,6 @@
 const User = require('../../models/user');
 const jwt = require("jsonwebtoken");
+const crypto = require('crypto');
 
 // Asignar la clave secreta desde las variables de entorno
 const secret = process.env.SECRET;
@@ -79,8 +80,14 @@ const getUserData = async (req, res) => {
     try {
         const user = jwt.verify(token, secret);
         const useremail = user.email;
+        
+        // Calcular el hash del email (asegúrate de que coincida con la normalización que usas en el pre-save)
+        const emailHash = crypto.createHash('sha256')
+            .update(useremail.toLowerCase())
+            .digest('hex');
 
-        const data = await User.findOne({ email: useremail });
+        // Buscar usando el emailHash
+        const data = await User.findOne({ emailHash: emailHash });
 
         if (!data) {
             return res.status(404).send({ status: "Error", message: "Usuario no encontrado" });
