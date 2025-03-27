@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "cross-env NODE_ENV=production node app.js",
-    "dev": "cross-env NODE_ENV=testing node app.js",
+    "dev": "cross-env NODE_ENV=development nodemon app.js",
     "test": "echo \"No tests specified\" && exit 1"
   },
   "author": "sgonzalezm9045@gmail.com",
@@ -13,6 +13,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.0",
+    "chalk": "^4.1.2",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "debug": "^4.4.0",
