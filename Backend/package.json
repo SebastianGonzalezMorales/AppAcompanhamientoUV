@@ -2,7 +2,7 @@
   "name": "my-app",
   "version": "1.0.0",
   "engines": {
-    "node": "20.14.0"
+    "node": "20.x"
   },
   "description": "Backend for the My-App application, including API endpoints, database integration, and authentication.",
   "main": "app.js",
