@@ -9,6 +9,7 @@
         "@react-native-community/datetimepicker": "^8.2.0",
         "buffer": "^6.0.3",
         "date-fns": "^4.1.0",
+        "debug": "^4.4.0",
         "react-native-image-pan-zoom": "^2.1.12"
     }
 }
