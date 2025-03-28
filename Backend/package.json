@@ -8,6 +8,10 @@
     "dev": "cross-env NODE_ENV=development nodemon app.js",
     "test": "echo \"No tests specified\" && exit 1"
   },
+  "engines": {
+  "node": "22.14.0",
+  "npm": "11.2.0"
+},
   "author": "sgonzalezm9045@gmail.com",
   "license": "ISC",
   "dependencies": {
