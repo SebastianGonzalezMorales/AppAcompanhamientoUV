@@ -23,7 +23,10 @@ if (process.env.NODE_ENV !== 'production') {
   }
 } else {
   // En producción, Heroku gestiona las variables de entorno
-  console.log(chalk.blue('Entorno de producción detectado. Usando variables configuradas en Heroku.'));
+  console.log(''); // línea en blanco para espaciar
+  console.log(chalk.blue('=== Entorno de producción detectado ==='));
+  console.log(chalk.blue('Usando variables configuradas en Heroku.'));
+  console.log(''); // línea en blanco final
 }
 
 // Importar middlewares personalizados
@@ -73,8 +76,6 @@ mongoose.set('strictQuery', false);
 // Conectar a la base de datos MongoDB
 mongoose
   .connect(process.env.CONNECTION_STRING, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
     dbName: 'my-app', // Nombre de la base de datos
   })
   .then(() => {
