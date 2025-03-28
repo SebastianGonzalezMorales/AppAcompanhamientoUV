@@ -95,11 +95,24 @@ usersSchema.pre('save', function (next) {
  * - Se encriptan: name, rut, email, phoneNumber.
  * - 'rutHash' y 'emailHash' no se encriptan para que sean buscables.
  */
+const encryptionKey = process.env.ENCRYPTION_KEY;
+const signingKey = process.env.SIGNING_KEY;
+
+if (!encryptionKey || !signingKey) {
+  throw new Error(
+    "Faltan las variables de entorno ENCRYPTION_KEY o SIGNING_KEY. Configúralas antes de iniciar la aplicación."
+  );
+}
+
+// Ahora que estás seguro de que existen, conviértalas a Buffer
+const encryptionKeyBuffer = Buffer.from(encryptionKey, 'hex');
+const signingKeyBuffer = Buffer.from(signingKey, 'hex');
+
 usersSchema.plugin(encrypt, {
-    encryptionKey: Buffer.from(process.env.ENCRYPTION_KEY, 'hex'), // Clave de 32 bytes en formato hex (64 caracteres hex)
-    signingKey: Buffer.from(process.env.SIGNING_KEY, 'hex'),       // Clave de 64 bytes en formato hex (128 caracteres hex)
-    encryptedFields: ['name', 'rut', 'email', 'phoneNumber'],
-    encryptOnly: true, // Permite mantener los campos hash sin encriptar para búsquedas
+  encryptionKey: encryptionKeyBuffer,
+  signingKey: signingKeyBuffer,
+  encryptedFields: ['name', 'rut', 'email', 'phoneNumber'],
+  encryptOnly: true,
 });
 
 module.exports = mongoose.model('User', usersSchema);
