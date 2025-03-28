@@ -1,16 +1,25 @@
 const { expressjwt: jwt } = require("express-jwt");
 
-// Verifica que las variables se están cargando
-console.log("JWT Secret:", process.env.SECRET); 
-console.log("API URL:", process.env.API_URL);
-
 const secret = process.env.SECRET;
 const api = process.env.API_URL;
 const baseUrl = process.env.BASE_URL;
 
 if (!secret) {
-    throw new Error("JWT secret is not defined in environment variables");
+    throw new Error("La clave secreta JWT no está definida en las variables de entorno");
 }
+
+if (!api) {
+    throw new Error("La URL de la API no está definida en las variables de entorno");
+}
+
+if (!baseUrl) {
+    throw new Error("La URL base no está definida en las variables de entorno");
+}
+
+// Verifica que las variables se están cargando
+console.log("JWT Secret:", process.env.SECRET); 
+console.log("API URL:", process.env.API_URL);
+
 
 const authJwt = jwt({
     secret: secret,

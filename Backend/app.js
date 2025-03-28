@@ -73,6 +73,12 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 // Ajustar strictQuery (nueva configuración de Mongoose)
 mongoose.set('strictQuery', false);
 
+// Verifica que la variable de entorno CONNECTION_STRING esté definida.
+// Si no lo está, lanza un error para evitar intentar conectarse sin una cadena de conexión válida.
+if (!process.env.CONNECTION_STRING) {
+  throw new Error("La cadena de conexión a la base de datos (CONNECTION_STRING) no está definida en las variables de entorno");
+}
+
 // Conectar a la base de datos MongoDB
 mongoose
   .connect(process.env.CONNECTION_STRING, {
