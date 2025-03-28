@@ -8,9 +8,6 @@
     "dev": "cross-env NODE_ENV=development nodemon app.js",
     "test": "echo \"No tests specified\" && exit 1"
   },
-  "engines": {
-    "node": "20.x"
-  },
   "author": "sgonzalezm9045@gmail.com",
   "license": "ISC",
   "dependencies": {
