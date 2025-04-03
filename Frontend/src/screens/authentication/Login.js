@@ -4,7 +4,7 @@ import React, { useState, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Svg, { Circle } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import axios from 'axios';
+import api from '../../utils/api';
 
 import { AuthContext } from '../../context/AuthContext';
 
@@ -49,7 +49,8 @@ const Login = ({ navigation }) => {
     try {
       // Convertir el correo electrónico a minúsculas
       const lowercaseEmail = email.toLowerCase();
-      const response = await axios.post(`${API_URL}/auth/login`, { email: lowercaseEmail, password });
+      const response = await api.post(`${API_URL}/auth/login`, { email: lowercaseEmail, password }
+      );
 
       const { token } = response.data;
       await login(token);
@@ -66,25 +67,33 @@ const Login = ({ navigation }) => {
         ]
       );
     } catch (error) {
-      // Registra la respuesta completa del servidor para inspeccionar
-      console.log('Error en login:', error.response?.data);
-
-      // Si el backend devuelve { success: false, message: '...'}, podemos usar error.response.data.message
-      const errorMessage = error.response?.data?.message || "Error al iniciar sesión. Verifica tus credenciales.";
-
-      Alert.alert(
-        "Error",
-        errorMessage,
-        [
-          {
-            text: "OK",
-            onPress: () => console.log("Usuario presionó OK en el alerta de error")
-          }
-        ]
-      );
+      console.log('[LOGIN ERROR]');
+      console.log('Mensaje:', error.message);
+      console.log('Código:', error.code);
+      console.log('Response:', error.response);
+      console.log('Config:', error.config);
+    
+      let errorMessage = "Ha ocurrido un error inesperado. Por favor, inténtalo nuevamente.";
+    
+      // Casos más comunes:
+      if (error.code === 'ECONNABORTED') {
+        errorMessage = "El servidor tardó demasiado en responder. Revisa tu conexión a internet.";
+      } else if (error.message === 'Network Error') {
+        errorMessage = "No se pudo conectar con el servidor. Asegúrate de estar conectado a la red y que el servidor esté activo.";
+      } else if (error.response?.status === 401 || error.response?.status === 400) {
+        errorMessage = "Correo o contraseña incorrectos. Por favor, verifica tus credenciales.";
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+    
+      Alert.alert("Error al iniciar sesión", errorMessage, [
+        {
+          text: "OK",
+          onPress: () => console.log("Usuario presionó OK en el alerta de error"),
+        },
+      ]);
     }
-  };
-
+  }
 
   /*
    * ****************

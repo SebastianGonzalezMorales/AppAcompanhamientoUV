@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Linking,
 } from 'react-native';
-import axios from 'axios';
+import api from '../../../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
@@ -36,7 +36,7 @@ function Conectados({ navigation }) {
       try {
         const token = await AsyncStorage.getItem('token');
         if (token) {
-          const response = await axios.post(
+          const response = await api.post(
             `${API_URL}/user-management/userdata`,
             { token },
             { headers: { Authorization: `Bearer ${token}` } }

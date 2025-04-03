@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
+import api from '../../utils/api';
 
 // Import the API URL from environment variables
 import { API_URL } from '@env';
@@ -27,7 +27,7 @@ export const onAuthStateChanged = async (setUser, setInitialising) => {
 
     console.log(token)
     // Verificar el token con el backen
-   const response = await axios.get(`${API_URL}/tokens/verifyToken`, {
+   const response = await api.get(`${API_URL}/tokens/verifyToken`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

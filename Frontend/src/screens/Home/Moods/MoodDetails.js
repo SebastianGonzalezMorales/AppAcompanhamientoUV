@@ -23,7 +23,7 @@ import FormStyle from '../../../assets/styles/FormStyle';
 import GlobalStyle from '../../../assets/styles/GlobalStyle';
 
 // Import Axios for backend requests
-import axios from 'axios';
+import api from '../../../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '@env';
 
@@ -53,7 +53,7 @@ const MoodDetails = ({ route, navigation }) => {
         }
 
         // Solicitar detalles del estado de ánimo
-        const response = await axios.get(
+        const response = await api.get(
           `${API_URL}/moodState/get-MoodStatesById/${moodId}`,
           {
             headers: { Authorization: `Bearer ${token}` },

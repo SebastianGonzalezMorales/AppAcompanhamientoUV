@@ -2,7 +2,7 @@
 import { Dimensions, SafeAreaView, Text, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { BarChart } from 'react-native-chart-kit';
-import axios from 'axios';
+import api from '../../../../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '@env';
 
@@ -45,7 +45,7 @@ const QuestionnaireStats = ({ navigation }) => {
         return;
       }
 
-      const response = await axios.get(`${API_URL}/resultsTests/getResultsTestByMonth`, {
+      const response = await api.get(`${API_URL}/resultsTests/getResultsTestByMonth`, {
         headers: { Authorization: `Bearer ${token}` },
         params: { month },
       });

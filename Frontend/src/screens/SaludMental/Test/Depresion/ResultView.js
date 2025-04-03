@@ -1,7 +1,7 @@
 // react imports
 import { SafeAreaView, Text, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../../../utils/api';
 import { API_URL } from '@env'; // URL de la API desde las variables de entorno
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -38,7 +38,7 @@ const ResultView = ({ route, navigation }) => {
         // Hacer una llamada a la API para obtener los resultados del test
         const token = await AsyncStorage.getItem('token'); // Autorización con token
 
-        const response = await axios.get(
+        const response = await api.get(
           `${API_URL}/resultsTests/get-resultsTest/${documentId}`,
           {
             headers: {

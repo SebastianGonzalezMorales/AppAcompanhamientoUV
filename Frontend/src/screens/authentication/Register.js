@@ -4,7 +4,7 @@ import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import Svg, { Circle } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import axios from 'axios';
+import api from '../../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNPickerSelect from 'react-native-picker-select';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -384,7 +384,7 @@ const Register = ({ navigation }) => {
       console.log('Datos enviados al backend:', userData);
 
       // Realizar la solicitud POST al backend
-      const response = await axios.post(`${API_URL}/auth/register`, userData);
+      const response = await api.post(`${API_URL}/auth/register`, userData);
       console.log('Datos enviados al backend:', userData);
 
 

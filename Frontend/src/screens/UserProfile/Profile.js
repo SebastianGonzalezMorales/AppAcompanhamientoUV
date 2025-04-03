@@ -5,7 +5,7 @@ import React, { useState, useContext, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native'; // Importar useFocusEffect
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { ProgressBar } from 'react-native-paper'; // Asegúrate de instalar react-native-paper
-import axios from 'axios';
+import api from '../../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { AuthContext } from '../../context/AuthContext';
@@ -33,7 +33,7 @@ function UserProfile({ navigation }) {
     try {
       const token = await AsyncStorage.getItem('token');
       if (token) {
-        const userResponse = await axios.post(
+        const userResponse = await api.post(
           `${API_URL}/user-management/userdata`,
           { token },
           { headers: { Authorization: `Bearer ${token}` } }
@@ -49,7 +49,7 @@ function UserProfile({ navigation }) {
         setPhone(userData.phoneNumber);
 
         // Obtener progreso semanal desde el backend
-        const progressResponse = await axios.get(
+        const progressResponse = await api.get(
           `${API_URL}/moodState/calculateStreak`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -62,8 +62,14 @@ function UserProfile({ navigation }) {
       }
     } catch (error) {
       console.error('Error fetching user data or progress:', error);
-      setMessage('Hubo un problema al cargar tu progreso. Inténtalo más tarde. 😓');
+    
+      if (error.message === 'Network Error') {
+        setMessage('No pudimos conectarnos. Revisa tu conexión a Internet. 🌐');
+      } else {
+        setMessage('Hubo un problema al cargar tu progreso. Inténtalo más tarde. 😓');
+      }
     }
+    
   };
 
   // Se ejecuta cada vez que la pantalla gana foco

@@ -1,6 +1,6 @@
 import { FlatList, SafeAreaView, Text, View, StyleSheet, TouchableOpacity, Linking, Modal } from 'react-native';
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../../../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
@@ -124,7 +124,7 @@ function DepressionTestMain({ navigation }) {
       }
 
       // Consulta a la base de datos para obtener el usuario
-      const response = await axios.post(
+      const response = await api.post(
         `${API_URL}/user-management/userdata`,
         { token }, // Envía el token en el cuerpo de la solicitud
         {
@@ -176,7 +176,7 @@ function DepressionTestMain({ navigation }) {
           }
   
           // Obtener userId
-          const { data: userResponse } = await axios.post(
+          const { data: userResponse } = await api.post(
             `${API_URL}/tokens/userid`,
             { token },
             { headers: { Authorization: `Bearer ${token}` } }
@@ -189,7 +189,7 @@ function DepressionTestMain({ navigation }) {
           }
   
           // Obtener resultados del test
-          const { data: resultsResponse } = await axios.post(
+          const { data: resultsResponse } = await api.post(
             `${API_URL}/resultsTests/get-resultsTestUser/${userId}`,
             { token },
             { headers: { Authorization: `Bearer ${token}` } }

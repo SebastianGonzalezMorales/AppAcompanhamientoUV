@@ -1,7 +1,7 @@
 // react imports
 import { Image, Text, TextInput, TouchableOpacity, Alert, View } from 'react-native';
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 import Svg, { Circle } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -52,7 +52,7 @@ const ForgotPassword = ({ navigation }) => {
       const lowercaseEmail = email.toLowerCase();
       
     // Enviar la solicitud al backend
-    const response = await axios.post(`${API_URL}/password/forgot-password`, { email: lowercaseEmail });
+    const response = await api.post(`${API_URL}/password/forgot-password`, { email: lowercaseEmail });
     console.log(response)
     // Manejar la respuesta del backend
     if (response.data.success) {

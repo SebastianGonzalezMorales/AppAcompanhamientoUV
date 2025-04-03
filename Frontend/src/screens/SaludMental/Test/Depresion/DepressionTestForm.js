@@ -2,7 +2,7 @@
 import { Alert, FlatList, Text, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import axios from 'axios';
+import api from '../../../../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { format } from 'date-fns';
@@ -39,7 +39,7 @@ const DepressionTestForm = ({ navigation }) => {
         const token = await AsyncStorage.getItem('token');
 
         if (token) {
-          const response = await axios.get(`${API_URL}/questions/get-questions`, {
+          const response = await api.get(`${API_URL}/questions/get-questions`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -105,7 +105,7 @@ const DepressionTestForm = ({ navigation }) => {
       const token = await AsyncStorage.getItem('token');
 
       if (token) {
-        const userResponse = await axios.post(
+        const userResponse = await api.post(
           `${API_URL}/tokens/userid`,
           { token: `${token}` },
           {
@@ -117,7 +117,7 @@ const DepressionTestForm = ({ navigation }) => {
 
         const userId = userResponse.data.userId;
 
-        const response = await axios.post(
+        const response = await api.post(
           `${API_URL}/resultsTests/post-resultsTest`,
           {
             userId,

@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   Linking,
 } from 'react-native';
-import axios from 'axios';
+import api from '../../../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Buffer } from 'buffer'; // Importar Buffer
 
@@ -41,7 +41,7 @@ function AsistenteSocial({ navigation }) {
       try {
         const token = await AsyncStorage.getItem('token');
         if (token) {
-          const response = await axios.post(
+          const response = await api.post(
             `${API_URL}/user-management/userdata`,
             { token: `${token}` },
             { headers: { Authorization: `Bearer ${token}` } }
@@ -73,7 +73,7 @@ function AsistenteSocial({ navigation }) {
       try {
         const token = await AsyncStorage.getItem('token');
         if (token) {
-          const response = await axios.get(
+          const response = await api.get(
             `${API_URL}/assistants/${userCareer}`,
             {
               headers: { Authorization: `Bearer ${token}` },
@@ -92,7 +92,7 @@ function AsistenteSocial({ navigation }) {
 
           setAssistant(assistantData);
           if (assistantData.imagen) {
-            const imageResponse = await axios.get(assistantData.imagen, {
+            const imageResponse = await api.get(assistantData.imagen, {
               headers: { Authorization: `Bearer ${token}` },
               responseType: 'arraybuffer',
             });

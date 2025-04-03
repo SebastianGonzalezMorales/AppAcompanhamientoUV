@@ -15,7 +15,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import Activity from '../Activities';
 
-import axios from 'axios';
+import api from '../../../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Import the API URL from environment variables
@@ -89,7 +89,7 @@ const MoodTrack = ({ route, navigation }) => {
                 };
 
                 // Obtener el consejo del backend
-                const response = await axios.get(`${API_URL}/tips/get-tips`, {
+                const response = await api.get(`${API_URL}/tips/get-tips`, {
                     headers: { 'Authorization': `Bearer ${token}` },
                     params
                 });
@@ -97,7 +97,7 @@ const MoodTrack = ({ route, navigation }) => {
                 const consejo = response.data.consejo;
 
                 // Guardar el estado de ánimo en la base de datos
-                await axios.post(
+                await api.post(
                     `${API_URL}/moodState/post-moodState`,
                     {
                         mood_state: mood,

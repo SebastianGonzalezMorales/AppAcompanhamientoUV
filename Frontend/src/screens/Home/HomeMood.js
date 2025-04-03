@@ -25,7 +25,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 
 // Librerías adicionales
 import { PieChart } from 'react-native-chart-kit';
-import axios from 'axios';
+import api from '../../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Importar la URL de la API desde variables de entorno
@@ -76,7 +76,7 @@ const HomeMood = ({ navigation }) => {
     try {
       const token = await AsyncStorage.getItem('token');
       if (token) {
-        const response = await axios.get(
+        const response = await api.get(
           `${API_URL}/moodState/get-MoodStatesByUserId`,
           {
             headers: {
@@ -218,7 +218,7 @@ const HomeMood = ({ navigation }) => {
       const token = await AsyncStorage.getItem('token');
 
       if (token) {
-        const response = await axios.get(
+        const response = await api.get(
           `${API_URL}/phraseOfTheDay/get-random-phraseOfTheDay`,
           {
             headers: {
@@ -246,7 +246,7 @@ const HomeMood = ({ navigation }) => {
     try {
       const token = await AsyncStorage.getItem('token');
       if (token) {
-        const response = await axios.post(
+        const response = await api.post(
           `${API_URL}/user-management/userdata`,
           {
       /*       // Token en el cuerpo de la solicitud
