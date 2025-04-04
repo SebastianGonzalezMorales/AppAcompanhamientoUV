@@ -31,6 +31,8 @@ function DepressionTestMain({ navigation }) {
   const [userCareer, setUserCareer] = useState('');
   const [userPhone, setUserPhone] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
 
 
 
@@ -50,7 +52,7 @@ function DepressionTestMain({ navigation }) {
       console.error('Error al guardar el estado de la alerta:', error);
     }
   };
-  
+
 
   const initializeTooltip = async () => {
     try {
@@ -158,45 +160,45 @@ function DepressionTestMain({ navigation }) {
           return false;
         }
       };
-  
+
       const fetchData = async () => {
         try {
           setIsLoading(true);
-  
+
           // Obtener los datos del usuario
           await fetchUserData();
-  
+
           // Inicializar tooltip solo una vez al entrar a la vista
           await initializeTooltip();
-  
+
           const token = await AsyncStorage.getItem('token');
           if (!token) {
             console.error('No se encontró el token');
             return;
           }
-  
+
           // Obtener userId
           const { data: userResponse } = await api.post(
             `${API_URL}/tokens/userid`,
             { token },
             { headers: { Authorization: `Bearer ${token}` } }
           );
-  
+
           const userId = userResponse.userId;
           if (!userId) {
             console.error('No se encontró userId');
             return;
           }
-  
+
           // Obtener resultados del test
           const { data: resultsResponse } = await api.post(
             `${API_URL}/resultsTests/get-resultsTestUser/${userId}`,
             { token },
             { headers: { Authorization: `Bearer ${token}` } }
           );
-  
+
           const results = resultsResponse.results || [];
-  
+
           // Ordenar resultados por fecha
           const formattedResults = results
             .sort((a, b) => new Date(b.created) - new Date(a.created))
@@ -206,16 +208,16 @@ function DepressionTestMain({ navigation }) {
               dateData: formatDate(created),
               totalScore: `${total}/27`,
             }));
-  
+
           const graveResults = formattedResults.filter(
             (result) => result.severity === 'Grave'
           );
-  
+
           const previousGraveCount = parseInt(await AsyncStorage.getItem('graveCount'), 10) || 0;
           const currentGraveCount = graveResults.length;
-  
+
           const isAlertClosed = await checkAlertStatus();
-  
+
           if (currentGraveCount > 0) {
             if (currentGraveCount > previousGraveCount) {
               console.log('Nuevos resultados graves detectados. Reiniciando alerta.');
@@ -229,10 +231,10 @@ function DepressionTestMain({ navigation }) {
           } else {
             setGraveCount(0); // No hay resultados graves
           }
-  
+
           // Guardar el conteo actual de resultados graves
           await AsyncStorage.setItem('graveCount', currentGraveCount.toString());
-  
+
           // Actualizar resultados y última prueba realizada
           setResults(formattedResults);
           setLastTest(formattedResults.length > 0 ? formattedResults[0].dateData : 'Sin resultados previos');
@@ -241,16 +243,19 @@ function DepressionTestMain({ navigation }) {
             'Error al obtener los resultados:',
             error.response ? error.response.data : error.message
           );
+          setErrorMessage(
+            'No se pudo establecer conexión con el servidor.\n Revisa tu conexión a Internet e inténtalo nuevamente. 🌐'
+          );
         } finally {
           setIsLoading(false);
         }
       };
-  
+
       fetchData(); // Siempre llama a fetchData al regresar a la vista
     }, [])
   );
-  
-  
+
+
   return (
     <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
       <BackButton onPress={() => navigation.goBack()} />
@@ -365,9 +370,23 @@ function DepressionTestMain({ navigation }) {
 
         <View style={GlobalStyle.line} />
 
+
         <Text style={[GlobalStyle.text, { textAlign: 'left' }]}>
-          Última prueba realizada: {isLoading ? 'Cargando...' : lastTest}
+          Última prueba realizada:{' '}
+          {isLoading ? (
+            'Cargando...'
+          ) : errorMessage ? (
+            // Si hay error, no mostramos nada más aquí
+            '—'
+          ) : results.length === 0 ? (
+            // Sin error pero sin datos
+            'Sin resultados previos'
+          ) : (
+            // Hay datos
+            lastTest
+          )}
         </Text>
+
       </View>
 
 
@@ -389,11 +408,18 @@ function DepressionTestMain({ navigation }) {
           <Text style={{ textAlign: 'center', color: '#888', marginTop: 20 }}>
             Cargando resultados...
           </Text>
+        ) : errorMessage ? (
+          // Solo mostramos el mensaje de error si lo hay
+          <Text style={{ textAlign: 'center', color: '#666', fontSize: 16, marginTop: 7}}>
+            {errorMessage}
+          </Text>
         ) : results.length === 0 ? (
+          // Si no hay error y la lista está vacía
           <Text style={{ textAlign: 'center', color: '#888', marginTop: 20 }}>
             Aún no has realizado ningún test. Completa un test para ver tus resultados.
           </Text>
         ) : (
+          // Finalmente, si no hay error y sí hay datos, mostramos la lista
           <FlatList
             data={results.slice(0, 10)}
             numColumns={1}
@@ -478,7 +504,7 @@ function DepressionTestMain({ navigation }) {
         >
           <Text>Reset Tooltip</Text>
         </TouchableOpacity> */}
-     
+
       </View>
       <Modal
         transparent={true}
