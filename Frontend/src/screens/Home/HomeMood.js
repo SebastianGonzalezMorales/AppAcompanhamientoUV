@@ -41,6 +41,8 @@ const HomeMood = ({ navigation }) => {
   const [motivationalQuote, setMotivationalQuote] = useState('');
   const [pieChartData, setPieChartData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
+
 
   // Obtener mes y año actuales
   const currentMonth = new Date().getMonth(); // Mes actual (0 = enero, 11 = diciembre)
@@ -84,18 +86,18 @@ const HomeMood = ({ navigation }) => {
             },
           }
         );
-
+  
         if (response.data.data.length === 0) {
           console.log('No se encontraron estados de ánimo para este usuario.');
           setMoods([]);
+          setMessage('Aún no has registrado cómo te sientes. ¡Anímate a hacerlo hoy! 😊');
         } else {
-          // Ordenar los datos por fecha descendente
           const moodsData = response.data.data
             .sort((a, b) => new Date(b.date) - new Date(a.date))
             .map((item) => {
               const date = formatDate(item.date);
               const time = new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
+  
               return {
                 id: item._id,
                 mood: item.mood_state,
@@ -103,17 +105,22 @@ const HomeMood = ({ navigation }) => {
                 time,
               };
             });
-
-          // Actualizar el estado con los estados de ánimo
+  
           setMoods(moodsData);
+          setMessage(''); // limpiamos cualquier mensaje anterior
         }
       } else {
         console.log('No se encontró el token. Por favor, inicia sesión.');
+        setMessage('Sesión expirada. Por favor, vuelve a iniciar sesión.');
       }
     } catch (error) {
       console.error('Error al obtener los estados de ánimo:', error);
-    }
+      setMessage('No se pudo establecer conexión con el servidor.\n Revisa tu conexión a Internet e inténtalo nuevamente. 🌐');
+    }finally {
+    setLoading(false); // esto asegura que siempre se actualice
+  }
   };
+  
 
   // Función para obtener los datos del gráfico
   const fetchChartData = async () => {
@@ -403,8 +410,13 @@ const HomeMood = ({ navigation }) => {
   </View>
 
   {/* Frase del día */}
-  <View style={{ marginTop: -10, paddingHorizontal: 20 }}>
-    <Text style={[GlobalStyle.subtitle, { marginBottom: 6 }]}>Frase del día:</Text>
+{/* Frase del día */}
+<View style={{ marginTop: -10, paddingHorizontal: 20 }}>
+  <Text style={[GlobalStyle.subtitle, { marginBottom: 6 }]}>
+    Frase del día:
+  </Text>
+
+  {motivationalQuote !== '' && (
     <Text
       style={[
         GlobalStyle.quoteText || {
@@ -417,9 +429,11 @@ const HomeMood = ({ navigation }) => {
       numberOfLines={3}
       ellipsizeMode="tail"
     >
-      {motivationalQuote || "Cargando ..."}
+      {motivationalQuote}
     </Text>
-  </View>
+  )}
+</View>
+
 </View>
 
 
@@ -441,25 +455,39 @@ const HomeMood = ({ navigation }) => {
         <View style={FormStyle.flexContainer}></View>
 
         {loading ? (
-          <Text>Cargando datos...</Text>
-        ) : (
-          <View style={ChartStyle.pieChartContainer}>
-            <PieChart
-              data={pieChartData}
-              width={Dimensions.get('window').width * 0.8}
-              height={130}
-              chartConfig={{
-                backgroundGradientFrom: '#f2f2f2',
-                backgroundGradientTo: '#f2f2f2',
-                decimalPlaces: 0,
-                color: (opacity = 1) => `rgba(93, 165, 169, ${opacity})`,
-              }}
-              accessor="count"
-              backgroundColor="transparent"
-              style={ChartStyle.pieChartStyle}
-            />
-          </View>
-        )}
+  <Text style={{ textAlign: 'center', color: '#666' }}>Cargando datos...</Text>
+) : message !== '' ? (
+<Text style={{
+  textAlign: 'center',
+  color: '#666', // Color del mensaje
+  fontSize: 16,     //Tamaño más legible
+  fontWeight: '500',
+  paddingHorizontal: 20,
+  marginVertical: 12,
+  lineHeight: 24
+}}>
+  {message}
+</Text>
+
+) : (
+  <View style={ChartStyle.pieChartContainer}>
+    <PieChart
+      data={pieChartData}
+      width={Dimensions.get('window').width * 0.8}
+      height={130}
+      chartConfig={{
+        backgroundGradientFrom: '#f2f2f2',
+        backgroundGradientTo: '#f2f2f2',
+        decimalPlaces: 0,
+        color: (opacity = 1) => `rgba(93, 165, 169, ${opacity})`,
+      }}
+      accessor="count"
+      backgroundColor="transparent"
+      style={ChartStyle.pieChartStyle}
+    />
+  </View>
+)}
+
 
         <HistoryButton
           onPress={() => navigation.navigate('MoodHistory')}

@@ -8,6 +8,7 @@ import {
   Dimensions,
   TouchableOpacity,
   Linking,
+  Alert, // Si quieres usar Alert
 } from 'react-native';
 import api from '../../../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -18,6 +19,7 @@ import GlobalStyle from '../../../assets/styles/GlobalStyle';
 
 import Icon from 'react-native-vector-icons/MaterialIcons'; // Íconos generales
 import FontAwesome from 'react-native-vector-icons/FontAwesome'; // Ícono de WhatsApp
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 // Components
 import BackButton from '../../../components/buttons/BackButton';
@@ -28,12 +30,15 @@ import { API_URL, BASE_URL } from '@env';
 const { width, height } = Dimensions.get('window'); // Obtener dimensiones
 
 function AsistenteSocial({ navigation }) {
-  const [assistant, setAssistant] = useState(null); // Para almacenar los datos del asistente social
-  const [firstName, setFirstName] = useState(''); // Para almacenar solo el primer nombre del usuario
-  const [imageData, setImageData] = useState(null); // Para almacenar los datos de la imagen en Base64
-  const [userRut, setUserRut] = useState(''); // RUT del usuario
-  const [userCareer, setUserCareer] = useState(''); // Carrera del usuario
-  const [userPhone, setUserPhone] = useState(''); // Carrera del usuario
+  const [assistant, setAssistant] = useState(null); 
+  const [firstName, setFirstName] = useState(''); 
+  const [imageData, setImageData] = useState(null); 
+  const [userRut, setUserRut] = useState(''); 
+  const [userCareer, setUserCareer] = useState(''); 
+  const [userPhone, setUserPhone] = useState(''); 
+
+  // Estado para manejar errores:
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Función para obtener los datos del usuario
   useEffect(() => {
@@ -43,27 +48,26 @@ function AsistenteSocial({ navigation }) {
         if (token) {
           const response = await api.post(
             `${API_URL}/user-management/userdata`,
-            { token: `${token}` },
+            { token },
             { headers: { Authorization: `Bearer ${token}` } }
           );
-
           const userData = response.data.data;
-
-          setFirstName(userData.name.split(' ')[0]); // Tomar solo el primer nombre
-          setUserRut(userData.rut); // Guardar el RUT
-          setUserCareer(userData.carrera); // Guardar la carrera
+          setFirstName(userData.name.split(' ')[0]); 
+          setUserRut(userData.rut); 
+          setUserCareer(userData.carrera); 
           setUserPhone(userData.phoneNumber);
 
-
-          console.log(" ")
+          console.log('Datos de usuario cargados correctamente.');
         } else {
           console.log('No se encontró el token. Por favor, inicia sesión.');
+          setErrorMessage('No se encontró el token. Inicia sesión para continuar.');
         }
       } catch (error) {
         console.error('Error al obtener los datos del usuario:', error);
+        // Mensaje genérico de error al usuario
+        setErrorMessage('No se pudo conectar al servidor. Verifica tu conexión. 🌐');
       }
     };
-
     fetchUserData();
   }, []);
 
@@ -75,9 +79,7 @@ function AsistenteSocial({ navigation }) {
         if (token) {
           const response = await api.get(
             `${API_URL}/assistants/${userCareer}`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
+            { headers: { Authorization: `Bearer ${token}` } }
           );
           const assistantData = response.data.assistant;
 
@@ -96,43 +98,40 @@ function AsistenteSocial({ navigation }) {
               headers: { Authorization: `Bearer ${token}` },
               responseType: 'arraybuffer',
             });
-
             const base64Image = `data:image/jpeg;base64,${Buffer.from(
               imageResponse.data,
               'binary'
             ).toString('base64')}`;
-
             setImageData(base64Image);
           }
         } else {
           console.log('No se encontró el token. Por favor, inicia sesión.');
+          setErrorMessage('No se encontró el token. Inicia sesión para continuar.');
         }
       } catch (error) {
         if (error.response && error.response.status === 404) {
           // El caso en que no se encuentra un asistente social para la carrera
           console.log('Mensaje del servidor:', error.response.data.message);
-          setAssistant(null); // Aseguramos que el estado `assistant` sea null
+          setAssistant(null);
         } else if (error.response && error.response.data.message) {
           // Otros errores provenientes del backend
           console.error('Error del servidor:', error.response.data.message);
+          setErrorMessage(error.response.data.message);
         } else {
           // Errores desconocidos (por ejemplo, problemas de red)
           console.error('Error desconocido:', error);
+          setErrorMessage('No se pudo conectar al servidor. Verifica tu conexión.');
         }
       }
-
     };
-
 
     if (userCareer) {
       fetchAssistantData();
     }
-  }, [userCareer]); // Ejecutar solo cuando la carrera esté disponible
+  }, [userCareer]);
 
   return (
-    <SafeAreaView
-      style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}
-    >
+    <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
       {/* Botón para regresar */}
       <BackButton onPress={() => navigation.goBack()} />
 
@@ -146,14 +145,6 @@ function AsistenteSocial({ navigation }) {
       >
         <Text style={GlobalStyle.welcomeText}>Contactarse con apoyo UV</Text>
 
-{/*         <Text
-          style={[
-            GlobalStyle.text,
-            { textAlign: 'justify', color: '#FFFFFF' },
-          ]}
-        >
-          Contactarse con Recursos UV
-        </Text> */}
         <Text
           style={[
             GlobalStyle.text,
@@ -170,7 +161,9 @@ function AsistenteSocial({ navigation }) {
         >
           {firstName
             ? `${firstName}, te presentamos a la asistente social asignada a tu carrera. Ella es tu primer contacto para recibir orientación y apoyo. Posteriormente, en caso de ser necesario podrás recibir atención psicológica`
-            : 'Cargando...'}
+            : errorMessage
+              ? '' // No mostramos nada si hay error
+              : 'Cargando...'}
         </Text>
       </View>
 
@@ -183,6 +176,29 @@ function AsistenteSocial({ navigation }) {
           borderTopRightRadius: 20,
         }}
       >
+        {/** Si existe un error, mostrarlo al usuario */}
+        {errorMessage ? (
+  <View style={{ alignItems: 'center', marginVertical: 12 }}>
+    <MaterialCommunityIcons
+     
+      size={10}
+      color="#666"
+      style={{ marginBottom: 8 }}
+    />
+    <Text
+      style={{
+        textAlign: 'center',
+        color: '#666',
+        fontSize: 16,
+        fontWeight: '500',
+        paddingHorizontal: 20,
+        lineHeight: 24,
+      }}
+    >
+      {errorMessage}
+    </Text>
+  </View>
+) : null}
         {assistant ? (
           <ScrollView contentContainerStyle={{ padding: 20 }}>
             <View
@@ -257,7 +273,12 @@ function AsistenteSocial({ navigation }) {
                     Linking.openURL(`tel:${assistant.phone}`);
                   }}
                 >
-                  <Icon name="phone" size={20} color="white" style={{ marginRight: 8 }} />
+                  <Icon
+                    name="phone"
+                    size={20}
+                    color="white"
+                    style={{ marginRight: 8 }}
+                  />
                   <Text style={{ color: 'white' }}>Llamar</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -270,42 +291,46 @@ function AsistenteSocial({ navigation }) {
                   }}
                   onPress={() => {
                     const assistantFirstName = assistant?.name
-                      ? assistant.name.trim().split(' ')[0] // Recortar y tomar solo el primer nombre
-                      : 'Asistente'; // Valor predeterminado si no hay nombre
-
-                    console.log('Nombre del asistente:', assistantFirstName); // Depuración
+                      ? assistant.name.trim().split(' ')[0]
+                      : 'Asistente';
 
                     Linking.openURL(
                       `mailto:${assistant.email}?subject=[Atención Salud Mental - AppAcompañamientoUV]&body=Estimada ${assistantFirstName},%0D%0A%0D%0A` +
-                      `Junto con saludar y esperando que se encuentre bien, le escribo este correo porque quiero contar con acompañamiento psicológico.%0D%0A%0D%0A` +
-                      `Datos del estudiante:%0D%0A` +
-                      `- Nombre: ${firstName}%0D%0A` +
-                      `- Carrera: ${userCareer}%0D%0A` +
-                      `- RUT: ${userRut}%0D%0A` +
-                      `- Teléfono: ${userPhone}%0D%0A%0D%0A` + // Agrega el número de teléfono aquí
-                      `Quedo atento.%0D%0A%0D%0A` +
-                      `Muchas gracias.`
+                        `Junto con saludar y esperando que se encuentre bien, le escribo este correo porque quiero contar con acompañamiento psicológico.%0D%0A%0D%0A` +
+                        `Datos del estudiante:%0D%0A` +
+                        `- Nombre: ${firstName}%0D%0A` +
+                        `- Carrera: ${userCareer}%0D%0A` +
+                        `- RUT: ${userRut}%0D%0A` +
+                        `- Teléfono: ${userPhone}%0D%0A%0D%0A` +
+                        `Quedo atento.%0D%0A%0D%0A` +
+                        `Muchas gracias.`
                     );
-
                   }}
                 >
-                  <Icon name="email" size={20} color="white" style={{ marginRight: 8 }} />
+                  <Icon
+                    name="email"
+                    size={20}
+                    color="white"
+                    style={{ marginRight: 8 }}
+                  />
                   <Text style={{ color: 'white' }}>Enviar correo</Text>
                 </TouchableOpacity>
-
               </View>
             </View>
           </ScrollView>
         ) : (
-          <Text
-            style={{
-              textAlign: 'center',
-              color: '#999',
-              marginTop: 20,
-            }}
-          >
-            Cargando datos...
-          </Text>
+          /** Si no hay asistente pero tampoco hay error, mostrar "Cargando..." **/
+          !errorMessage && (
+            <Text
+              style={{
+                textAlign: 'center',
+                color: '#999',
+                marginTop: 20,
+              }}
+            >
+              Cargando datos...
+            </Text>
+          )
         )}
       </View>
     </SafeAreaView>
