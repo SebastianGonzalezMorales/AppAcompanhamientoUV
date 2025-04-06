@@ -19,7 +19,11 @@ import api from '../../../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Import the API URL from environment variables
-import { API_URL } from '@env';
+import Constants from 'expo-constants';
+
+// Asigna API_URL desde la configuración
+const { API_URL } = Constants.expoConfig?.extra || {};
+
 
 // components
 import BackButton from '../../../components/buttons/BackButton';

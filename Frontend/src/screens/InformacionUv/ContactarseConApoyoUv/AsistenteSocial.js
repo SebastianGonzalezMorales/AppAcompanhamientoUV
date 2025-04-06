@@ -25,7 +25,9 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import BackButton from '../../../components/buttons/BackButton';
 
 // Importamos API_URL y BASE_URL desde las variables de entorno
-import { API_URL, BASE_URL } from '@env';
+import Constants from 'expo-constants';
+
+const { API_URL, BASE_URL } = Constants.expoConfig?.extra || {};
 
 const { width, height } = Dimensions.get('window'); // Obtener dimensiones
 

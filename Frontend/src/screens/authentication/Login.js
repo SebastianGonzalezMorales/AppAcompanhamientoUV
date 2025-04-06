@@ -9,7 +9,11 @@ import api from '../../utils/api';
 import { AuthContext } from '../../context/AuthContext';
 
 // Import the API URL from environment variables
-import { API_URL } from '@env';
+import Constants from 'expo-constants';
+
+// Asigna API_URL desde la configuración
+const { API_URL } = Constants.expoConfig?.extra || {};
+
 
 // components
 import AuthButton from '../../components/buttons/AuthButton';

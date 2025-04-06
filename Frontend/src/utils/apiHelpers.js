@@ -1,6 +1,10 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_URL } from '@env';
+import Constants from 'expo-constants';
+
+// Asigna API_URL desde la configuración
+const { API_URL } = Constants.expoConfig?.extra || {};
+
 
 export const fetchWithToken = async (endpoint, method = 'GET', data = null, params = null) => {
   try {

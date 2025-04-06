@@ -45,7 +45,8 @@
     "react-native-vector-icons": "^10.2.0",
     "react-native-video": "^6.7.0",
     "react-native-webview": "^13.12.3",
-    "react-native-youtube-iframe": "^2.3.0"
+    "react-native-youtube-iframe": "^2.3.0",
+    "expo-updates": "~0.25.28"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2"

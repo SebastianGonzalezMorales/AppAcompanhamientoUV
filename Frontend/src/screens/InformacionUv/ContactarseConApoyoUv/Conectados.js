@@ -22,7 +22,11 @@ import GlobalStyle from '../../../assets/styles/GlobalStyle';
 import BackButton from '../../../components/buttons/BackButton';
 
 // Variables de entorno
-import { API_URL } from '@env';
+import Constants from 'expo-constants';
+
+// Asigna API_URL desde la configuración
+const { API_URL } = Constants.expoConfig?.extra || {};
+
 
 const { height, width } = Dimensions.get('window');
 

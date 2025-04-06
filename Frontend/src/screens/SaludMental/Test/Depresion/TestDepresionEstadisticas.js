@@ -4,7 +4,11 @@ import React, { useEffect, useState } from 'react';
 import { BarChart } from 'react-native-chart-kit';
 import api from '../../../../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_URL } from '@env';
+import Constants from 'expo-constants';
+
+// Asigna API_URL desde la configuración
+const { API_URL } = Constants.expoConfig?.extra || {};
+
 
 // components
 import BackButton from '../../../../components/buttons/BackButton';

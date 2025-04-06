@@ -2,7 +2,11 @@
 import { SafeAreaView, Text, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import api from '../../../../utils/api';
-import { API_URL } from '@env'; // URL de la API desde las variables de entorno
+import Constants from 'expo-constants';
+
+// Asigna API_URL desde la configuración
+const { API_URL } = Constants.expoConfig?.extra || {};
+ // URL de la API desde las variables de entorno
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { format } from 'date-fns';

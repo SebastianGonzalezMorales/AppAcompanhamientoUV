@@ -12,7 +12,10 @@
       "backgroundColor": "#000C7B"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -20,10 +23,12 @@
         "backgroundColor": "#000C7B"
       },
       "permissions": [
+        "INTERNET",
         "INTERNET"
       ],
       "usesCleartextTraffic": true,
-      "package": "com.sebastian2040.AppAcompanhamientoUVdevelopment_build"
+      "package": "com.sebastian2040.AppAcompanhamientoUVdevelopment_build",
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "favicon": "./src/assets/images/Icon_Application_Blue.png"
@@ -35,6 +40,9 @@
     },
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "updates": {
+      "url": "https://u.expo.dev/5640adae-eeb5-444b-bc8c-7f844cf16b9c"
+    }
   }
 }

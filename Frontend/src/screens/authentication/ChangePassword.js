@@ -7,7 +7,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import api from '../../utils/api';
 
 // Import the API URL from environment variables
-import { API_URL } from '@env';
+import Constants from 'expo-constants';
+
+// Asigna API_URL desde la configuración
+const { API_URL } = Constants.expoConfig?.extra || {};
+
 
 // components
 import AuthButton from '../../components/buttons/AuthButton';

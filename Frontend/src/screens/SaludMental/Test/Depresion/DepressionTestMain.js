@@ -5,7 +5,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
 import { Ionicons } from '@expo/vector-icons';
-import { API_URL } from '@env';
+import Constants from 'expo-constants';
+
+// Asigna API_URL desde la configuración
+const { API_URL } = Constants.expoConfig?.extra || {};
+
 
 import CustomButton from '../../../../components/buttons/CustomButton';
 import HistoryButton from '../../../../components/buttons/HistoryButton';

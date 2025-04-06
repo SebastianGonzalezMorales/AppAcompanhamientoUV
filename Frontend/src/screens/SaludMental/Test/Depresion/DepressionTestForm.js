@@ -9,7 +9,11 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale'; // Importar el idioma español
 
 // Import the API URL from environment variables
-import { API_URL } from '@env';
+import Constants from 'expo-constants';
+
+// Asigna API_URL desde la configuración
+const { API_URL } = Constants.expoConfig?.extra || {};
+
 
 // components
 import BackButton from '../../../../components/buttons/BackButton';

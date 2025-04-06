@@ -10,7 +10,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { AuthContext } from '../../context/AuthContext';
 
-import { API_URL } from '@env';
+import Constants from 'expo-constants';
+
+// Asigna API_URL desde la configuración
+const { API_URL } = Constants.expoConfig?.extra || {};
+
 
 import AuthButton from '../../components/buttons/AuthButton';
 
