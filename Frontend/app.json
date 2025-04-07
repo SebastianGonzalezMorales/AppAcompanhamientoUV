@@ -1,7 +1,8 @@
 {
   "expo": {
     "name": "AppAcompañamientoUV",
-    "slug": "AppAcompanhamientoUV-development_build",
+    "slug": "appAcompanhamiento",
+    "owner": "appacompanhamiento",
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./src/assets/images/Icon_Application_Blue.png",
@@ -35,7 +36,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "5640adae-eeb5-444b-bc8c-7f844cf16b9c"
+        "projectId": "d12c0447-dc33-4e66-a443-aa93b78bb204"
       }
     },
     "plugins": [
