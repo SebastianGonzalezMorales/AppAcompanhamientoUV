@@ -23,6 +23,7 @@
     "expo-font": "~12.0.10",
     "expo-splash-screen": "~0.27.7",
     "expo-status-bar": "~1.12.1",
+    "expo-updates": "~0.25.28",
     "jwt-decode": "^4.0.0",
     "react": "18.2.0",
     "react-native": "0.74.5",
@@ -31,7 +32,6 @@
     "react-native-chart-kit": "^6.12.0",
     "react-native-cli": "^2.0.1",
     "react-native-datepicker": "^1.7.2",
-    "react-native-dotenv": "^3.4.11",
     "react-native-element-dropdown": "^2.12.2",
     "react-native-image-pan-zoom": "^2.1.12",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
@@ -45,8 +45,7 @@
     "react-native-vector-icons": "^10.2.0",
     "react-native-video": "^6.7.0",
     "react-native-webview": "^13.12.3",
-    "react-native-youtube-iframe": "^2.3.0",
-    "expo-updates": "~0.25.28"
+    "react-native-youtube-iframe": "^2.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2"
