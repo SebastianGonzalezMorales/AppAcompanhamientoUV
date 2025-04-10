@@ -21,11 +21,7 @@ if (process.env.NODE_ENV !== 'production') {
   } else {
     console.log(chalk.green(`Archivo .env cargado para el entorno: ${env}.`));
   }
-  // Unificar BASE_URL para usar solo una en el resto de la aplicación
-process.env.BASE_URL = process.env.NODE_ENV === 'production'
-? process.env.BASE_URL_PROD
-: process.env.BASE_URL_DEV;
-
+  
 } else {
   // En producción, Heroku gestiona las variables de entorno
   console.log(''); // línea en blanco para espaciar
@@ -33,6 +29,10 @@ process.env.BASE_URL = process.env.NODE_ENV === 'production'
   console.log(chalk.blue('Usando variables configuradas en Heroku.'));
   console.log(''); // línea en blanco final
 }
+// Unificar BASE_URL para usar solo una en el resto de la aplicación
+process.env.BASE_URL = process.env.NODE_ENV === 'production'
+? process.env.BASE_URL_PROD
+: process.env.BASE_URL_DEV;
 
 // Importar middlewares personalizados
 const authJwt = require('./middlewares/jwt');
