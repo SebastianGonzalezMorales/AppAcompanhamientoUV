@@ -21,6 +21,11 @@ if (process.env.NODE_ENV !== 'production') {
   } else {
     console.log(chalk.green(`Archivo .env cargado para el entorno: ${env}.`));
   }
+  // Unificar BASE_URL para usar solo una en el resto de la aplicación
+process.env.BASE_URL = process.env.NODE_ENV === 'production'
+? process.env.BASE_URL_PROD
+: process.env.BASE_URL_DEV;
+
 } else {
   // En producción, Heroku gestiona las variables de entorno
   console.log(''); // línea en blanco para espaciar
