@@ -1,107 +1,87 @@
 const express = require('express');
 const app = express();
-const bodyParser = require('body-parser'); // Corrección del nombre
+const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 const favicon = require('serve-favicon');
 const dotenv = require('dotenv');
-const chalk = require('chalk'); // Librería para colores en consola
+const chalk = require('chalk');
 
-// Solo carga archivos .env si NO estás en producción
-if (process.env.NODE_ENV !== 'production') {
-  const env = process.env.NODE_ENV || 'development';
-  const envPath = path.resolve(__dirname, `.env.${env}`);
-  const result = dotenv.config({ path: envPath });
+// Cargar variables de entorno desde el archivo correspondiente
+const env = process.env.NODE_ENV || 'development';
+const envPath = path.resolve(__dirname, `.env.${env}`);
+const fallbackPath = path.resolve(__dirname, `.env`);
 
+let result = dotenv.config({ path: envPath });
+if (result.error) {
+  result = dotenv.config({ path: fallbackPath });
   if (result.error) {
-    // Si no se encuentra el archivo .env correspondiente, se muestra una advertencia
-    console.warn(chalk.red(`No se encontró el archivo .env para el entorno: ${env}.`), result.error);
-  } else {
-    console.log(chalk.green(` `));
+    console.warn(chalk.red(`No se encontró ningún archivo .env válido para el entorno: ${env}`));
   }
-  
-} else {
-  // En producción, Heroku gestiona las variables de entorno
-  console.log(''); // línea en blanco para espaciar
+}
+
+if (process.env.NODE_ENV === 'production') {
+  console.log();
   console.log(chalk.blue('=== Entorno de producción detectado ==='));
   console.log(chalk.blue('Usando variables configuradas en Heroku.'));
-  console.log(''); // línea en blanco final
+  console.log();
 }
-// Unificar BASE_URL para usar solo una en el resto de la aplicación
-process.env.BASE_URL = process.env.NODE_ENV === 'production'
-? process.env.BASE_URL_PROD
-: process.env.BASE_URL_DEV;
 
-// Importar middlewares personalizados
+// Definir BASE_URL según entorno
+process.env.BASE_URL = process.env.NODE_ENV === 'production'
+  ? process.env.BASE_URL_PROD
+  : process.env.BASE_URL_DEV;
+
+// Middlewares personalizados
 const authJwt = require('./middlewares/jwt');
 const errorHandler = require('./helpers/error-handler');
 
 // Configuración global de middlewares
-app.use(cors()); // Habilitar CORS para todas las solicitudes
-app.options('*', cors()); // Habilitar preflight para solicitudes CORS
-
+app.use(cors());
+app.options('*', cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Servir favicon desde la carpeta pública
 app.use(favicon(path.join(__dirname, 'public', 'Icon_Application_Blue.png')));
-
-// Middleware para parsear JSON en las solicitudes
 app.use(bodyParser.json());
-
-// Middleware para registrar solicitudes HTTP en la consola
 app.use(morgan('tiny'));
-
-// Middleware de autenticación (JWT)
 app.use(authJwt);
-
-// Middleware para manejar errores globales
 app.use(errorHandler);
 
-// Exponer la carpeta "uploads" como pública
+// Rutas públicas
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
-// Importar y registrar todas las rutas de la aplicación
+// Rutas principales
 const routes = require('./routes');
 routes(app);
 
-// Ruta raíz de prueba
 app.get('/', (req, res) => {
   res.send('<h1> Funcionando </h1>');
 });
 
-// Exponer carpeta "public"
-app.use('/public', express.static(path.join(__dirname, 'public')));
-
-// Ajustar strictQuery (nueva configuración de Mongoose)
 mongoose.set('strictQuery', false);
 
-// Verifica que la variable de entorno CONNECTION_STRING esté definida.
-// Si no lo está, lanza un error para evitar intentar conectarse sin una cadena de conexión válida.
 if (!process.env.CONNECTION_STRING) {
   throw new Error("La cadena de conexión a la base de datos (CONNECTION_STRING) no está definida en las variables de entorno");
 }
 
-// Conectar a la base de datos MongoDB
 mongoose
   .connect(process.env.CONNECTION_STRING, {
-    dbName: 'my-app', // Nombre de la base de datos
+    dbName: 'my-app',
   })
   .then(() => {
-    // Añadimos un salto de línea antes para separar de la configuración previa
-    console.log('');
+    console.log();
     console.log(chalk.green('✅ Conexión a la base de datos lista...'));
   })
   .catch((err) => {
     console.error(chalk.red('Error al conectar con la base de datos:'), err);
   });
 
-// Configurar el puerto y arrancar el servidor
 const PORT = process.env.PORT || 3001;
 const server = app.listen(PORT, () => {
-  // Título/Separador
+  console.log();
   console.log(chalk.magenta.bold('========================================'));
   console.log(
     chalk.bold('🔧 Archivo .env cargado para el entorno:'),
@@ -109,28 +89,31 @@ const server = app.listen(PORT, () => {
   );
   console.log(chalk.magenta.bold('========================================'));
 
-  // Variables de entorno cargadas
   console.log(chalk.cyan('---------------------------------'));
   console.log(chalk.cyan.bold('🔑 Variables de entorno cargadas:'));
   console.log(chalk.cyan('---------------------------------'));
-  console.log(' '); // Espacio adicional
-  console.log(chalk.white('API_URL:'.padEnd(22)), chalk.green(process.env.API_URL));
-  console.log(chalk.white('JWT SECRET:'.padEnd(22)), chalk.green(process.env.SECRET?.slice(0, 70) + '...'));
-  console.log(chalk.white('CONNECTION_STRING:'.padEnd(22)), chalk.green(process.env.CONNECTION_STRING?.slice(0, 70) + '...'));
-  console.log(chalk.white('...'));
-  console.log(chalk.white('..'));
-  console.log(chalk.white('.'));
-  console.log(' '); // Espacio adicional
-    // Información del servidor
-  console.log(chalk.blue.bold('SERVIDOR CORRIENDO EN:'.padEnd(22)), chalk.blue(`http://localhost:${PORT}`));
+  console.log();
 
+  console.log(chalk.white('API_URL:'.padEnd(22)), chalk.green(process.env.API_URL));
+  if (process.env.NODE_ENV === 'production') {
+    console.log(chalk.white('BASE_URL_PROD:'.padEnd(22)), chalk.green(process.env.BASE_URL_PROD));
+  } else {
+    console.log(chalk.white('BASE_URL_DEV:'.padEnd(22)), chalk.green(process.env.BASE_URL_DEV));
+  }
+  console.log(chalk.white('JWT_SECRET:'.padEnd(22)), chalk.green(process.env.SECRET?.slice(0, 50) + '...'));
+  console.log(chalk.white('CONNECTION_STRING:'.padEnd(22)), chalk.green(process.env.CONNECTION_STRING?.slice(0, 50) + '...'));
+  console.log(chalk.white('EMAIL_USER:'.padEnd(22)), chalk.green(process.env.EMAIL_USER?.slice(0, 10) + '...'));
+  console.log(chalk.white('EMAIL_PASS:'.padEnd(22)), chalk.green(process.env.EMAIL_PASS?.slice(0, 10) + '...'));
+  console.log(chalk.white('ENCRYPTION_KEY:'.padEnd(22)), chalk.green(process.env.ENCRYPTION_KEY?.slice(0, 50) + '...'));
+  console.log(chalk.white('SIGNING_KEY:'.padEnd(22)), chalk.green(process.env.SIGNING_KEY?.slice(0, 50) + '...'));
+
+  console.log();
+  console.log(chalk.blue.bold('SERVIDOR CORRIENDO EN:'.padEnd(22)), chalk.blue(`http://localhost:${PORT}`));
 });
 
-// Manejo de cierre de la aplicación
 process.on('SIGINT', () => {
   server.close(() => {
-
-    console.log('');
+    console.log();
     console.log(chalk.yellow.bold('===================================='));
     console.log(chalk.yellow.bold('PROCESO TERMINADO. SERVIDOR CERRADO.'));
     console.log(chalk.yellow.bold('===================================='));
