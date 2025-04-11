@@ -19,7 +19,7 @@ if (process.env.NODE_ENV !== 'production') {
     // Si no se encuentra el archivo .env correspondiente, se muestra una advertencia
     console.warn(chalk.red(`No se encontró el archivo .env para el entorno: ${env}.`), result.error);
   } else {
-    console.log(chalk.green(`Archivo .env cargado para el entorno: ${env}.`));
+    console.log(chalk.green(` `));
   }
   
 } else {
@@ -92,7 +92,7 @@ mongoose
   .then(() => {
     // Añadimos un salto de línea antes para separar de la configuración previa
     console.log('');
-    console.log(chalk.green('Conexión a la base de datos lista...'));
+    console.log(chalk.green('✅ Conexión a la base de datos lista...'));
   })
   .catch((err) => {
     console.error(chalk.red('Error al conectar con la base de datos:'), err);
@@ -102,33 +102,28 @@ mongoose
 const PORT = process.env.PORT || 3001;
 const server = app.listen(PORT, () => {
   // Título/Separador
-  console.log(chalk.magenta.bold('===================================='));
+  console.log(chalk.magenta.bold('========================================'));
   console.log(
-    chalk.bold('Archivo .env cargado para el entorno:'),
+    chalk.bold('🔧 Archivo .env cargado para el entorno:'),
     chalk.yellow(`${process.env.NODE_ENV}`)
   );
-  console.log(chalk.magenta.bold('===================================='));
-  console.log(' '); // Espacio adicional
-
-  // Configuración de la API
-  console.log(chalk.cyan.bold('Configuración de la API:'));
-  console.log(chalk.cyan('-------------------------'));
-  console.log(chalk.white('JWT Secret:'), chalk.green(process.env.SECRET));
-  console.log(chalk.white('API URL:'), chalk.green(process.env.API_URL));
-  console.log(chalk.white('API Base URL:'), chalk.green(process.env.API_URL));
-  console.log(' '); // Espacio adicional en lugar del '\n'
-
-  // Información del servidor
-  console.log(chalk.blue.bold('Servidor corriendo en:'), chalk.blue(`http://localhost:${PORT}`));
+  console.log(chalk.magenta.bold('========================================'));
 
   // Variables de entorno cargadas
-  console.log(' ');
-  console.log(chalk.cyan.bold('Variables de entorno cargadas:'));
-  console.log(chalk.cyan('-------------------------------'));
-  console.log(chalk.white('API_URL:'), chalk.green(process.env.API_URL));
-  console.log(chalk.white('SECRET:'), chalk.green(process.env.SECRET));
-  console.log(chalk.white('CONNECTION_STRING:'), chalk.green(process.env.CONNECTION_STRING));
-  console.log(chalk.white('BASE_URL:'), chalk.green(process.env.BASE_URL));
+  console.log(chalk.cyan('---------------------------------'));
+  console.log(chalk.cyan.bold('🔑 Variables de entorno cargadas:'));
+  console.log(chalk.cyan('---------------------------------'));
+  console.log(' '); // Espacio adicional
+  console.log(chalk.white('API_URL:'.padEnd(22)), chalk.green(process.env.API_URL));
+  console.log(chalk.white('JWT SECRET:'.padEnd(22)), chalk.green(process.env.SECRET?.slice(0, 70) + '...'));
+  console.log(chalk.white('CONNECTION_STRING:'.padEnd(22)), chalk.green(process.env.CONNECTION_STRING?.slice(0, 70) + '...'));
+  console.log(chalk.white('...'));
+  console.log(chalk.white('..'));
+  console.log(chalk.white('.'));
+  console.log(' '); // Espacio adicional
+    // Información del servidor
+  console.log(chalk.blue.bold('SERVIDOR CORRIENDO EN:'.padEnd(22)), chalk.blue(`http://localhost:${PORT}`));
+
 });
 
 // Manejo de cierre de la aplicación

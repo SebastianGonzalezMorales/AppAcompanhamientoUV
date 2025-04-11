@@ -17,8 +17,8 @@ if (!baseUrl) {
 }
 
 // Verifica que las variables se están cargando
-console.log("JWT Secret:", process.env.SECRET); 
-console.log("API URL:", process.env.API_URL);
+//console.log("JWT Secret:", process.env.SECRET); 
+//console.log("API URL:", process.env.API_URL);
 
 
 const authJwt = jwt({
