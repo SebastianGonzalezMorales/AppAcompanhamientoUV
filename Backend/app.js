@@ -29,7 +29,7 @@ if (result.error) {
 // Mensaje uniforme para cualquier entorno
 if (env === 'production') {
   console.log();
-  console.log(chalk.blue.bold('Entorno de producción detectado:'));
+  console.log(chalk.blue.bold('==== Entorno de producción detectado ===='));
   console.log(chalk.blue('Usando variables configuradas en Heroku.'));
   console.log();
 }
@@ -37,7 +37,7 @@ if (env === 'production') {
 console.log(chalk.magenta.bold('====================================='));
 console.log(
   chalk.bold('Archivo .env cargado para el entorno:'),
-  chalk.yellow(`${env}`) + ' ' + chalk.bold(env === 'production' ? '🚀' : '🛠️')
+  chalk.yellow(`${env}`) + ' ' + chalk.bold(env === 'production' ? '🚀.' : '🛠️.')
 );
 console.log(chalk.magenta.bold('====================================='));
 
@@ -85,7 +85,8 @@ mongoose
   })
   .then(() => {
     console.log();
-    console.log(chalk.green('Conexión a la base de datos lista...✅'));
+    console.log(chalk.green('Conexión a la base de datos lista ✅.'));
+    console.log();
   })
   .catch((err) => {
     console.error(chalk.red('Error al conectar con la base de datos:'), err);
