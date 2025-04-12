@@ -113,7 +113,7 @@ const server = app.listen(PORT, () => {
   console.log(chalk.white('SIGNING_KEY:'.padEnd(22)), chalk.green(process.env.SIGNING_KEY?.slice(0, 50) + '...'));
 
   console.log();
-  console.log(chalk.blue.bold('SERVIDOR CORRIENDO EN:'.padEnd(22)), chalk.blue(`http://localhost:${PORT}`));
+  console.log(chalk.blue.bold('SERVIDOR CORRIENDO EN:'.padEnd(22)), chalk.blue(`http://localhost:${PORT} 🟢.`));
 });
 
 process.on('SIGINT', () => {
