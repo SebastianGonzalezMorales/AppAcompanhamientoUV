@@ -26,18 +26,20 @@ if (result.error) {
   loadedFrom = `.env.${env}`;
 }
 
-// Mostrar mensaje uniforme para cualquier entorno
-if (loadedFrom) {
+// Mensaje uniforme para cualquier entorno
+if (env === 'production') {
   console.log();
-  console.log(chalk.magenta.bold('========================================'));
-  console.log(
-    chalk.bold(`${env === 'production' ? '🚀' : '🛠️'} Archivo .env cargado para el entorno:`),
-    chalk.yellow(`${env}`)
-  );
-  console.log(chalk.magenta.bold('========================================'));
-} else {
-  console.warn(chalk.red(`⚠️ No se encontró ningún archivo .env válido para el entorno: ${env}`));
+  console.log(chalk.blue.bold('Entorno de producción detectado:'));
+  console.log(chalk.blue('Usando variables configuradas en Heroku.'));
+  console.log();
 }
+
+console.log(chalk.magenta.bold('====================================='));
+console.log(
+  chalk.bold('Archivo .env cargado para el entorno:'),
+  chalk.yellow(`${env}`) + ' ' + chalk.bold(env === 'production' ? '🚀' : '🛠️')
+);
+console.log(chalk.magenta.bold('====================================='));
 
 // Definir BASE_URL según entorno
 process.env.BASE_URL = process.env.NODE_ENV === 'production'
@@ -83,7 +85,7 @@ mongoose
   })
   .then(() => {
     console.log();
-    console.log(chalk.green('✅ Conexión a la base de datos lista...'));
+    console.log(chalk.green('Conexión a la base de datos lista...✅'));
   })
   .catch((err) => {
     console.error(chalk.red('Error al conectar con la base de datos:'), err);
