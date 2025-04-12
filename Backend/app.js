@@ -14,19 +14,29 @@ const env = process.env.NODE_ENV || 'development';
 const envPath = path.resolve(__dirname, `.env.${env}`);
 const fallbackPath = path.resolve(__dirname, `.env`);
 
+let loadedFrom = null;
 let result = dotenv.config({ path: envPath });
+
 if (result.error) {
   result = dotenv.config({ path: fallbackPath });
-  if (result.error) {
-    console.warn(chalk.red(`No se encontró ningún archivo .env válido para el entorno: ${env}`));
+  if (!result.error) {
+    loadedFrom = `.env`;
   }
+} else {
+  loadedFrom = `.env.${env}`;
 }
 
-if (process.env.NODE_ENV === 'production') {
+// Mostrar mensaje uniforme para cualquier entorno
+if (loadedFrom) {
   console.log();
-  console.log(chalk.blue('=== Entorno de producción detectado ==='));
-  console.log(chalk.blue('Usando variables configuradas en Heroku.'));
-  console.log();
+  console.log(chalk.magenta.bold('========================================'));
+  console.log(
+    chalk.bold(`${env === 'production' ? '🚀' : '🛠️'} Archivo .env cargado para el entorno:`),
+    chalk.yellow(`${env}`)
+  );
+  console.log(chalk.magenta.bold('========================================'));
+} else {
+  console.warn(chalk.red(`⚠️ No se encontró ningún archivo .env válido para el entorno: ${env}`));
 }
 
 // Definir BASE_URL según entorno
@@ -81,14 +91,6 @@ mongoose
 
 const PORT = process.env.PORT || 3001;
 const server = app.listen(PORT, () => {
-  console.log();
-  console.log(chalk.magenta.bold('========================================'));
-  console.log(
-    chalk.bold('🔧 Archivo .env cargado para el entorno:'),
-    chalk.yellow(`${process.env.NODE_ENV}`)
-  );
-  console.log(chalk.magenta.bold('========================================'));
-
   console.log(chalk.cyan('---------------------------------'));
   console.log(chalk.cyan.bold('🔑 Variables de entorno cargadas:'));
   console.log(chalk.cyan('---------------------------------'));
