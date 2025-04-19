@@ -70,7 +70,7 @@ const routes = require('./routes');
 routes(app);
 
 app.get('/', (req, res) => {
-  res.send('<h1> Funcionando </h1>');
+  res.send('<h1> Funcionando ! </h1>');
 });
 
 mongoose.set('strictQuery', false);
