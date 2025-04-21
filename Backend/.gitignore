@@ -5,3 +5,5 @@ uploads/
 .env.development
 
 .env.testing
+
+.expo/
