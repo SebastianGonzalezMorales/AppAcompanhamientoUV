@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const phraseOfTheDaySchema = mongoose.Schema({
-    mensaje: String,
-    autor: String
-})
+  message: String,
+  author: String,
+});
 
-exports.PhraseOfTheDay = mongoose.model('PhraseOfTheDay', phraseOfTheDaySchema);
+exports.PhraseOfTheDay = mongoose.model("PhraseOfTheDay", phraseOfTheDaySchema);

@@ -18,8 +18,8 @@ const getPhraseOfTheDay = async (req, res) => {
 // Controlador para crear un nuevo tip
 const postPhraseOfTheDay = async (req, res) => {
   const phraseOfTheDay = new PhraseOfTheDay({
-    mensaje: req.body.mensaje,
-    autor: req.body.autor,
+    message: req.body.message,
+    author: req.body.author,
   });
   try {
     const createdPhraseOfTheDay = await phraseOfTheDay.save();
@@ -48,12 +48,12 @@ const getRandomPhraseOfTheDay = async (req, res) => {
     if (existingUserPhrase) {
       console.log(
         "Frase ya asignada para el día de hoy:",
-        existingUserPhrase.phraseId.mensaje
+        existingUserPhrase.phraseId.message
       );
       return res.send({
         status: "Ok",
-        mensaje: existingUserPhrase.phraseId.mensaje,
-        autor: existingUserPhrase.phraseId.autor,
+        message: existingUserPhrase.phraseId.message,
+        author: existingUserPhrase.phraseId.author,
       });
     }
 
@@ -77,7 +77,7 @@ const getRandomPhraseOfTheDay = async (req, res) => {
     const randomPhrase = await PhraseOfTheDay.aggregate([
       { $match: matchQuery },
       { $sample: { size: 1 } }, // Selecciona una frase aleatoria
-      { $project: { mensaje: 1, autor: 1 } },
+      { $project: { message: 1, author: 1 } },
     ]);
 
     if (randomPhrase.length === 0) {
@@ -87,7 +87,7 @@ const getRandomPhraseOfTheDay = async (req, res) => {
         .send({ status: "Error", message: "No hay frases disponibles." });
     }
 
-    console.log("Nueva frase seleccionada:", randomPhrase[0].mensaje);
+    console.log("Nueva frase seleccionada:", randomPhrase[0].message);
 
     // Crear un registro en la colección UserPhrase
     const newUserPhrase = new UserPhrase({
@@ -102,8 +102,8 @@ const getRandomPhraseOfTheDay = async (req, res) => {
     // Devolver la frase al cliente
     res.send({
       status: "Ok",
-      mensaje: randomPhrase[0].mensaje,
-      autor: randomPhrase[0].autor,
+      message: randomPhrase[0].message,
+      author: randomPhrase[0].author,
     });
   } catch (error) {
     console.error("Error al obtener la frase del día:", error.message);
@@ -117,10 +117,10 @@ const getRandomPhraseOfTheDay = async (req, res) => {
     try {
         const data = await PhraseOfTheDay.aggregate([
             { $sample: { size: 1 } },
-            { $project: { mensaje: 1, autor: 1 } }
+            { $project: { message: 1, author: 1 } }
         ]);
         if (data.length > 0) {
-            res.send({ status: "Ok", mensaje: data[0].mensaje, autor: data[0].autor });
+            res.send({ status: "Ok", message: data[0].message, author: data[0].author });
         } else {
             res.send({ status: "Error", message: "No phraseOfTheDay found" });
         }
