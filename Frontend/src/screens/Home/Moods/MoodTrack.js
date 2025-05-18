@@ -37,7 +37,7 @@ import GlobalStyle from "../../../assets/styles/GlobalStyle";
 // route to manage navigation history
 const MoodTrack = ({ route, navigation }) => {
   // Obtener mood y value desde la pantalla anterior
-  const { mood, value, consejo } = route.params;
+  const { mood, value, tip } = route.params;
   // references
 
   // states
@@ -86,8 +86,8 @@ const MoodTrack = ({ route, navigation }) => {
 
         // Construir parámetros para la solicitud del consejo
         const params = {
-          estado: mood, // Estado de ánimo
-          actividades:
+          moodState: mood, // Estado de ánimo
+          activities:
             selectedActivities.length > 0 ? selectedActivities.join(",") : null, // Solo si hay actividades seleccionadas
         };
 
@@ -97,7 +97,7 @@ const MoodTrack = ({ route, navigation }) => {
           params,
         });
 
-        const consejo = response.data.consejo;
+        const tip = response.data.tip;
 
         // Guardar el estado de ánimo en la base de datos
         await api.post(
@@ -115,7 +115,7 @@ const MoodTrack = ({ route, navigation }) => {
         );
 
         // Mostrar el consejo al usuario con una alerta
-        Alert.alert("Consejo para ti", consejo, [
+        Alert.alert("Consejo para ti", tip, [
           { text: "OK", onPress: () => navigation.navigate("HomeMood") },
         ]);
       } else {
