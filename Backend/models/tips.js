@@ -1,25 +1,25 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 // Definir el esquema para los consejos
 const tipsSchema = new mongoose.Schema({
-  estado: {
+  moodState: {
     type: String,
-    enum: ['Mal', 'Regular', 'Bien', 'Excelente'],
+    enum: ["Mal", "Regular", "Bien", "Excelente"],
     required: true,
   },
-  consejosActividades: [
+  activityTips: [
     {
-      consejo: {
+      tip: {
         type: String,
         required: true,
       },
-      actividades: {
+      activities: {
         type: [String],
         required: true,
       },
     },
   ],
-  consejosGenerales: {
+  generalTips: {
     type: [String], // Consejos generales para el estado, no asociados a actividades específicas
     default: [],
   },
@@ -30,6 +30,6 @@ const tipsSchema = new mongoose.Schema({
 });
 
 // Crear el modelo a partir del esquema
-const Tips = mongoose.model('Tips', tipsSchema);
+const Tips = mongoose.model("Tips", tipsSchema);
 
 module.exports = Tips;
