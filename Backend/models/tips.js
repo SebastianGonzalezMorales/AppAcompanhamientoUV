@@ -23,7 +23,7 @@ const tipsSchema = new mongoose.Schema({
     type: [String], // Consejos generales para el estado, no asociados a actividades específicas
     default: [],
   },
-  fechaCreacion: {
+  creationDate: {
     type: Date,
     default: Date.now,
   },
