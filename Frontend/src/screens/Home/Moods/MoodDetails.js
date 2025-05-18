@@ -10,49 +10,48 @@ import {
   View,
   ActivityIndicator,
   ScrollView, // Importamos ScrollView
-} from 'react-native';
-import React, { useEffect, useState } from 'react';
+} from "react-native";
+import React, { useEffect, useState } from "react";
 
 // Components
-import BackButton from '../../../components/buttons/BackButton';
-import InputButton from '../../../components/buttons/InputButton';
+import BackButton from "../../../components/buttons/BackButton";
+import InputButton from "../../../components/buttons/InputButton";
 
 // Customization
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import FormStyle from '../../../assets/styles/FormStyle';
-import GlobalStyle from '../../../assets/styles/GlobalStyle';
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import FormStyle from "../../../assets/styles/FormStyle";
+import GlobalStyle from "../../../assets/styles/GlobalStyle";
 
 // Import Axios for backend requests
-import api from '../../../utils/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from 'expo-constants';
+import api from "../../../utils/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
 
 // Asigna API_URL desde la configuración
 const { API_URL } = Constants.expoConfig?.extra || {};
 
-
 // Import activities from Activities.js
-import Activity from '../Activities';
+import Activity from "../Activities";
 
 const MoodDetails = ({ route, navigation }) => {
   // Obtener el ID del estado de ánimo desde la ruta
   const { moodId } = route.params;
 
   // Estados
-  const [mood, setMood] = useState('');
-  const [title, setTitle] = useState('');
-  const [comentarios, setComentarios] = useState('');
+  const [mood, setMood] = useState("");
+  const [title, setTitle] = useState("");
+  const [comentarios, setComentarios] = useState("");
   const [activities, setActivities] = useState(Activity);
   const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Cargar los datos desde el backend
   useEffect(() => {
     const fetchMoodDetails = async () => {
       try {
-        const token = await AsyncStorage.getItem('token'); // Obtener token del almacenamiento
+        const token = await AsyncStorage.getItem("token"); // Obtener token del almacenamiento
         if (!token) {
-          setErrorMessage('Token no encontrado. Por favor, inicia sesión.');
+          setErrorMessage("Token no encontrado. Por favor, inicia sesión.");
           return;
         }
 
@@ -66,30 +65,30 @@ const MoodDetails = ({ route, navigation }) => {
         const data = response.data.data;
 
         // Establecer los datos obtenidos
-        setMood(data.mood_state || 'Estado no definido');
-        setTitle(data.title || 'No registraste información sobre tu día.');
+        setMood(data.moodState || "Estado no definido");
+        setTitle(data.title || "No registraste información sobre tu día.");
 
         // Verificar campo de comentarios
-        if (data.comentarios) {
-          setComentarios(data.comentarios);
+        if (data.comments) {
+          setComentarios(data.comments);
         } else if (data.commentarios) {
           setComentarios(data.commentarios);
         } else {
-          setComentarios('No se agregaron detalles importantes.');
+          setComentarios("No se agregaron detalles importantes.");
         }
 
         // Actualizar las actividades seleccionadas
         const updatedActivities = Activity.map((activity) => {
-          if (data.Activities.includes(activity.activity)) {
+          if (data.activities.includes(activity.activity)) {
             return { ...activity, selected: true };
           }
           return { ...activity, selected: false };
         });
         setActivities(updatedActivities);
       } catch (error) {
-        console.error('Error al cargar los datos del mood:', error);
+        console.error("Error al cargar los datos del mood:", error);
         setErrorMessage(
-          'Error al cargar los datos del estado de ánimo. Por favor, inténtalo de nuevo.'
+          "Error al cargar los datos del estado de ánimo. Por favor, inténtalo de nuevo."
         );
       } finally {
         setIsLoading(false); // Ocultar indicador de carga
@@ -100,7 +99,7 @@ const MoodDetails = ({ route, navigation }) => {
   }, [moodId]);
 
   // keyboard offset
-  const keyboardVerticalOffset = Platform.OS === 'ios' ? 80 : 0;
+  const keyboardVerticalOffset = Platform.OS === "ios" ? 80 : 0;
 
   /*
    * ****************
@@ -140,30 +139,30 @@ const MoodDetails = ({ route, navigation }) => {
         <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}>
           <View style={FormStyle.formContainer}>
             {/* Activities */}
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-    <Text
-      style={[
-        GlobalStyle.subtitle,
-        {
-          textAlign: 'left',
-          fontFamily: 'CustomFontForQuestion', // Estilo específico para el signo de pregunta
-        },
-      ]}
-    >
-      ¿ 
-    </Text>
-    <Text
-      style={[
-        GlobalStyle.subtitle, // Manteniendo el estilo original
-        {
-          textAlign: 'left',
-          marginLeft: -60, // Ajuste fino para eliminar el espacio grande
-        },
-      ]}
-    >
-          Qué has estado haciendo?
-    </Text>
-</View>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Text
+                style={[
+                  GlobalStyle.subtitle,
+                  {
+                    textAlign: "left",
+                    fontFamily: "CustomFontForQuestion", // Estilo específico para el signo de pregunta
+                  },
+                ]}
+              >
+                ¿
+              </Text>
+              <Text
+                style={[
+                  GlobalStyle.subtitle, // Manteniendo el estilo original
+                  {
+                    textAlign: "left",
+                    marginLeft: -60, // Ajuste fino para eliminar el espacio grande
+                  },
+                ]}
+              >
+                Qué has estado haciendo?
+              </Text>
+            </View>
 
             <View style={FormStyle.flatListContainer}>
               <FlatList
@@ -172,59 +171,59 @@ const MoodDetails = ({ route, navigation }) => {
                 numColumns={4}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => {
-                  let iconName = '';
+                  let iconName = "";
                   // Asignar iconos basados en el id de la actividad
                   switch (item.id) {
                     case 1:
-                      iconName = 'thought-bubble';
+                      iconName = "thought-bubble";
                       break;
                     case 2:
-                      iconName = 'emoticon-confused';
+                      iconName = "emoticon-confused";
                       break;
                     case 3:
-                      iconName = 'account-group';
+                      iconName = "account-group";
                       break;
                     case 4:
-                      iconName = 'emoticon-sad';
+                      iconName = "emoticon-sad";
                       break;
                     case 5:
-                      iconName = 'book-check';
+                      iconName = "book-check";
                       break;
                     case 6:
-                      iconName = 'tea';
+                      iconName = "tea";
                       break;
                     case 7:
-                      iconName = 'school';
+                      iconName = "school";
                       break;
                     case 8:
-                      iconName = 'run';
+                      iconName = "run";
                       break;
                     case 9:
-                      iconName = 'briefcase-check';
+                      iconName = "briefcase-check";
                       break;
                     case 10:
-                      iconName = 'calendar-clock';
+                      iconName = "calendar-clock";
                       break;
                     case 11:
-                      iconName = 'lightbulb-on';
+                      iconName = "lightbulb-on";
                       break;
                     case 12:
-                      iconName = 'home-heart';
+                      iconName = "home-heart";
                       break;
                     case 13:
-                      iconName = 'emoticon-happy';
+                      iconName = "emoticon-happy";
                       break;
                     case 14:
-                      iconName = 'arm-flex';
+                      iconName = "arm-flex";
                       break;
                     case 15:
-                      iconName = 'heart';
+                      iconName = "heart";
                       break;
                     case 16:
-                      iconName = 'dots-horizontal';
+                      iconName = "dots-horizontal";
                       break;
                     default:
-                      iconName = 'alert-circle';
+                      iconName = "alert-circle";
                       break;
                   }
 
@@ -234,7 +233,9 @@ const MoodDetails = ({ route, navigation }) => {
                         style={[
                           FormStyle.activityContainer,
                           {
-                            backgroundColor: item.selected ? 'white' : 'transparent',
+                            backgroundColor: item.selected
+                              ? "white"
+                              : "transparent",
                           },
                         ]}
                       >
@@ -244,7 +245,7 @@ const MoodDetails = ({ route, navigation }) => {
                           style={[
                             FormStyle.activityIcon,
                             {
-                              color: item.selected ? '#5da5a9' : '#f2f2f2',
+                              color: item.selected ? "#5da5a9" : "#f2f2f2",
                             },
                           ]}
                         />
@@ -252,7 +253,7 @@ const MoodDetails = ({ route, navigation }) => {
                           style={[
                             FormStyle.activityText,
                             {
-                              color: item.selected ? '#5da5a9' : '#f2f2f2',
+                              color: item.selected ? "#5da5a9" : "#f2f2f2",
                             },
                           ]}
                         >
@@ -266,7 +267,7 @@ const MoodDetails = ({ route, navigation }) => {
             </View>
 
             {/* Se ha eliminado el texto "Desliza para ver más" */}
-            
+
             {/* Inputs */}
             <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
               <View style={FormStyle.inputContainer}>
@@ -284,14 +285,13 @@ const MoodDetails = ({ route, navigation }) => {
                 <Text style={FormStyle.text}>Detalles importantes</Text>
                 <View pointerEvents="none">
                   <InputButton
-                    value={comentarios}
+                    value={comments}
                     editable={true}
                     autoCorrect={false}
                   />
                 </View>
               </View>
             </TouchableWithoutFeedback>
-
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

@@ -1,41 +1,38 @@
-import {
- SafeAreaView, Text, View, Alert
-} from 'react-native';
-import React, { useState, useContext, useCallback } from 'react';
-import { useFocusEffect } from '@react-navigation/native'; // Importar useFocusEffect
-import Icon from 'react-native-vector-icons/FontAwesome';
-import { ProgressBar } from 'react-native-paper'; // Asegúrate de instalar react-native-paper
-import api from '../../utils/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SafeAreaView, Text, View, Alert } from "react-native";
+import React, { useState, useContext, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native"; // Importar useFocusEffect
+import Icon from "react-native-vector-icons/FontAwesome";
+import { ProgressBar } from "react-native-paper"; // Asegúrate de instalar react-native-paper
+import api from "../../utils/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { AuthContext } from '../../context/AuthContext';
+import { AuthContext } from "../../context/AuthContext";
 
-import Constants from 'expo-constants';
+import Constants from "expo-constants";
 
 // Asigna API_URL desde la configuración
 const { API_URL } = Constants.expoConfig?.extra || {};
 
+import AuthButton from "../../components/buttons/AuthButton";
 
-import AuthButton from '../../components/buttons/AuthButton';
-
-import GlobalStyle from '../../assets/styles/GlobalStyle';
+import GlobalStyle from "../../assets/styles/GlobalStyle";
 
 function UserProfile({ navigation }) {
   const { logout } = useContext(AuthContext);
 
   // states
-  const [name, setName] = useState('');
-  const [rut, setRut] = useState('');
-  const [email, setEmail] = useState('');
-  const [birthdate, setBirthdate] = useState('');
-  const [carrera, setCarrera] = useState('');
-  const [phone, setPhone] = useState('');
+  const [name, setName] = useState("");
+  const [rut, setRut] = useState("");
+  const [email, setEmail] = useState("");
+  const [birthdate, setBirthdate] = useState("");
+  const [carrera, setCarrera] = useState("");
+  const [phone, setPhone] = useState("");
   const [progress, setProgress] = useState(0); // Progreso inicial en días consecutivos
-  const [message, setMessage] = useState('Cargando tu progreso semanal...'); // Mensaje motivacional
+  const [message, setMessage] = useState("Cargando tu progreso semanal..."); // Mensaje motivacional
 
   const fetchUserData = async () => {
     try {
-      const token = await AsyncStorage.getItem('token');
+      const token = await AsyncStorage.getItem("token");
       if (token) {
         const userResponse = await api.post(
           `${API_URL}/user-management/userdata`,
@@ -48,8 +45,8 @@ function UserProfile({ navigation }) {
         setName(userData.name);
         setRut(userData.rut);
         setEmail(userData.email);
-        setBirthdate(userData.birthdate.split('T')[0]);
-        setCarrera(userData.carrera);
+        setBirthdate(userData.birthdate.split("T")[0]);
+        setCarrera(userData.career);
         setPhone(userData.phoneNumber);
 
         // Obtener progreso semanal desde el backend
@@ -62,18 +59,19 @@ function UserProfile({ navigation }) {
         setProgress(progressData.progress);
         setMessage(progressData.message);
       } else {
-        console.log('No se encontró el token. Por favor, inicia sesión.');
+        console.log("No se encontró el token. Por favor, inicia sesión.");
       }
     } catch (error) {
-      console.error('Error fetching user data or progress:', error);
-    
-      if (error.message === 'Network Error') {
-        setMessage('No pudimos conectarnos. Revisa tu conexión a Internet. 🌐');
+      console.error("Error fetching user data or progress:", error);
+
+      if (error.message === "Network Error") {
+        setMessage("No pudimos conectarnos. Revisa tu conexión a Internet. 🌐");
       } else {
-        setMessage('Hubo un problema al cargar tu progreso. Inténtalo más tarde. 😓');
+        setMessage(
+          "Hubo un problema al cargar tu progreso. Inténtalo más tarde. 😓"
+        );
       }
     }
-    
   };
 
   // Se ejecuta cada vez que la pantalla gana foco
@@ -86,48 +84,61 @@ function UserProfile({ navigation }) {
   const handleSignOut = async () => {
     try {
       await logout();
-      navigation.replace('Login');
-            // Mostrar alerta de éxito
-            Alert.alert(
-              "Cierre de sesión exitoso",
-              "¡Has cerrado sesión correctamente!",
-              [
-                {
-                  text: "OK",
-                  onPress: () => console.log("Usuario presionó OK al cierre de sesión exitoso")
-                }
-              ]
-            );
+      navigation.replace("Login");
+      // Mostrar alerta de éxito
+      Alert.alert(
+        "Cierre de sesión exitoso",
+        "¡Has cerrado sesión correctamente!",
+        [
+          {
+            text: "OK",
+            onPress: () =>
+              console.log("Usuario presionó OK al cierre de sesión exitoso"),
+          },
+        ]
+      );
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
+      console.error("Error al cerrar sesión:", error);
     }
   };
 
   return (
     <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
       {/* Header Section */}
-      <View style={{ height: 310, alignItems: 'center' }}>
-        <Text style={[GlobalStyle.welcomeText, { marginRight: 30 }]}>Mi perfil</Text>
-        <Icon name="user-circle" size={100} color="#000" style={{ marginTop: 20 }} />
+      <View style={{ height: 310, alignItems: "center" }}>
+        <Text style={[GlobalStyle.welcomeText, { marginRight: 30 }]}>
+          Mi perfil
+        </Text>
+        <Icon
+          name="user-circle"
+          size={100}
+          color="#000"
+          style={{ marginTop: 20 }}
+        />
 
         {/* Mensaje motivacional */}
         <Text
           style={[
             GlobalStyle.text,
-            { textAlign: 'center', color: '#FFFFFF', fontSize: 16, marginTop: 0 },
+            {
+              textAlign: "center",
+              color: "#FFFFFF",
+              fontSize: 16,
+              marginTop: 0,
+            },
           ]}
         >
           {message}
         </Text>
 
         {/* Barra de progreso */}
-        <View style={{ width: '80%', marginTop: 15 }}>
+        <View style={{ width: "80%", marginTop: 15 }}>
           <ProgressBar
             progress={progress / 7} // Progreso basado en un objetivo de 7 días
             color="#4CAF50"
             style={{ height: 10, borderRadius: 5 }}
           />
-          <Text style={{ textAlign: 'center', marginTop: 5, color: '#FFFFFF' }}>
+          <Text style={{ textAlign: "center", marginTop: 5, color: "#FFFFFF" }}>
             {progress}/7 días esta semana
           </Text>
         </View>
@@ -137,22 +148,30 @@ function UserProfile({ navigation }) {
       <View style={GlobalStyle.rowTwo}>
         <View style={GlobalStyle.statsContainer}>
           <Text style={[GlobalStyle.statsTitle, { marginVertical: -5 }]}>
-            <Text style={{ fontWeight: 'bold', fontSize: 17 }}>Nombre: </Text> {name}
+            <Text style={{ fontWeight: "bold", fontSize: 17 }}>Nombre: </Text>{" "}
+            {name}
           </Text>
           <Text style={[GlobalStyle.statsTitle, { marginVertical: -5 }]}>
-            <Text style={{ fontWeight: 'bold', fontSize: 17 }}>Rut: </Text> {rut}
+            <Text style={{ fontWeight: "bold", fontSize: 17 }}>Rut: </Text>{" "}
+            {rut}
           </Text>
           <Text style={[GlobalStyle.statsTitle, { marginVertical: -5 }]}>
-            <Text style={{ fontWeight: 'bold', fontSize: 17 }}>Email: </Text> {email}
+            <Text style={{ fontWeight: "bold", fontSize: 17 }}>Email: </Text>{" "}
+            {email}
           </Text>
           <Text style={[GlobalStyle.statsTitle, { marginVertical: -5 }]}>
-            <Text style={{ fontWeight: 'bold', fontSize: 17 }}>Teléfono: </Text> {phone}
+            <Text style={{ fontWeight: "bold", fontSize: 17 }}>Teléfono: </Text>{" "}
+            {phone}
           </Text>
           <Text style={[GlobalStyle.statsTitle, { marginVertical: -5 }]}>
-            <Text style={{ fontWeight: 'bold', fontSize: 17 }}>Carrera: </Text> {carrera}
+            <Text style={{ fontWeight: "bold", fontSize: 17 }}>Carrera: </Text>{" "}
+            {career}
           </Text>
           <Text style={[GlobalStyle.statsTitle, { marginVertical: -5 }]}>
-            <Text style={{ fontWeight: 'bold', fontSize: 17 }}>Fecha de nacimiento: </Text> {birthdate}
+            <Text style={{ fontWeight: "bold", fontSize: 17 }}>
+              Fecha de nacimiento:{" "}
+            </Text>{" "}
+            {birthdate}
           </Text>
         </View>
 
@@ -163,8 +182,8 @@ function UserProfile({ navigation }) {
             text="Cerrar sesión"
             iconName="log-out-outline"
             iconColor="#388E3C"
-            buttonStyle={{ backgroundColor: '#A5D6A7' }}
-            textStyle={{ color: '#388E3C' }}
+            buttonStyle={{ backgroundColor: "#A5D6A7" }}
+            textStyle={{ color: "#388E3C" }}
           />
         </View>
       </View>

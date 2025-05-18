@@ -1,54 +1,52 @@
 // react imports
-import { Image, Text, TextInput, View, TouchableOpacity } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import React, { useState } from 'react';
-import Svg, { Circle } from 'react-native-svg';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import api from '../../utils/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import RNPickerSelect from 'react-native-picker-select';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { Platform } from 'react-native';
-import { Alert } from 'react-native';
+import { Image, Text, TextInput, View, TouchableOpacity } from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import React, { useState } from "react";
+import Svg, { Circle } from "react-native-svg";
+import { SafeAreaView } from "react-native-safe-area-context";
+import api from "../../utils/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import RNPickerSelect from "react-native-picker-select";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { Platform } from "react-native";
+import { Alert } from "react-native";
 
-import { format } from 'date-fns';
+import { format } from "date-fns";
 
 // Import the API URL from environment variables
-import Constants from 'expo-constants';
+import Constants from "expo-constants";
 
 // Asigna API_URL desde la configuración
 const { API_URL } = Constants.expoConfig?.extra || {};
 
-
 // components
-import AuthButton from '../../components/buttons/AuthButton';
-import SmallAuthButton from '../../components/buttons/SmallAuthButton';
+import AuthButton from "../../components/buttons/AuthButton";
+import SmallAuthButton from "../../components/buttons/SmallAuthButton";
 
 // customisation
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
-import AuthStyle from '../../assets/styles/AuthStyle';
+import AuthStyle from "../../assets/styles/AuthStyle";
 
-import facultadesData from '../../assets/data/facultades.json'; // Importamos el archivo JSON con las facultades y carreras
+import facultadesData from "../../assets/data/facultades.json"; // Importamos el archivo JSON con las facultades y carreras
 
 const Register = ({ navigation }) => {
-
   // states
-  const [fullName, setFullName] = useState('');
-  const [rut, setRut] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [fullName, setFullName] = useState("");
+  const [rut, setRut] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [birthdate, setBirthdate] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+  const [birthdate, setBirthdate] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [policyAccepted, setPolicyAccepted] = useState(false);
-  const [facultad, setFacultad] = useState('');
-  const [carrera, setCarrera] = useState('');
+  const [facultad, setFacultad] = useState("");
+  const [carrera, setCarrera] = useState("");
   const [carrerasDisponibles, setCarrerasDisponibles] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState('+569 '); // Inicializa con el prefijo
+  const [phoneNumber, setPhoneNumber] = useState("+569 "); // Inicializa con el prefijo
 
   /*
    * *******************
@@ -56,13 +54,11 @@ const Register = ({ navigation }) => {
    * *******************
    */
 
-
-
   // Función para manejar el cambio de facultad
   const handleFacultadChange = (selectedFacultad) => {
     setFacultad(selectedFacultad);
     setCarrerasDisponibles(facultadesData[selectedFacultad] || []);
-    setCarrera(''); // Resetea carrera si cambia la facultad
+    setCarrera(""); // Resetea carrera si cambia la facultad
   };
 
   const handleDateChange = (event, selectedDate) => {
@@ -76,20 +72,19 @@ const Register = ({ navigation }) => {
   };
 
   const handlePhoneFocus = () => {
-    if (!phoneNumber.startsWith('+569 ')) {
-      setPhoneNumber('+569 '); // Agrega el prefijo al enfocar
+    if (!phoneNumber.startsWith("+569 ")) {
+      setPhoneNumber("+569 "); // Agrega el prefijo al enfocar
     }
   };
 
-
   const handlePhoneNumberChange = (text) => {
     // Forzar el prefijo "+569 " al inicio
-    if (!text.startsWith('+569 ')) {
-      text = '+569 ';
+    if (!text.startsWith("+569 ")) {
+      text = "+569 ";
     }
 
     // Permitir solo números después del prefijo
-    let numbersOnly = text.slice(5).replace(/[^0-9]/g, '');
+    let numbersOnly = text.slice(5).replace(/[^0-9]/g, "");
 
     // Limitar a 8 dígitos
     if (numbersOnly.length > 8) {
@@ -97,32 +92,32 @@ const Register = ({ navigation }) => {
     }
 
     const formattedNumber = `+569 ${numbersOnly}`;
-    console.log('Número actualizado correctamente:', formattedNumber); // Log adicional
+    console.log("Número actualizado correctamente:", formattedNumber); // Log adicional
     setPhoneNumber(formattedNumber);
   };
 
   /*
-  * ***********************
-  * **** Recuperación de AsyncStorage ****
-  * ***********************
-  */
+   * ***********************
+   * **** Recuperación de AsyncStorage ****
+   * ***********************
+   */
 
   const handleBirthdateChange = (text) => {
     // Permitir solo números y guiones
-    const validText = text.replace(/[^0-9\-]/g, '');
+    const validText = text.replace(/[^0-9\-]/g, "");
 
     // Aplicar formato YYYY-MM-DD de forma dinámica
-    let formattedDate = '';
-    const numbersOnly = validText.replace(/-/g, ''); // Eliminar guiones para contar caracteres
+    let formattedDate = "";
+    const numbersOnly = validText.replace(/-/g, ""); // Eliminar guiones para contar caracteres
 
     if (numbersOnly.length > 0) {
       formattedDate += numbersOnly.substring(0, 4); // Añadir año
     }
     if (numbersOnly.length >= 5) {
-      formattedDate += '-' + numbersOnly.substring(4, 6); // Añadir mes
+      formattedDate += "-" + numbersOnly.substring(4, 6); // Añadir mes
     }
     if (numbersOnly.length >= 7) {
-      formattedDate += '-' + numbersOnly.substring(6, 8); // Añadir día
+      formattedDate += "-" + numbersOnly.substring(6, 8); // Añadir día
     }
 
     // Actualizar el estado con el formato actual
@@ -130,39 +125,49 @@ const Register = ({ navigation }) => {
 
     // Solo hacer la validación cuando se haya ingresado una fecha completa
     if (formattedDate.length === 10) {
-      const [year, month, day] = formattedDate.split('-').map(Number);
+      const [year, month, day] = formattedDate.split("-").map(Number);
 
       // Validar el año (por ejemplo, debe ser un valor razonable)
       if (year < 1900 || year > new Date().getFullYear()) {
-        console.log('Año inválido');
+        console.log("Año inválido");
         return;
       }
 
       // Validar el mes (1 a 12)
       if (month < 1 || month > 12) {
-        console.log('Mes inválido');
+        console.log("Mes inválido");
         return;
       }
 
       // Validar el día en función del mes y si el año es bisiesto
-      const daysInMonth = [31, (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0 ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      const daysInMonth = [
+        31,
+        (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0 ? 29 : 28,
+        31,
+        30,
+        31,
+        30,
+        31,
+        31,
+        30,
+        31,
+        30,
+        31,
+      ];
 
       if (day < 1 || day > daysInMonth[month - 1]) {
-        console.log('Día inválido');
+        console.log("Día inválido");
         return;
       }
 
       // La fecha es válida
-      console.log('Fecha válida');
+      console.log("Fecha válida");
     }
   };
 
-
-
   const validateRut = (rut) => {
-
     // Remover puntos y guiones
-    rut = rut.replace(/[^0-9kK]/g, '');
+    rut = rut.replace(/[^0-9kK]/g, "");
     if (rut.length < 2) {
       return false;
     }
@@ -182,34 +187,32 @@ const Register = ({ navigation }) => {
     const calculatedDv = 11 - (sum % 11);
 
     // Convertir el dígito verificador calculado
-    if (calculatedDv === 11) dv = '0';
-    else if (calculatedDv === 10) dv = 'K';
+    if (calculatedDv === 11) dv = "0";
+    else if (calculatedDv === 10) dv = "K";
     else dv = calculatedDv.toString();
 
     return dv === rut.slice(-1).toUpperCase();
   };
 
-
   const formatRut = (rut) => {
     // Elimina cualquier carácter que no sea un número, punto o guion
-    let cleanRut = rut.replace(/[^0-9kK.-]/g, '');
+    let cleanRut = rut.replace(/[^0-9kK.-]/g, "");
 
     // Añade puntos y guion si no están presentes
     if (cleanRut.length > 1) {
-      if (cleanRut.length > 2 && cleanRut[2] !== '.') {
-        cleanRut = cleanRut.slice(0, 2) + '.' + cleanRut.slice(2);
+      if (cleanRut.length > 2 && cleanRut[2] !== ".") {
+        cleanRut = cleanRut.slice(0, 2) + "." + cleanRut.slice(2);
       }
-      if (cleanRut.length > 6 && cleanRut[6] !== '.') {
-        cleanRut = cleanRut.slice(0, 6) + '.' + cleanRut.slice(6);
+      if (cleanRut.length > 6 && cleanRut[6] !== ".") {
+        cleanRut = cleanRut.slice(0, 6) + "." + cleanRut.slice(6);
       }
-      if (cleanRut.length > 10 && cleanRut[10] !== '-') {
-        cleanRut = cleanRut.slice(0, 10) + '-' + cleanRut.slice(10);
+      if (cleanRut.length > 10 && cleanRut[10] !== "-") {
+        cleanRut = cleanRut.slice(0, 10) + "-" + cleanRut.slice(10);
       }
     }
 
     return cleanRut.toUpperCase(); // Devuelve el RUT formateado
   };
-
 
   const handleRutChange = (text) => {
     // Aplica formateo solo si el usuario está ingresando caracteres, no borrando
@@ -221,7 +224,6 @@ const Register = ({ navigation }) => {
     }
   };
 
-
   const validateEmail = (email) => {
     const uvEmailPattern = /^[a-zA-Z]+\.[a-zA-Z]+@alumnos\.uv\.cl$/;
     return uvEmailPattern.test(email);
@@ -231,7 +233,6 @@ const Register = ({ navigation }) => {
     const nameParts = fullName.trim().split(" ");
     return nameParts.length >= 2; // Verifica que haya al menos dos palabras
   };
-
 
   const isStrongPassword = (password) => {
     // Verificar longitud mínima
@@ -253,33 +254,45 @@ const Register = ({ navigation }) => {
   };
 
   // sign up function
-  const handleSignUp = async (fullName, rut, email, facultad, carrera, birthdate, phoneNumber, password, confirmPassword) => {
-
+  const handleSignUp = async (
+    fullName,
+    rut,
+    email,
+    faculty,
+    career,
+    birthdate,
+    phoneNumber,
+    password,
+    confirmPassword
+  ) => {
     try {
-      console.log(" ")
-      console.log(fullName)
-      console.log(rut)
-      console.log(email)
-      console.log(facultad)
-      console.log(carrera)
-      console.log(birthdate)
-      console.log(phoneNumber)
-      console.log(password)
-      console.log(confirmPassword)
-      console.log(" ")
+      console.log(" ");
+      console.log(fullName);
+      console.log(rut);
+      console.log(email);
+      console.log(faculty);
+      console.log(career);
+      console.log(birthdate);
+      console.log(phoneNumber);
+      console.log(password);
+      console.log(confirmPassword);
+      console.log(" ");
 
       // Validación de nombre y apellido
       if (!validateFullName(fullName)) {
-        Alert.alert(
-          "Error",
-          "Por favor, ingresa tu nombre y apellido.",
-          [{ text: "OK" }]
-        );
+        Alert.alert("Error", "Por favor, ingresa tu nombre y apellido.", [
+          { text: "OK" },
+        ]);
         return;
       }
 
       if (!/^\+569 \d{8}$/.test(phoneNumber.trim())) {
-        console.log('Número de teléfono inválido (detalles):', phoneNumber.trim(), 'Longitud:', phoneNumber.trim().length);
+        console.log(
+          "Número de teléfono inválido (detalles):",
+          phoneNumber.trim(),
+          "Longitud:",
+          phoneNumber.trim().length
+        );
         Alert.alert(
           "Error",
           "El número ingresado no es válido. Asegúrate de usar el formato +569 XXXXXXXX.",
@@ -288,40 +301,34 @@ const Register = ({ navigation }) => {
         return;
       }
 
-      if (!facultad) {
-        Alert.alert(
-          "Error",
-          "Por favor, selecciona una facultad.",
-          [{ text: "OK" }]
-        );
+      if (!faculty) {
+        Alert.alert("Error", "Por favor, selecciona una facultad.", [
+          { text: "OK" },
+        ]);
         return;
       }
 
-      if (!carrera) {
-        Alert.alert(
-          "Error",
-          "Por favor, selecciona una carrera.",
-          [{ text: "OK" }]
-        );
+      if (!career) {
+        Alert.alert("Error", "Por favor, selecciona una carrera.", [
+          { text: "OK" },
+        ]);
         return;
       }
 
-          // Validar que la fecha de nacimiento no esté vacía
-    if (!birthdate || birthdate.trim() === "") {
-      Alert.alert(
-        "Error",
-        "Por favor, selecciona tu fecha de nacimiento.",
-        [{ text: "OK" }]
-      );
-      return;
-    }
+      // Validar que la fecha de nacimiento no esté vacía
+      if (!birthdate || birthdate.trim() === "") {
+        Alert.alert("Error", "Por favor, selecciona tu fecha de nacimiento.", [
+          { text: "OK" },
+        ]);
+        return;
+      }
 
       // Verifica si se aceptó la política
-      const accepted = await AsyncStorage.getItem('policyAccepted');
-      console.log('Policy Accepted:', accepted); // Verificar en consola
+      const accepted = await AsyncStorage.getItem("policyAccepted");
+      console.log("Policy Accepted:", accepted); // Verificar en consola
 
-      if (accepted !== 'true') {
-        alert('Debes aceptar la política de privacidad para continuar.');
+      if (accepted !== "true") {
+        alert("Debes aceptar la política de privacidad para continuar.");
         return; // Detenemos el registro si no se aceptó la política
       }
 
@@ -335,14 +342,12 @@ const Register = ({ navigation }) => {
       }
 
       if (!email.trim()) {
-        Alert.alert(
-          "Error",
-          "Por favor, ingresa tu correo electrónico.",
-          [{ text: "OK" }]
-        );
+        Alert.alert("Error", "Por favor, ingresa tu correo electrónico.", [
+          { text: "OK" },
+        ]);
         return;
       }
-      
+
       if (!validateEmail(email)) {
         Alert.alert(
           "Error",
@@ -371,7 +376,6 @@ const Register = ({ navigation }) => {
         return;
       }
 
-
       // Datos a enviar al backend
       const userData = {
         name: fullName,
@@ -380,25 +384,23 @@ const Register = ({ navigation }) => {
         password: password,
         confirmPassword: confirmPassword,
         birthdate: birthdate,
-        carrera: carrera,
-        facultad: facultad,
-        phoneNumber: phoneNumber.replace(' ', ''), // Elimina el espacio
+        career: career,
+        faculty: faculty,
+        phoneNumber: phoneNumber.replace(" ", ""), // Elimina el espacio
         policyAccepted: accepted,
       };
-      console.log('Datos enviados al backend:', userData);
+      console.log("Datos enviados al backend:", userData);
 
       // Realizar la solicitud POST al backend
       const response = await api.post(`${API_URL}/auth/register`, userData);
-      console.log('Datos enviados al backend:', userData);
-
-
+      console.log("Datos enviados al backend:", userData);
 
       // Verificar la respuesta del servidor
       if (response.status === 201) {
         Alert.alert(
           "Registro exitoso",
           "¡Tu cuenta ha sido creada correctamente! Verifica tu correo electrónico para activarla.",
-          [{ text: "OK", onPress: () => navigation.navigate('Login') }]
+          [{ text: "OK", onPress: () => navigation.navigate("Login") }]
         );
       } else {
         Alert.alert(
@@ -410,13 +412,10 @@ const Register = ({ navigation }) => {
     } catch (error) {
       if (error.response) {
         // Extraer la propiedad "message" del objeto devuelto por el backend
-        const errorMessage = error.response.data.message || "Ha ocurrido un error inesperado.";
-    
-        Alert.alert(
-          "Error en el registro",
-          errorMessage,
-          [{ text: "OK" }]
-        );
+        const errorMessage =
+          error.response.data.message || "Ha ocurrido un error inesperado.";
+
+        Alert.alert("Error en el registro", errorMessage, [{ text: "OK" }]);
       } else if (error.request) {
         // Error de conexión
         Alert.alert(
@@ -426,16 +425,12 @@ const Register = ({ navigation }) => {
         );
       } else {
         // Error al configurar la solicitud
-        Alert.alert(
-          "Error",
-          `Ocurrió un error inesperado: ${error.message}`,
-          [{ text: "OK" }]
-        );
+        Alert.alert("Error", `Ocurrió un error inesperado: ${error.message}`, [
+          { text: "OK" },
+        ]);
       }
     }
-    
   };
-
 
   /*
    * ****************
@@ -443,48 +438,46 @@ const Register = ({ navigation }) => {
    * ****************
    */
 
-
   return (
     <KeyboardAwareScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <View style={AuthStyle.container}>
         {/* section one */}
         <View style={AuthStyle.rowOne}>
-          <Svg style={{ position: 'absolute' }}>
+          <Svg style={{ position: "absolute" }}>
             <Circle opacity={0.2} fill="#abced5" cx="10%" cy="30%" r="25" />
           </Svg>
-          <Svg style={{ position: 'absolute' }}>
+          <Svg style={{ position: "absolute" }}>
             <Circle opacity={0.2} fill="#abced5" cx="2%" cy="70%" r="25" />
           </Svg>
-          <Svg style={{ position: 'absolute' }}>
+          <Svg style={{ position: "absolute" }}>
             <Circle opacity={0.2} fill="#abced5" cx="30%" cy="50%" r="30" />
           </Svg>
-          <Svg style={{ position: 'absolute' }}>
+          <Svg style={{ position: "absolute" }}>
             <Circle opacity={0.2} fill="#abced5" cx="25%" cy="95%" r="30" />
           </Svg>
-          <Svg style={{ position: 'absolute' }}>
+          <Svg style={{ position: "absolute" }}>
             <Circle opacity={0.2} fill="#abced5" cx="52%" cy="70%" r="25" />
           </Svg>
-          <Svg style={{ position: 'absolute' }}>
+          <Svg style={{ position: "absolute" }}>
             <Circle opacity={0.2} fill="#abced5" cx="64%" cy="20%" r="25" />
           </Svg>
-          <Svg style={{ position: 'absolute' }}>
+          <Svg style={{ position: "absolute" }}>
             <Circle opacity={0.2} fill="#abced5" cx="70%" cy="100%" r="25" />
           </Svg>
-          <Svg style={{ position: 'absolute' }}>
+          <Svg style={{ position: "absolute" }}>
             <Circle opacity={0.2} fill="#abced5" cx="75%" cy="60%" r="30" />
           </Svg>
-          <Svg style={{ position: 'absolute' }}>
+          <Svg style={{ position: "absolute" }}>
             <Circle opacity={0.2} fill="#abced5" cx="95%" cy="35%" r="25" />
           </Svg>
-          <Svg style={{ position: 'absolute' }}>
+          <Svg style={{ position: "absolute" }}>
             <Circle opacity={0.2} fill="#abced5" cx="100%" cy="85%" r="30" />
           </Svg>
           <SafeAreaView style={AuthStyle.logo}>
             {/* <Text style={AuthStyle.logoText}>Logo</Text> */}
             <Image
               style={{ width: 100, height: 100 }}
-              source={require('./../../assets/images/SlidesOnboarding/Icon_Application.png')}
-
+              source={require("./../../assets/images/SlidesOnboarding/Icon_Application.png")}
             />
           </SafeAreaView>
         </View>
@@ -509,7 +502,6 @@ const Register = ({ navigation }) => {
               autoComplete="name"
               textContentType="name"
             />
-
           </View>
           <View style={AuthStyle.inputContainer}>
             <MaterialCommunityIcons
@@ -547,7 +539,7 @@ const Register = ({ navigation }) => {
           </View>
 
           {/* Dropdown para Facultad */}
-          <View style={[AuthStyle.inputContainer, { position: 'relative' }]}>
+          <View style={[AuthStyle.inputContainer, { position: "relative" }]}>
             <MaterialCommunityIcons
               name="domain"
               size={24}
@@ -555,14 +547,14 @@ const Register = ({ navigation }) => {
               style={AuthStyle.icon}
             />
             <Picker
-              selectedValue={facultad}
+              selectedValue={faculty}
               onValueChange={(itemValue) => handleFacultadChange(itemValue)}
               style={[
                 AuthStyle.input,
                 {
-                  backgroundColor: 'transparent',
-                  width: '87%', // Asegura que el Picker ocupe todo el espacio disponible
-                  right: 16 // Ajusta este valor
+                  backgroundColor: "transparent",
+                  width: "87%", // Asegura que el Picker ocupe todo el espacio disponible
+                  right: 16, // Ajusta este valor
                 },
               ]}
               enabled={Object.keys(facultadesData).length > 0}
@@ -575,11 +567,8 @@ const Register = ({ navigation }) => {
             </Picker>
           </View>
 
-
-
-
           {/* Dropdown para Carrera */}
-          <View style={[AuthStyle.inputContainer, { position: 'relative' }]}>
+          <View style={[AuthStyle.inputContainer, { position: "relative" }]}>
             <MaterialCommunityIcons
               name="school-outline" // Ícono para Carrera
               size={24}
@@ -587,13 +576,13 @@ const Register = ({ navigation }) => {
               style={AuthStyle.icon} // Usa el mismo estilo que los otros íconos
             />
             <Picker
-              selectedValue={carrera}
+              selectedValue={career}
               onValueChange={(itemValue) => setCarrera(itemValue)}
               style={[
                 AuthStyle.input,
                 {
-                  backgroundColor: 'transparent',
-                  width: '87%', // Asegura que el Picker ocupe todo el espacio disponible
+                  backgroundColor: "transparent",
+                  width: "87%", // Asegura que el Picker ocupe todo el espacio disponible
                   right: 16, // Ajusta este valor
                 },
               ]}
@@ -611,7 +600,13 @@ const Register = ({ navigation }) => {
             onPress={() => setShowDatePicker(true)}
             style={AuthStyle.inputContainer} // Aplica los mismos estilos
           >
-            <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%' }}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                width: "100%",
+              }}
+            >
               <MaterialCommunityIcons
                 name="calendar-outline"
                 size={24}
@@ -631,12 +626,11 @@ const Register = ({ navigation }) => {
             <DateTimePicker
               value={birthdate ? new Date(birthdate) : new Date()}
               mode="date"
-              display={Platform.OS === 'ios' ? 'spinner' : 'spinner'}
+              display={Platform.OS === "ios" ? "spinner" : "spinner"}
               onChange={handleDateChange}
               maximumDate={new Date()}
               locale="es-ES"
             />
-
           )}
 
           <View style={AuthStyle.inputContainer}>
@@ -656,8 +650,6 @@ const Register = ({ navigation }) => {
               style={AuthStyle.input}
             />
           </View>
-
-
 
           <View style={AuthStyle.inputContainer}>
             <MaterialCommunityIcons
@@ -713,12 +705,23 @@ const Register = ({ navigation }) => {
                 color="#92959f"
               />
             </TouchableOpacity>
-
           </View>
 
           <AuthButton
             text="Finalizar"
-            onPress={() => handleSignUp(fullName, rut, email, facultad, carrera, birthdate, phoneNumber, password, confirmPassword)}
+            onPress={() =>
+              handleSignUp(
+                fullName,
+                rut,
+                email,
+                faculty,
+                career,
+                birthdate,
+                phoneNumber,
+                password,
+                confirmPassword
+              )
+            }
           />
 
           <View style={AuthStyle.changeScreenContainer}>
@@ -727,7 +730,7 @@ const Register = ({ navigation }) => {
             </Text>
             <SmallAuthButton
               text="Iniciar sesión"
-              onPress={() => navigation.replace('Login')}
+              onPress={() => navigation.replace("Login")}
             />
           </View>
         </View>

@@ -1,14 +1,14 @@
-import { Dimensions, SafeAreaView, Text, View } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { LineChart, PieChart } from 'react-native-chart-kit';
-import { fetchWithToken } from '../../../utils/apiHelpers';
-import { Dropdown } from 'react-native-element-dropdown';
-import { getMonth, getMonths, getMonthName } from '../../../utils/getMonths';
-import ChartStyle from '../../../assets/styles/ChartStyle';
-import GlobalStyle from '../../../assets/styles/GlobalStyle';
-import FormStyle from '../../../assets/styles/FormStyle';
+import { Dimensions, SafeAreaView, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { LineChart, PieChart } from "react-native-chart-kit";
+import { fetchWithToken } from "../../../utils/apiHelpers";
+import { Dropdown } from "react-native-element-dropdown";
+import { getMonth, getMonths, getMonthName } from "../../../utils/getMonths";
+import ChartStyle from "../../../assets/styles/ChartStyle";
+import GlobalStyle from "../../../assets/styles/GlobalStyle";
+import FormStyle from "../../../assets/styles/FormStyle";
 
-import BackButton from '../../../components/buttons/BackButton';
+import BackButton from "../../../components/buttons/BackButton";
 
 const MoodStats = ({ navigation }) => {
   const [x, setX] = useState([]);
@@ -17,29 +17,55 @@ const MoodStats = ({ navigation }) => {
   const [regularCounter, setRegularCount] = useState(0);
   const [bienCounter, setBienCount] = useState(0);
   const [excelenteCounter, setExcelenteCount] = useState(0);
-  const [monthChart, setMonthChart] = useState('');
+  const [monthChart, setMonthChart] = useState("");
   const [moodData, setMoodData] = useState([]);
 
-  const currentMonth = getMonth();  
+  const currentMonth = getMonth();
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
   const months = getMonths();
 
   const pieChartData = [
-    { name: 'Mal', count: malCounter, color: '#F20C0C', legendFontColor: '#7F7F7F', legendFontSize: 14 },
-    { name: 'Regular', count: regularCounter, color: '#F4D63D', legendFontColor: '#7F7F7F', legendFontSize: 14 },
-    { name: 'Bien', count: bienCounter, color: '#2626D8', legendFontColor: '#7F7F7F', legendFontSize: 14 },
-    { name: 'Excelente', count: excelenteCounter, color: '#32CD32', legendFontColor: '#7F7F7F', legendFontSize: 14 },
+    {
+      name: "Mal",
+      count: malCounter,
+      color: "#F20C0C",
+      legendFontColor: "#7F7F7F",
+      legendFontSize: 14,
+    },
+    {
+      name: "Regular",
+      count: regularCounter,
+      color: "#F4D63D",
+      legendFontColor: "#7F7F7F",
+      legendFontSize: 14,
+    },
+    {
+      name: "Bien",
+      count: bienCounter,
+      color: "#2626D8",
+      legendFontColor: "#7F7F7F",
+      legendFontSize: 14,
+    },
+    {
+      name: "Excelente",
+      count: excelenteCounter,
+      color: "#32CD32",
+      legendFontColor: "#7F7F7F",
+      legendFontSize: 14,
+    },
   ];
 
   // Obtenemos los datos solo una vez
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetchWithToken('/moodState/get-MoodStatesByUserId');
+        const response = await fetchWithToken(
+          "/moodState/get-MoodStatesByUserId"
+        );
         setMoodData(response.data);
       } catch (error) {
-        console.error('Error al obtener los estados de ánimo:', error);
+        console.error("Error al obtener los estados de ánimo:", error);
       }
     };
     fetchData();
@@ -61,27 +87,33 @@ const MoodStats = ({ navigation }) => {
     let excelente = 0;
 
     moodData.forEach((moodEntry) => {
-      const { mood_state, intensidad, date } = moodEntry;
-      const moodStateValue = typeof mood_state === 'object' ? (mood_state.value || mood_state.label) : mood_state;
-      const intensidadValue = typeof intensidad === 'object' ? (intensidad.value || intensidad.label) : intensidad;
+      const { moodState, intensity, date } = moodEntry;
+      const moodStateValue =
+        typeof moodState === "object"
+          ? moodState.value || moodState.label
+          : moodState;
+      const intensidadValue =
+        typeof intensity === "object"
+          ? intensity.value || intensity.label
+          : intensity;
       const month = getMonthName(new Date(date).getMonth());
 
       if (monthLabel === month) {
-        x.push('');
+        x.push("");
         y.push(Number(intensidadValue));
         setMonthChart(monthLabel);
 
         switch (moodStateValue) {
-          case 'Mal':
+          case "Mal":
             mal++;
             break;
-          case 'Regular':
+          case "Regular":
             regular++;
             break;
-          case 'Bien':
+          case "Bien":
             bien++;
             break;
-          case 'Excelente':
+          case "Excelente":
             excelente++;
             break;
         }
@@ -101,20 +133,29 @@ const MoodStats = ({ navigation }) => {
     <SafeAreaView style={[FormStyle.container, GlobalStyle.androidSafeArea]}>
       <View style={FormStyle.flexContainer}>
         <BackButton onPress={() => navigation.goBack()} />
-        <Text style={[FormStyle.title, { left: 30 }]}>Estadísticas por mes</Text>
+        <Text style={[FormStyle.title, { left: 30 }]}>
+          Estadísticas por mes
+        </Text>
       </View>
 
       <View style={{ paddingHorizontal: 30, marginVertical: 20 }}>
         <Dropdown
-          placeholderStyle={{ color: '#f2f2f2', fontFamily: 'DoppioOne' }}
+          placeholderStyle={{ color: "#f2f2f2", fontFamily: "DoppioOne" }}
           containerStyle={{ borderRadius: 10 }}
-          selectedTextStyle={{ color: '#f2f2f2', fontFamily: 'DoppioOne', fontSize: 14 }}
-          itemTextStyle={{ color: '#666a72', fontFamily: 'DoppioOne' }}
-          iconStyle={{ tintColor: '#fff' }}
+          selectedTextStyle={{
+            color: "#f2f2f2",
+            fontFamily: "DoppioOne",
+            fontSize: 14,
+          }}
+          itemTextStyle={{ color: "#666a72", fontFamily: "DoppioOne" }}
+          iconStyle={{ tintColor: "#fff" }}
           placeholder={currentMonth}
-          data={months.map((month) => ({ label: month.label, value: month.label }))}
+          data={months.map((month) => ({
+            label: month.label,
+            value: month.label,
+          }))}
           value={selectedMonth}
-          onChange={(item) => setSelectedMonth(item.label)} 
+          onChange={(item) => setSelectedMonth(item.label)}
           labelField="label"
           valueField="value"
         />
@@ -124,30 +165,30 @@ const MoodStats = ({ navigation }) => {
         <View>
           <LineChart
             data={{ labels: x, datasets: [{ data: y }] }}
-            width={Dimensions.get('window').width * 0.85}
+            width={Dimensions.get("window").width * 0.85}
             height={200}
             chartConfig={{
-              backgroundGradientFrom: '#f2f2f2',
-              backgroundGradientTo: '#f2f2f2',
+              backgroundGradientFrom: "#f2f2f2",
+              backgroundGradientTo: "#f2f2f2",
               decimalPlaces: 0,
               color: (opacity = 1) => `rgba(93, 165, 169, ${opacity})`,
               labelColor: (opacity = 1) => `rgba(40, 42, 45, ${opacity})`,
-              propsForDots: { r: '3', strokeWidth: '1', stroke: '#5da5a9' },
+              propsForDots: { r: "3", strokeWidth: "1", stroke: "#5da5a9" },
             }}
             style={ChartStyle.chartStyle}
             bezier
-            fromNumber={4} 
+            fromNumber={4}
             yAxisMax={4}
             fromZero={true}
           />
           <Text
             style={{
-              position: 'absolute',
-              alignSelf: 'center',
-              bottom: '3%',
+              position: "absolute",
+              alignSelf: "center",
+              bottom: "3%",
               paddingLeft: 30,
-              color: '#666a72',
-              fontFamily: 'DoppioOne',
+              color: "#666a72",
+              fontFamily: "DoppioOne",
             }}
           >
             {monthChart}
@@ -167,11 +208,11 @@ const MoodStats = ({ navigation }) => {
       <View style={ChartStyle.pieChartContainer}>
         <PieChart
           data={pieChartData}
-          width={Dimensions.get('window').width * 0.85}
+          width={Dimensions.get("window").width * 0.85}
           height={200}
           chartConfig={{
-            backgroundGradientFrom: '#f2f2f2',
-            backgroundGradientTo: '#f2f2f2',
+            backgroundGradientFrom: "#f2f2f2",
+            backgroundGradientTo: "#f2f2f2",
             decimalPlaces: 0,
             color: (opacity = 1) => `rgba(93, 165, 169, ${opacity})`,
           }}
