@@ -212,11 +212,11 @@ function DepressionTestMain({ navigation }) {
           // Ordenar resultados por fecha
           const formattedResults = results
             .sort((a, b) => new Date(b.created) - new Date(a.created))
-            .map(({ _id, severity, created, total }) => ({
+            .map(({ _id, severity, created, totalScore }) => ({
               id: _id,
               severity,
               dateData: formatDate(created),
-              totalScore: `${total}/27`,
+              totalScore: `${totalScore}/27`,
             }));
 
           const graveResults = formattedResults.filter(

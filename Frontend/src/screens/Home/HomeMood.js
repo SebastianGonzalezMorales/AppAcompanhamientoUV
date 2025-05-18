@@ -242,11 +242,11 @@ const HomeMood = ({ navigation }) => {
           }
         );
         console.log(`token: ${token}`);
-        const { mensaje, autor } = response.data;
-        console.log(`Mensaje: ${mensaje}`);
-        console.log(`Autor: ${autor}`);
+        const { message, author } = response.data;
+        console.log(`Mensaje: ${message}`);
+        console.log(`Autor: ${author}`);
 
-        setMotivationalQuote(`${mensaje} - ${autor}`);
+        setMotivationalQuote(`${message} - ${author}`);
       } else {
         console.log("No se encontró el token. Por favor, inicia sesión.");
       }

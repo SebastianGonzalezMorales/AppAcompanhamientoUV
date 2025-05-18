@@ -1,33 +1,32 @@
 // react imports
-import { SafeAreaView, Text, View } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import api from '../../../../utils/api';
-import Constants from 'expo-constants';
+import { SafeAreaView, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import api from "../../../../utils/api";
+import Constants from "expo-constants";
 
 // Asigna API_URL desde la configuración
 const { API_URL } = Constants.expoConfig?.extra || {};
- // URL de la API desde las variables de entorno
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// URL de la API desde las variables de entorno
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale'; // Importa el idioma español
-
+import { format } from "date-fns";
+import { es } from "date-fns/locale"; // Importa el idioma español
 
 // components
-import FormButton from '../../../../components/buttons/FormButton';
+import FormButton from "../../../../components/buttons/FormButton";
 
 // customisation
-import FormStyle from '../../../../assets/styles/FormStyle';
-import GlobalStyle from '../../../../assets/styles/GlobalStyle';
+import FormStyle from "../../../../assets/styles/FormStyle";
+import GlobalStyle from "../../../../assets/styles/GlobalStyle";
 
 const ResultView = ({ route, navigation }) => {
   // fetch document id passed from previous screen
   const { documentId } = route.params;
 
   // states
-  const [total, setTotal] = useState('');
-  const [severity, setSeverity] = useState('');
-  const [date, setDate] = useState('');
+  const [total, setTotal] = useState("");
+  const [severity, setSeverity] = useState("");
+  const [date, setDate] = useState("");
 
   /*
    * *******************
@@ -40,7 +39,7 @@ const ResultView = ({ route, navigation }) => {
     const getResult = async () => {
       try {
         // Hacer una llamada a la API para obtener los resultados del test
-        const token = await AsyncStorage.getItem('token'); // Autorización con token
+        const token = await AsyncStorage.getItem("token"); // Autorización con token
 
         const response = await api.get(
           `${API_URL}/resultsTests/get-resultsTest/${documentId}`,
@@ -53,14 +52,18 @@ const ResultView = ({ route, navigation }) => {
 
         const resultData = response.data;
 
-        setTotal(resultData.total);
+        setTotal(resultData.totalScore);
         setSeverity(resultData.severity);
 
-        const formattedDate = format(new Date(resultData.created), "dd 'de' MMMM", { locale: es });
+        const formattedDate = format(
+          new Date(resultData.created),
+          "dd 'de' MMMM",
+          { locale: es }
+        );
 
         setDate(formattedDate);
       } catch (error) {
-        console.error('Error al obtener los resultados:', error);
+        console.error("Error al obtener los resultados:", error);
       }
     };
 
@@ -78,7 +81,7 @@ const ResultView = ({ route, navigation }) => {
       {/* table */}
       <View style={FormStyle.resultContainer}>
         <Text style={FormStyle.resultTextOne}>Tu resultado</Text>
-        <Text style={FormStyle.resultTextTwo}>{total} / 27</Text>
+        <Text style={FormStyle.resultTextTwo}>{totalScore} / 27</Text>
         <Text style={FormStyle.resultTextThree}>{severity}</Text>
       </View>
 
@@ -93,7 +96,9 @@ const ResultView = ({ route, navigation }) => {
 
         <View style={FormStyle.tableSubContainer}>
           <View style={FormStyle.tableHeader}>
-            <Text style={FormStyle.tableHeaderTitle}>Clasificación del test</Text>
+            <Text style={FormStyle.tableHeaderTitle}>
+              Clasificación del test
+            </Text>
           </View>
           <View style={FormStyle.tableRowOdd}>
             <Text style={FormStyle.tableText}>Normal</Text>
@@ -121,10 +126,10 @@ const ResultView = ({ route, navigation }) => {
       {/* button */}
       <View style={[FormStyle.buttonContainer, FormStyle.buttonPosition]}>
         <FormButton
-          onPress={() => navigation.navigate('DepressionTestMain')}
+          onPress={() => navigation.navigate("DepressionTestMain")}
           text="Volver atrás"
-          buttonStyle={{ backgroundColor: '#f2f2f2' }}
-          textStyle={{ color: '#5da5a9' }}
+          buttonStyle={{ backgroundColor: "#f2f2f2" }}
+          textStyle={{ color: "#5da5a9" }}
         />
       </View>
     </SafeAreaView>
