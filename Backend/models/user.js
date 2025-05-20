@@ -30,7 +30,7 @@ const usersSchema = new mongoose.Schema({
   },
   faculty: {
     type: String,
-    required: false,
+    required: true,
   },
   career: {
     type: String,
