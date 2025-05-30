@@ -40,7 +40,7 @@ const MoodDetails = ({ route, navigation }) => {
   // Estados
   const [mood, setMood] = useState("");
   const [title, setTitle] = useState("");
-  const [comentarios, setComentarios] = useState("");
+  const [comments, setComments] = useState("");
   const [activities, setActivities] = useState(Activity);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -70,11 +70,9 @@ const MoodDetails = ({ route, navigation }) => {
 
         // Verificar campo de comentarios
         if (data.comments) {
-          setComentarios(data.comments);
-        } else if (data.commentarios) {
-          setComentarios(data.commentarios);
+          setComments(data.comments);
         } else {
-          setComentarios("No se agregaron detalles importantes.");
+          setComments("No se agregaron detalles importantes.");
         }
 
         // Actualizar las actividades seleccionadas
