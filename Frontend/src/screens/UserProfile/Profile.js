@@ -25,7 +25,7 @@ function UserProfile({ navigation }) {
   const [rut, setRut] = useState("");
   const [email, setEmail] = useState("");
   const [birthdate, setBirthdate] = useState("");
-  const [carrera, setCarrera] = useState("");
+  const [career, setCarrera] = useState("");
   const [phone, setPhone] = useState("");
   const [progress, setProgress] = useState(0); // Progreso inicial en días consecutivos
   const [message, setMessage] = useState("Cargando tu progreso semanal..."); // Mensaje motivacional
