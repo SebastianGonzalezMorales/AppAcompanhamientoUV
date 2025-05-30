@@ -141,7 +141,7 @@ const MoodHistory = ({ navigation }) => {
           <MaterialCommunityIcons name="arrow-left" color="#666a72" size={30} />
         </TouchableOpacity>
         <Text style={[ModalStyle.modalTitle, { flex: 1, textAlign: "center" }]}>
-          Historial de Estado de Ánimo
+          Historial de estado de ánimo
         </Text>
       </View>
 
