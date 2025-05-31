@@ -19,68 +19,16 @@ const MoodHistory = ({ navigation }) => {
   const [moods, setMoods] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [noData, setNoData] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const months = getMonths();
   const currentMonth = getMonth();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setErrorMessage("");
-
-      try {
-        const response = await fetchWithToken(
-          "/moodState/get-MoodStatesByUserId"
-        );
-        const moodData = response?.data || [];
-
-        if (!Array.isArray(moodData)) {
-          throw new Error(
-            "Los datos obtenidos no son una lista válida de estados de ánimo"
-          );
-        }
-
-        const currentMonthNumber = new Date().getMonth();
-
-        const filteredMoods = moodData
-          .filter(
-            (entry) => new Date(entry.date).getMonth() === currentMonthNumber
-          )
-          .map((entry) => ({
-            id: entry._id,
-            mood: entry.moodState,
-            date: new Date(entry.date).toLocaleDateString(),
-            time: new Date(entry.date).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-          }));
-
-        if (filteredMoods.length === 0) {
-          setErrorMessage("No se encontraron registros para este mes.");
-        } else {
-          setErrorMessage("");
-        }
-
-        setMoods(filteredMoods);
-      } catch (error) {
-        console.error("Error al obtener los estados de ánimo:", error);
-        setErrorMessage(
-          "Error al cargar los datos. Por favor, inténtalo de nuevo."
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const handleMonthSelected = async (selectedValue) => {
-    setSelectedMonth(selectedValue);
+  const fetchData = async (monthFilter = null) => {
     setIsLoading(true);
     setErrorMessage("");
+    setNoData(false);
 
     try {
       const response = await fetchWithToken(
@@ -89,17 +37,18 @@ const MoodHistory = ({ navigation }) => {
       const moodData = response?.data || [];
 
       if (!Array.isArray(moodData)) {
-        throw new Error(
-          "Los datos obtenidos no son una lista válida de estados de ánimo"
-        );
+        throw new Error("Formato de datos inválido");
       }
 
       const filteredMoods = moodData
         .filter((entry) => {
-          const entryMonth = `${new Date(entry.date).getFullYear()}-${String(
-            new Date(entry.date).getMonth() + 1
+          const date = new Date(entry.date);
+          const entryMonth = `${date.getFullYear()}-${String(
+            date.getMonth() + 1
           ).padStart(2, "0")}`;
-          return entryMonth === selectedValue;
+
+          if (monthFilter) return entryMonth === monthFilter;
+          return date.getMonth() === new Date().getMonth();
         })
         .map((entry) => ({
           id: entry._id,
@@ -112,20 +61,29 @@ const MoodHistory = ({ navigation }) => {
         }));
 
       if (filteredMoods.length === 0) {
-        setErrorMessage("No se encontraron registros para este mes.");
+        setNoData(true);
+        setMoods([]);
       } else {
-        setErrorMessage("");
+        setNoData(false);
+        setMoods(filteredMoods);
       }
-
-      setMoods(filteredMoods);
     } catch (error) {
-      console.error("Error al obtener los estados de ánimo:", error);
+      console.error("Error de conexión:", error);
       setErrorMessage(
-        "Error al cargar los datos. Por favor, inténtalo de nuevo."
+        "No pudimos conectarnos. Revisa tu conexión a Internet e inténtalo nuevamente."
       );
     } finally {
       setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleMonthSelected = async (selectedValue) => {
+    setSelectedMonth(selectedValue);
+    await fetchData(selectedValue);
   };
 
   return (
@@ -170,8 +128,8 @@ const MoodHistory = ({ navigation }) => {
         />
       </View>
 
-      {/* Lista o mensaje de error o cargando */}
-      <View style={ModalStyle.flatlistWrapper}>
+      {/* Lista, mensaje de error o mensaje sin datos */}
+      <View style={[{ flex: 1 }, ModalStyle.flatlistWrapper]}>
         {isLoading ? (
           <View
             style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
@@ -184,22 +142,48 @@ const MoodHistory = ({ navigation }) => {
               flex: 1,
               justifyContent: "center",
               alignItems: "center",
-              padding: 20,
+              paddingHorizontal: 20,
+            }}
+          >
+            <MaterialCommunityIcons name="wifi-off" size={60} color="#666a72" />
+            <Text
+              style={{
+                color: "#666a72",
+                fontFamily: "DoppioOne",
+                fontSize: 16,
+                marginTop: 10,
+                textAlign: "center",
+              }}
+            >
+              {errorMessage}
+            </Text>
+          </View>
+        ) : noData ? (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              paddingHorizontal: 20,
             }}
           >
             <Text
-              style={[
-                GlobalStyles.text,
-                { textAlign: "center", color: "#666a72" },
-              ]}
+              style={{
+                color: "#666a72",
+                fontFamily: "DoppioOne",
+                fontSize: 16,
+                marginTop: 10,
+                textAlign: "center",
+              }}
             >
-              {errorMessage}
+              No se encontraron registros de estados de ánimo para este mes 😞.
             </Text>
           </View>
         ) : (
           <FlatList
             data={moods}
             numColumns={1}
+            keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <CustomButton
                 buttonStyle={{
@@ -230,7 +214,6 @@ const MoodHistory = ({ navigation }) => {
                 }}
               />
             )}
-            keyExtractor={(item) => item.id}
           />
         )}
       </View>
