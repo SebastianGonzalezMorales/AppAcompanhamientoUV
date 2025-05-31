@@ -122,6 +122,7 @@ const HomeMood = ({ navigation }) => {
       }
     } catch (error) {
       console.error("Error al obtener los estados de ánimo:", error);
+      setMoods([]);
       setMessage(
         "No se pudo establecer conexión con el servidor.\n Revisa tu conexión a Internet e inténtalo nuevamente. 🌐"
       );
@@ -469,6 +470,7 @@ const HomeMood = ({ navigation }) => {
        */}
 
       <View style={GlobalStyle.rowTwo}>
+        {/* Botón “Estadísticas del último mes” */}
         <View style={GlobalStyle.statsContainer}>
           <HistoryButton
             onPress={() => navigation.navigate("MoodStats")}
@@ -479,16 +481,17 @@ const HomeMood = ({ navigation }) => {
 
         <View style={FormStyle.flexContainer}></View>
 
+        {/* ───── PieChart o mensajes de carga / error ───── */}
         {loading ? (
           <Text style={{ textAlign: "center", color: "#666" }}>
-            Cargando datos...
+            Cargando datos…
           </Text>
         ) : message !== "" ? (
           <Text
             style={{
               textAlign: "center",
-              color: "#666", // Color del mensaje
-              fontSize: 16, //Tamaño más legible
+              color: "#666",
+              fontSize: 16,
               fontWeight: "500",
               paddingHorizontal: 20,
               marginVertical: 12,
@@ -516,61 +519,63 @@ const HomeMood = ({ navigation }) => {
           </View>
         )}
 
-        <HistoryButton
-          onPress={() => navigation.navigate("MoodHistory")}
-          textLeft="Recientes"
-          textRight="Ver todo"
-        />
-        <FlatList
-          data={moods.slice(0, 5)}
-          numColumns={1}
-          renderItem={({ item }) => (
-            <CustomButton
-              buttonStyle={{
-                backgroundColor:
-                  item.mood === "Mal"
-                    ? "#f7d8e3"
-                    : item.mood === "Regular"
-                    ? "#FBEEB0" // Color ajustado
-                    : item.mood === "Bien"
-                    ? "#d8eef7"
-                    : item.mood === "Excelente"
-                    ? "#d8f7ea" // Color ajustado
-                    : "#fff",
-              }}
-              textStyle={{
-                color:
-                  item.mood === "Mal"
-                    ? "#F20C0C"
-                    : item.mood === "Regular"
-                    ? "#F4D63D" // Color ajustado
-                    : item.mood === "Bien"
-                    ? "#2626D8"
-                    : item.mood === "Excelente"
-                    ? "#32CD32" // Color ajustado
-                    : "#000",
-              }}
-              // Mostrar emojis en lugar de texto
-              title={
-                item.mood === "Mal"
-                  ? "😞"
-                  : item.mood === "Regular"
-                  ? "🙂"
-                  : item.mood === "Bien"
-                  ? "😊"
-                  : "😃"
-              }
-              textOne={item.date}
-              textTwo={item.time}
-              onLongPress={() => (
-                setModalVisible(true), setSelectedId(item.id)
-              )}
-              onPress={() => {
-                navigation.navigate("MoodDetails", { moodId: item.id });
-              }}
+        {/* ───── “Recientes” y lista: SOLO si no hay error ni carga ───── */}
+        {message === "" && !loading && (
+          <>
+            <HistoryButton
+              onPress={() => navigation.navigate("MoodHistory")}
+              textLeft="Recientes"
+              textRight="Ver todo"
             />
-          )}
-        />
+
+            <FlatList
+              data={moods.slice(0, 5)}
+              numColumns={1}
+              renderItem={({ item }) => (
+                <CustomButton
+                  buttonStyle={{
+                    backgroundColor:
+                      item.mood === "Mal"
+                        ? "#f7d8e3"
+                        : item.mood === "Regular"
+                        ? "#FBEEB0"
+                        : item.mood === "Bien"
+                        ? "#d8eef7"
+                        : "#d8f7ea",
+                  }}
+                  textStyle={{
+                    color:
+                      item.mood === "Mal"
+                        ? "#F20C0C"
+                        : item.mood === "Regular"
+                        ? "#F4D63D"
+                        : item.mood === "Bien"
+                        ? "#2626D8"
+                        : "#32CD32",
+                  }}
+                  title={
+                    item.mood === "Mal"
+                      ? "😞"
+                      : item.mood === "Regular"
+                      ? "🙂"
+                      : item.mood === "Bien"
+                      ? "😊"
+                      : "😃"
+                  }
+                  textOne={item.date}
+                  textTwo={item.time}
+                  onLongPress={() => {
+                    setModalVisible(true);
+                    setSelectedId(item.id);
+                  }}
+                  onPress={() => {
+                    navigation.navigate("MoodDetails", { moodId: item.id });
+                  }}
+                />
+              )}
+            />
+          </>
+        )}
       </View>
     </SafeAreaView>
   );
