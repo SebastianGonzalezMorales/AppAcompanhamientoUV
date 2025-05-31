@@ -29,7 +29,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 
 import AuthStyle from "../../assets/styles/AuthStyle";
 
-import facultadesData from "../../assets/data/facultades.json"; // Importamos el archivo JSON con las facultades y carreras
+import facultiesData from "../../assets/data/facultades.json"; // Importamos el archivo JSON con las facultades y carreras
 
 const Register = ({ navigation }) => {
   // states
@@ -42,9 +42,9 @@ const Register = ({ navigation }) => {
   const [birthdate, setBirthdate] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [policyAccepted, setPolicyAccepted] = useState(false);
-  const [facultad, setFacultad] = useState("");
-  const [carrera, setCarrera] = useState("");
-  const [carrerasDisponibles, setCarrerasDisponibles] = useState([]);
+  const [faculty, setFaculty] = useState("");
+  const [career, setCareer] = useState("");
+  const [careersAvailable, setCareersAvailable] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("+569 "); // Inicializa con el prefijo
 
@@ -55,10 +55,10 @@ const Register = ({ navigation }) => {
    */
 
   // Función para manejar el cambio de facultad
-  const handleFacultadChange = (selectedFacultad) => {
-    setFacultad(selectedFacultad);
-    setCarrerasDisponibles(facultadesData[selectedFacultad] || []);
-    setCarrera(""); // Resetea carrera si cambia la facultad
+  const handleFacultadChange = (selectedFaculty) => {
+    setFaculty(selectedFaculty);
+    setCareersAvailable(facultiesData[selectedFaculty] || []);
+    setCareer(""); // Resetea carrera si cambia la facultad
   };
 
   const handleDateChange = (event, selectedDate) => {
@@ -557,11 +557,11 @@ const Register = ({ navigation }) => {
                   right: 16, // Ajusta este valor
                 },
               ]}
-              enabled={Object.keys(facultadesData).length > 0}
+              enabled={Object.keys(facultiesData).length > 0}
               dropdownIconColor="#92959f"
             >
               <Picker.Item label="Selecciona una facultad" value="" />
-              {Object.keys(facultadesData).map((fac) => (
+              {Object.keys(facultiesData).map((fac) => (
                 <Picker.Item key={fac} label={fac} value={fac} />
               ))}
             </Picker>
@@ -577,7 +577,7 @@ const Register = ({ navigation }) => {
             />
             <Picker
               selectedValue={career}
-              onValueChange={(itemValue) => setCarrera(itemValue)}
+              onValueChange={(itemValue) => setCareer(itemValue)}
               style={[
                 AuthStyle.input,
                 {
@@ -586,11 +586,11 @@ const Register = ({ navigation }) => {
                   right: 16, // Ajusta este valor
                 },
               ]}
-              enabled={carrerasDisponibles.length > 0} // Solo habilitado si hay carreras disponibles
+              enabled={careersAvailable.length > 0} // Solo habilitado si hay carreras disponibles
               dropdownIconColor="#92959f" // Color de la flecha predeterminada
             >
               <Picker.Item label="Selecciona una carrera" value="" />
-              {carrerasDisponibles.map((car) => (
+              {careersAvailable.map((car) => (
                 <Picker.Item key={car} label={car} value={car} />
               ))}
             </Picker>
