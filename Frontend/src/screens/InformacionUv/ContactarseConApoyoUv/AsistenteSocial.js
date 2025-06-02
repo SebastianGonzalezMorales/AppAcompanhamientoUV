@@ -34,6 +34,7 @@ const { width, height } = Dimensions.get("window"); // Obtener dimensiones
 function AsistenteSocial({ navigation }) {
   const [assistant, setAssistant] = useState(null);
   const [firstName, setFirstName] = useState("");
+  const [secondName, setSecondName] = useState("");
   const [imageData, setImageData] = useState(null);
   const [userRut, setUserRut] = useState("");
   const [userCareer, setUserCareer] = useState("");
@@ -54,7 +55,9 @@ function AsistenteSocial({ navigation }) {
             { headers: { Authorization: `Bearer ${token}` } }
           );
           const userData = response.data.data;
-          setFirstName(userData.name.split(" ")[0]);
+          const nameParts = userData.name.trim().split(/\s+/);
+          setFirstName(nameParts[0] || "");
+          setSecondName(nameParts[1] || "");
           setUserRut(userData.rut);
           setUserCareer(userData.career);
           setUserPhone(userData.phoneNumber);
@@ -293,6 +296,9 @@ function AsistenteSocial({ navigation }) {
                     alignItems: "center",
                   }}
                   onPress={() => {
+                    const fullName = secondName
+                      ? `${firstName} ${secondName}`
+                      : firstName;
                     const assistantFirstName = assistant?.name
                       ? assistant.name.trim().split(" ")[0]
                       : "Asistente";
@@ -301,10 +307,10 @@ function AsistenteSocial({ navigation }) {
                       `mailto:${assistant.email}?subject=[Atención Salud Mental - AppAcompañamientoUV]&body=Estimada ${assistantFirstName},%0D%0A%0D%0A` +
                         `Junto con saludar y esperando que se encuentre bien, le escribo este correo porque quiero contar con acompañamiento psicológico.%0D%0A%0D%0A` +
                         `Datos del estudiante:%0D%0A` +
-                        `- Nombre: ${firstName}%0D%0A` +
-                        `- Carrera: ${userCareer}%0D%0A` +
-                        `- RUT: ${userRut}%0D%0A` +
-                        `- Teléfono: ${userPhone}%0D%0A%0D%0A` +
+                        `- Nombre: ${fullName}.%0D%0A` +
+                        `- Carrera: ${userCareer}.%0D%0A` +
+                        `- RUT: ${userRut}.%0D%0A` +
+                        `- Teléfono: ${userPhone}.%0D%0A%0D%0A` +
                         `Quedo atento.%0D%0A%0D%0A` +
                         `Muchas gracias.`
                     );
