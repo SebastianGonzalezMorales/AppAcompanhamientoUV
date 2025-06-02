@@ -164,7 +164,7 @@ function AsistenteSocial({ navigation }) {
           style={[GlobalStyle.text, { textAlign: "justify", color: "#FFFFFF" }]}
         >
           {firstName
-            ? `${firstName}, te presentamos a la asistente social asignada a tu carrera. Ella es tu primer contacto para recibir orientación y apoyo. Posteriormente, en caso de ser necesario podrás recibir atención psicológica`
+            ? `${firstName}, te presentamos a la asistente social asignada a tu carrera. Ella es tu primer contacto para recibir orientación y apoyo. Posteriormente, en caso de ser necesario podrás recibir atención psicológica.`
             : errorMessage
             ? "" // No mostramos nada si hay error
             : "Cargando..."}
