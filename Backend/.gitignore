@@ -1,7 +1,5 @@
 node_modules/
 
-uploads/
-
 .env.development
 
 .env.testing
