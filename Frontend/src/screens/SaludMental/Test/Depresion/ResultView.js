@@ -24,7 +24,7 @@ const ResultView = ({ route, navigation }) => {
   const { documentId } = route.params;
 
   // states
-  const [total, setTotal] = useState("");
+  const [totalScore, setTotal] = useState("");
   const [severity, setSeverity] = useState("");
   const [date, setDate] = useState("");
 
