@@ -42,7 +42,7 @@ const DepressionTestForm = ({ navigation }) => {
         const token = await AsyncStorage.getItem("token");
 
         if (token) {
-          const response = await api.get(`${API_URL}/questions/get-questions`, {
+          const response = await api.get(`${API_URL}/questions/get-questions?testKey=PHQ9`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
