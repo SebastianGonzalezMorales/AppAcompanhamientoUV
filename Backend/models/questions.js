@@ -1,20 +1,20 @@
 const mongoose = require("mongoose");
 
+/*  Esquema de preguntas — vinculado a Test  */
 const questionSchema = new mongoose.Schema({
-  /** Identificador del test: “PHQ9”, “GAD7”, etc. */
-  testKey: {
-    type: String,
+  /* Identificador del test (referencia al catálogo) */
+  testId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Test",
     required: true,
-    enum: ["PHQ9", "GAD7"], // añade más códigos según los vayas creando
   },
 
-  /** Orden de la pregunta dentro de ese test */
-  order: { type: Number, required: true, unique: true },
+  /* Orden de la pregunta dentro de ese test */
+  order: { type: Number, required: true },
 
-  /** Texto de la pregunta */
+  /* Texto y opciones */
   question: { type: String, required: true },
 
-  /** Opciones y su puntaje */
   option1: { type: String, required: true },
   option2: { type: String, required: true },
   option3: { type: String, required: true },
@@ -25,7 +25,10 @@ const questionSchema = new mongoose.Schema({
   selectedoption4: { type: Number, required: true },
 });
 
-// Crear el modelo
-exports.Question = mongoose.model("Question", questionSchema);
+/* Índice compuesto: evita duplicar el mismo 'order' dentro de un test  */
+questionSchema.index(
+  { testId: 1, order: 1 },
+  { unique: true, name: "testId_order_unique" }
+);
 
-exports.questionSchema = questionSchema;
+module.exports = mongoose.model("Question", questionSchema);

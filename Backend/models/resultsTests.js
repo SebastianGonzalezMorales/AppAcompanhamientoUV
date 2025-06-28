@@ -6,6 +6,11 @@ const resultsTestsSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  testId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Test",
+    required: true,
+  },
   totalScore: {
     type: Number,
     required: true,

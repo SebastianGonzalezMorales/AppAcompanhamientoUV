@@ -1,99 +1,91 @@
-const { Question } = require("../models/questions");
+const Question = require("../models/questions");
+const Test = require("../models/tests");
 
-/*----------------------------------------------------------
-  Crear pregunta
-----------------------------------------------------------*/
+/* ---------- Crear pregunta ---------- */
 const createQuestion = async (req, res) => {
   try {
-    // Asegurarse de que lleguen testKey y order
-    if (!req.body.testKey) {
-      return res.status(400).json({ message: "Falta el campo testKey." });
-    }
-    if (req.body.order === undefined) {
-      return res.status(400).json({ message: "Falta el campo order." });
+    // debe llegar testId o code + order
+    if (!req.body.testId && !req.body.code)
+      return res.status(400).json({ message: "Falta testId o code" });
+    if (req.body.order === undefined)
+      return res.status(400).json({ message: "Falta order" });
+
+    // convertir code → testId
+    if (!req.body.testId && req.body.code) {
+      const t = await Test.findOne({ code: req.body.code.toUpperCase() });
+      if (!t) return res.status(404).json({ message: "Test no existe" });
+      req.body.testId = t._id;
     }
 
-    const question = new Question(req.body);
-    await question.save();
-    res.status(201).json(question);
-  } catch (error) {
-    // Código 11000 = violación de índice único (testKey + order)
-    if (error.code === 11000) {
-      return res
-        .status(409)
-        .json({ message: "Ya existe una pregunta con ese testKey y order." });
-    }
-    res.status(400).json({ message: error.message });
+    const q = new Question(req.body);
+    await q.save();
+    res.status(201).json(q);
+  } catch (err) {
+    if (err.code === 11000)
+      return res.status(409).json({ message: "order duplicado en este test" });
+    res.status(400).json({ message: err.message });
   }
 };
 
-/*----------------------------------------------------------
-  Obtener todas las preguntas  (admite ?testKey=PHQ9)
-----------------------------------------------------------*/
+/* ---------- Listar preguntas ---------- */
 const getAllQuestions = async (req, res) => {
   try {
-    const filter = {};
-    if (req.query.testKey) {
-      filter.testKey = req.query.testKey;
+    let filter = {};
+
+    if (req.query.testId) {
+      filter.testId = req.query.testId;
+    } else if (req.query.code) {
+      const t = await Test.findOne({ code: req.query.code.toUpperCase() });
+      if (!t) return res.status(404).json({ message: "Test no existe" });
+      filter.testId = t._id;
+    } else {
+      return res.status(400).json({ message: "Falta testId o code" });
     }
-    const questions = await Question.find(filter).sort({ order: 1 });
-    res.status(200).json(questions);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+
+    const qs = await Question.find(filter).sort({ order: 1 });
+    if (!qs.length)
+      return res.status(404).json({ message: "El test no tiene preguntas" });
+
+    res.json(qs);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
 
-/*----------------------------------------------------------
-  Obtener una pregunta por ID
-----------------------------------------------------------*/
+/* ---------- Obtener por ID ---------- */
 const getQuestionById = async (req, res) => {
-  try {
-    const question = await Question.findById(req.params.id);
-    if (!question) {
-      return res.status(404).json({ message: "Pregunta no encontrada." });
-    }
-    res.status(200).json(question);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  const q = await Question.findById(req.params.id);
+  if (!q) return res.status(404).json({ message: "Pregunta no encontrada" });
+  res.json(q);
 };
 
-/*----------------------------------------------------------
-  Actualizar pregunta
-----------------------------------------------------------*/
+/* ---------- Actualizar ---------- */
 const updateQuestion = async (req, res) => {
   try {
-    const question = await Question.findByIdAndUpdate(req.params.id, req.body, {
+    if (!req.body.testId && req.body.code) {
+      const t = await Test.findOne({ code: req.body.code.toUpperCase() });
+      if (!t) return res.status(404).json({ message: "Test no existe" });
+      req.body.testId = t._id;
+    }
+
+    const q = await Question.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
     });
-    if (!question) {
-      return res.status(404).json({ message: "Pregunta no encontrada." });
-    }
-    res.status(200).json(question);
-  } catch (error) {
-    if (error.code === 11000) {
-      return res
-        .status(409)
-        .json({ message: "Ya existe otra pregunta con ese testKey y order." });
-    }
-    res.status(400).json({ message: error.message });
+    if (!q) return res.status(404).json({ message: "Pregunta no encontrada" });
+    res.json(q);
+  } catch (err) {
+    if (err.code === 11000)
+      return res.status(409).json({ message: "order duplicado en este test" });
+    res.status(400).json({ message: err.message });
   }
 };
 
-/*----------------------------------------------------------
-  Eliminar pregunta
-----------------------------------------------------------*/
+/* ---------- Eliminar ---------- */
 const deleteQuestion = async (req, res) => {
-  try {
-    const question = await Question.findByIdAndDelete(req.params.id);
-    if (!question) {
-      return res.status(404).json({ message: "Pregunta no encontrada." });
-    }
-    res.status(204).send();
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  const q = await Question.findByIdAndDelete(req.params.id);
+  if (!q) return res.status(404).json({ message: "Pregunta no encontrada" });
+  res.status(204).send();
 };
 
 module.exports = {
