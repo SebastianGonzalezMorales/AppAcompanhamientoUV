@@ -24,7 +24,7 @@ const postMoodState = async (req, res) => {
       intensity: req.body.intensity,
       activities: req.body.activities,
       title: req.body.title,
-      comentarios: req.body.comentarios,
+      comments: req.body.comments,
     });
 
     const createdMoodState = await moodState.save();
@@ -91,13 +91,11 @@ const getMoodStateById = async (req, res) => {
     res.status(200).json({ success: true, data: moodState });
   } catch (error) {
     console.error("Error al obtener el estado de ánimo:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error del servidor",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error del servidor",
+      error: error.message,
+    });
   }
 };
 const calculateWeeklyStreak = async (req, res) => {
