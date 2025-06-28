@@ -42,7 +42,7 @@ const DepressionTestForm = ({ navigation }) => {
         const token = await AsyncStorage.getItem("token");
 
         if (token) {
-          const response = await api.get(`${API_URL}/questions/get-questions?testKey=PHQ9`, {
+          const response = await api.get(`${API_URL}/questions/get-questions?code=PHQ9`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -124,6 +124,7 @@ const DepressionTestForm = ({ navigation }) => {
           `${API_URL}/resultsTests/post-resultsTest`,
           {
             userId,
+            code: "PHQ9", 
             totalScore,
             severity,
             date,
