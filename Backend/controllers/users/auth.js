@@ -13,19 +13,18 @@ if (!secret) {
   );
 }
 
+const sha256 = (v = "") => crypto.createHash("sha256").update(v).digest("hex");
+
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
     const normalizedEmail = email.toLowerCase();
 
     // Calcular hash determinista del email para buscar
-    const hashedEmail = crypto
-      .createHash("sha256")
-      .update(normalizedEmail)
-      .digest("hex");
+    const emailHash = sha256(normalizedEmail);
 
     // Verifica si existe un usuario temporal pendiente de verificación
-    const tempUser = await TempUser.findOne({ emailHash: hashedEmail });
+    const tempUser = await TempUser.findOne({ emailHash });
     if (tempUser) {
       return res.status(403).json({
         success: false,
@@ -35,7 +34,7 @@ const loginUser = async (req, res) => {
     }
 
     // Buscar usuario usando el hash del email
-    const user = await User.findOne({ emailHash: hashedEmail });
+    const user = await User.findOne({ emailHash });
     if (!user) {
       return res.status(400).json({
         success: false,
@@ -117,12 +116,10 @@ const registerUser = async (req, res) => {
       !password ||
       !confirmPassword
     ) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Todos los campos son obligatorios.",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Todos los campos son obligatorios.",
+      });
     }
 
     const firstName = name.split(" ")[0];
@@ -130,25 +127,21 @@ const registerUser = async (req, res) => {
     // Validar el formato del número de celular
     const phoneRegex = /^\+569\s?\d{8}$/;
     if (!phoneRegex.test(phoneNumber)) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message:
-            "Número de celular inválido. Debe seguir el formato +569 XXXXXXXX.",
-        });
+      return res.status(400).json({
+        success: false,
+        message:
+          "Número de celular inválido. Debe seguir el formato +569 XXXXXXXX.",
+      });
     }
     console.log("Número de celular recibido:", phoneNumber);
 
     // Validar fortaleza y confirmación de contraseña
     if (!isStrongPassword(password)) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message:
-            "La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una letra minúscula, un número y un símbolo.",
-        });
+      return res.status(400).json({
+        success: false,
+        message:
+          "La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una letra minúscula, un número y un símbolo.",
+      });
     }
     if (password !== confirmPassword) {
       return res
@@ -171,41 +164,31 @@ const registerUser = async (req, res) => {
       day < 1 ||
       day > 31
     ) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "La fecha de nacimiento no es válida.",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "La fecha de nacimiento no es válida.",
+      });
     }
     if (!policyAccepted) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Debes aceptar la política de privacidad para registrarte.",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Debes aceptar la política de privacidad para registrarte.",
+      });
     }
 
     // Calcular hash determinista para email y rut
-    const hashedEmail = crypto
-      .createHash("sha256")
-      .update(normalizedEmail)
-      .digest("hex");
-
-    const hashedRut = crypto.createHash("sha256").update(rut).digest("hex");
+    const emailHash = sha256(normalizedEmail);
+    const rutHash = sha256(rut);
 
     // Verificar si ya existe un usuario con el mismo email o rut
-    const existingUser = await User.findOne({ emailHash: hashedEmail });
+    const existingUser = await User.findOne({ emailHash });
     if (existingUser) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "El correo electrónico que ingresaste ya está registrado.",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "El correo electrónico que ingresaste ya está registrado.",
+      });
     }
-    const existingRut = await User.findOne({ rutHash: hashedRut });
+    const existingRut = await User.findOne({ rutHash });
     if (existingRut) {
       return res
         .status(400)
@@ -221,7 +204,9 @@ const registerUser = async (req, res) => {
     const tempUser = new TempUser({
       name,
       email: normalizedEmail,
+      emailHash,
       rut,
+      rutHash,
       birthdate: formattedBirthdate,
       faculty,
       career,
@@ -234,12 +219,10 @@ const registerUser = async (req, res) => {
 
     const savedTempUser = await tempUser.save();
     if (!savedTempUser)
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "No se pudo crear el usuario temporal.",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "No se pudo crear el usuario temporal.",
+      });
 
     // Configurar el enlace de verificación
     const baseUrl = process.env.BASE_URL;
@@ -288,13 +271,11 @@ const registerUser = async (req, res) => {
       ],
     });
 
-    res
-      .status(201)
-      .json({
-        success: true,
-        message:
-          "Registro exitoso. Por favor, revise su correo electrónico para verificar su cuenta.",
-      });
+    res.status(201).json({
+      success: true,
+      message:
+        "Registro exitoso. Por favor, revise su correo electrónico para verificar su cuenta.",
+    });
   } catch (error) {
     console.error("Error registering user:", error);
     res
@@ -317,9 +298,11 @@ const verifyEmail = async (req, res) => {
   console.log("Verifying email with token:", token);
 
   try {
-    const decoded = jwt.verify(token, secret);
-    const email = decoded.email;
+    // Comprobar el token JWT y normalizar el correo
+    const { email } = jwt.verify(token, secret);
+    const normalizedEmail = email.toLowerCase();
 
+    // Buscar el usuario temporal con ese token
     const tempUser = await TempUser.findOne({ verificationToken: token });
     if (!tempUser) {
       console.log("No temporary user found or token expired.");
@@ -333,23 +316,43 @@ const verifyEmail = async (req, res) => {
             `);
     }
 
-    const user = new User({
-      name: tempUser.name,
-      email: tempUser.email,
-      rut: tempUser.rut,
-      birthdate: tempUser.birthdate,
-      faculty: tempUser.faculty,
-      career: tempUser.career,
-      phoneNumber: tempUser.phoneNumber,
-      passwordHash: tempUser.passwordHash,
-      verified: true,
-      policyAccepted: true,
-      policyAcceptedAt: new Date(),
-    });
+    //  Calcular los hashes que se usarán como clave única
+    const emailHash = crypto
+      .createHash("sha256")
+      .update(normalizedEmail)
+      .digest("hex");
+    const rutHash = crypto
+      .createHash("sha256")
+      .update(tempUser.rut)
+      .digest("hex");
 
-    await user.save();
-    console.log("New user saved:", user);
+    let user = await User.findOne({ emailHash });
 
+    if (user) {
+      // Ya existe ⇒ sólo marca como verificado
+      user.verified = true;
+      await user.save(); // mongoose-encryption cifra si faltaba
+    } else {
+      // No existía ⇒ crear documento nuevo
+      user = new User({
+        name: tempUser.name,
+        email: tempUser.email,
+        rut: tempUser.rut,
+        birthdate: tempUser.birthdate,
+        faculty: tempUser.faculty,
+        career: tempUser.career,
+        phoneNumber: tempUser.phoneNumber,
+        passwordHash: tempUser.passwordHash,
+        policyAccepted: true,
+        policyAcceptedAt: new Date(),
+        verified: true,
+        emailHash,
+        rutHash,
+      });
+      await user.save(); // ← los campos sensibles se guardan cifrados
+    }
+
+    //  Borrar el usuario temporal
     try {
       const deleteResult = await TempUser.deleteOne({
         verificationToken: token,
@@ -377,7 +380,7 @@ const verifyEmail = async (req, res) => {
                 </html>
             `);
     }
-
+    //  Respuesta de éxito
     return res.send(`
             <html>
                 <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: Arial, sans-serif;">

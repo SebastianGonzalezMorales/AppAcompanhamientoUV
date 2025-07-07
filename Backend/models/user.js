@@ -4,66 +4,22 @@ const crypto = require("crypto");
 require("dotenv").config(); // Para cargar variables de entorno
 
 const usersSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  rut: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  rutHash: { type: String, unique: true }, // Para búsquedas por RUT
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  emailHash: { type: String, unique: true }, // Para búsquedas por email
-  passwordHash: {
-    type: String,
-    required: true,
-  },
-  birthdate: {
-    type: Date,
-    required: true,
-  },
-  faculty: {
-    type: String,
-    required: true,
-  },
-  career: {
-    type: String,
-    required: true,
-  },
-  isAdmin: {
-    type: Boolean,
-    default: false,
-  },
-  verified: {
-    type: Boolean,
-    default: false,
-  },
-  canResetPassword: {
-    type: Boolean,
-    default: false,
-  },
-  resetPasswordToken: {
-    type: String,
-    default: null,
-  },
-  resetPasswordExpires: {
-    type: Date,
-    default: null,
-  },
-  policyAccepted: {
-    type: Boolean,
-    default: false,
-  },
-  policyAcceptedAt: {
-    type: Date,
-    default: null,
-  },
+  name: { type: String, required: true },
+  rut: { type: String, required: true },
+  rutHash: { type: String, unique: true, sparse: true }, // Para búsquedas por RUT
+  email: { type: String, required: true, unique: true },
+  emailHash: { type: String, unique: true, required: true }, // Para búsquedas por email
+  passwordHash: { type: String, required: true },
+  birthdate: { type: Date, required: true },
+  faculty: { type: String, required: true },
+  career: { type: String, required: true },
+  isAdmin: { type: Boolean, default: false },
+  verified: { type: Boolean, default: false },
+  canResetPassword: { type: Boolean, default: false },
+  resetPasswordToken: { type: String, default: null },
+  resetPasswordExpires: { type: Date, default: null },
+  policyAccepted: { type: Boolean, default: false },
+  policyAcceptedAt: { type: Date, default: null },
   phoneNumber: { type: String, required: true },
 });
 
