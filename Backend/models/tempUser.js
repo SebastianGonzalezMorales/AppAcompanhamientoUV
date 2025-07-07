@@ -4,9 +4,9 @@ const crypto = require("crypto");
 
 const tempUserSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true },
   emailHash: { type: String, unique: true, required: true }, // Para búsquedas
-  rut: { type: String, required: true, unique: true },
+  rut: { type: String, required: true },
   rutHash: { type: String, unique: true, sparse: true }, // Para búsquedas
   birthdate: { type: Date, required: true },
   faculty: { type: String, required: true },

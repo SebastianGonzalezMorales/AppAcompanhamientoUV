@@ -7,7 +7,7 @@ const usersSchema = new mongoose.Schema({
   name: { type: String, required: true },
   rut: { type: String, required: true },
   rutHash: { type: String, unique: true, sparse: true }, // Para búsquedas por RUT
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true },
   emailHash: { type: String, unique: true, required: true }, // Para búsquedas por email
   passwordHash: { type: String, required: true },
   birthdate: { type: Date, required: true },

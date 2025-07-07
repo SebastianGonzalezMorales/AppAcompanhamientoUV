@@ -102,6 +102,9 @@ const registerUser = async (req, res) => {
     } = req.body;
     const normalizedEmail = email.toLowerCase();
 
+    const emailHash = sha256(normalizedEmail);
+    const rutHash = sha256(rut);
+
     // Debug: Verificar que los datos lleguen correctamente
     console.log("Datos de registro recibidos:", req.body);
 
@@ -176,9 +179,68 @@ const registerUser = async (req, res) => {
       });
     }
 
-    // Calcular hash determinista para email y rut
-    const emailHash = sha256(normalizedEmail);
-    const rutHash = sha256(rut);
+    // --------------------------------------------------------------------
+    // BLOQUE DE REENVÍO AUTOMÁTICO — añadir aquí
+    // --------------------------------------------------------------------
+    const pending = await TempUser.findOne({ emailHash });
+    if (pending) {
+      // Genera un nuevo token (o usa el que ya tiene)
+      const newToken = jwt.sign({ email: normalizedEmail }, secret, {
+        expiresIn: "1h",
+      });
+      pending.verificationToken = newToken;
+      await pending.save();
+
+      // Construir enlace
+      const verificationLink = `${process.env.BASE_URL}${process.env.API_URL}/auth/verificar?token=${newToken}`;
+
+      // Reenviar correo
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+      });
+
+      const resendHtml = `
+                      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 10px; padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <img src="cid:app_logo" alt="App Acompañamiento UV" style="width: 70px; height: auto;">
+                    </div>
+                    <h2 style="color: #1d72b8; text-align: center;">Bienvenido a la App Acompañamiento UV</h2>
+                    <p>Hola <strong>${firstName}</strong>,</p>
+                    <p>Gracias por registrarte en nuestra aplicación. Estamos encantados de que formes parte de nuestra comunidad.</p>
+                    <p>Para activar tu cuenta y comenzar a disfrutar de nuestros servicios, por favor haz clic en el siguiente botón:</p>
+                    <div style="text-align: center; margin: 20px 0;">
+                        <a href="${verificationLink}" style="background-color: #1d72b8; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Verificar Cuenta</a>
+                    </div>
+                    <p>Si no solicitaste este registro, por favor ignora este correo.</p>
+                    <p>Saludos cordiales,</p>
+                    <p style="font-style: italic; color: #333;">Equipo de App Acompañamiento UV</p>
+                    <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+                    <p style="font-size: 12px; text-align: center; color: #777;">
+                        Este correo se ha enviado automáticamente. Por favor, no respondas a este mensaje.
+                    </p>
+                </div> 
+`;
+
+      await transporter.sendMail({
+        to: normalizedEmail,
+        subject: "[Nuevo enlace de verificación – App Acompañamiento UV]",
+        html: resendHtml,
+        attachments: [
+          {
+            filename: "Icon_Application_Blue.png",
+            path: "public/Icon_Application_Blue.png",
+            cid: "app_logo",
+          },
+        ],
+      });
+
+      return res.status(200).json({
+        success: true,
+        message:
+          "Ya existía una solicitud pendiente. Se ha reenviado el enlace de verificación.",
+      });
+    }
 
     // Verificar si ya existe un usuario con el mismo email o rut
     const existingUser = await User.findOne({ emailHash });
