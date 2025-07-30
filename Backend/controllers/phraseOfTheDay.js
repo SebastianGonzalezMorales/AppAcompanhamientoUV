@@ -35,7 +35,8 @@ const getRandomPhraseOfTheDay = async (req, res) => {
   try {
     const userId = req.auth.userId;
     const today  = process.env.TEST_DATE || moment().format("YYYY-MM-DD");
-    // 1. Si ya hay frase para hoy, la devolvemos
+
+    // 1) Si ya hay frase para hoy, devolverla
     const existing = await UserPhrase
       .findOne({ userId, assignedDate: today })
       .populate("phraseId", "message author");
@@ -47,34 +48,43 @@ const getRandomPhraseOfTheDay = async (req, res) => {
       });
     }
 
-    // 2. Cargamos todas las frases y el historial completo del usuario
+    // 2) Cargar todas las frases y el historial completo del usuario
     const allPhrases  = await PhraseOfTheDay.find({}, "_id message author").lean();
-    const seenRecords = await UserPhrase.find({ userId }, "phraseId").lean();
-    const seenIds     = seenRecords.map(r => r.phraseId.toString());
+    const seenEntries = await UserPhrase.find({ userId }, "phraseId").lean();
+    const seenIds     = new Set(seenEntries.map(r => r.phraseId.toString()));
 
-    // 3. Filtrar las frases que el usuario aún no ha visto
-    const unseen = allPhrases.filter(f => !seenIds.includes(f._id.toString()));
-
-    // 4. Si no quedan frases nuevas, informamos al usuario
-    if (unseen.length === 0) {
+    // 3) Caso: base de datos vacía
+    if (allPhrases.length === 0) {
       return res.send({
         status:  "Ok",
-message: "🚀 ¡Felicidades! Has recorrido todas nuestras frases. Pronto cargaremos más para ti. 🔜",
-        author:  " "
+        message: "¡Hola! Aún no tenemos frases para ti, pero muy pronto las estaremos cargando. 😊",
+        author: " "
       });
     }
 
-    // 5. Elegir aleatoriamente de las no vistas
+    // 4) Filtrar las frases que el usuario aún no ha visto
+    const unseen = allPhrases.filter(f => !seenIds.has(f._id.toString()));
+
+    // 5) Caso: catálogo agotado
+    if (unseen.length === 0) {
+      return res.send({
+        status:  "Ok",
+        message: "🚀 ¡Felicidades! Has recorrido todas nuestras frases. Pronto cargaremos más para ti. 🔜",
+        author: " "
+      });
+    }
+
+    // 6) Elegir aleatoriamente de las no vistas
     const choice = unseen[Math.floor(Math.random() * unseen.length)];
 
-    // 6. Guardar en historial
+    // 7) Guardar en historial
     await new UserPhrase({
       userId,
       phraseId:     choice._id,
       assignedDate: today
     }).save();
 
-    // 7. Devolver la frase escogida
+    // 8) Devolver la frase escogida
     return res.send({
       status:  "Ok",
       message: choice.message,
@@ -86,6 +96,7 @@ message: "🚀 ¡Felicidades! Has recorrido todas nuestras frases. Pronto cargar
     return res.status(500).send({ status: "Error", error: err.message });
   }
 };
+
 
 module.exports = {
   getPhraseOfTheDay,
