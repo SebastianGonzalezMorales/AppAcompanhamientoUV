@@ -1,15 +1,16 @@
+// controllers/phraseOfTheDay.js
 const { PhraseOfTheDay } = require("../models/phraseOfTheDay");
-const { UserPhrase } = require("../models/userPhrase");
-const moment = require("moment");
+const { UserPhrase }   = require("../models/userPhrase");
+const moment           = require("moment");
 
 // Controlador para obtener todos los phraseOfTheDay
 const getPhraseOfTheDay = async (req, res) => {
   try {
-    const phraseOfTheDayList = await PhraseOfTheDay.find();
-    if (!phraseOfTheDayList) {
+    const list = await PhraseOfTheDay.find();
+    if (!list) {
       return res.status(500).json({ success: false });
     }
-    res.send(phraseOfTheDayList);
+    res.send(list);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -17,117 +18,74 @@ const getPhraseOfTheDay = async (req, res) => {
 
 // Controlador para crear un nuevo tip
 const postPhraseOfTheDay = async (req, res) => {
-  const phraseOfTheDay = new PhraseOfTheDay({
+  const phrase = new PhraseOfTheDay({
     message: req.body.message,
-    author: req.body.author,
+    author:  req.body.author,
   });
   try {
-    const createdPhraseOfTheDay = await phraseOfTheDay.save();
-    res.status(201).json(createdPhraseOfTheDay);
+    const created = await phrase.save();
+    res.status(201).json(created);
   } catch (err) {
-    res.status(500).json({
-      error: err.message,
-      success: false,
-    });
+    res.status(500).json({ error: err.message, success: false });
   }
 };
 
 // Controlador para asignar y retornar una frase motivacional del día al usuario
-
 const getRandomPhraseOfTheDay = async (req, res) => {
   try {
-    console.log("Datos del usuario autenticado:", req.auth); // Verifica que req.auth contiene los datos
-    const userId = req.auth.userId; // Obtén el ID del usuario desde el token
-    const today = moment().format("YYYY-MM-DD"); // Fecha actual en formato YYYY-MM-DD
-
-    // Verificar si el usuario ya tiene una frase asignada para hoy
-    const existingUserPhrase = await UserPhrase.findOne({
-      userId,
-      assignedDate: today,
-    }).populate("phraseId");
-    if (existingUserPhrase) {
-      console.log(
-        "Frase ya asignada para el día de hoy:",
-        existingUserPhrase.phraseId.message
-      );
+    const userId = req.auth.userId;
+    const today  = process.env.TEST_DATE || moment().format("YYYY-MM-DD");
+    // 1. Si ya hay frase para hoy, la devolvemos
+    const existing = await UserPhrase
+      .findOne({ userId, assignedDate: today })
+      .populate("phraseId", "message author");
+    if (existing) {
       return res.send({
-        status: "Ok",
-        message: existingUserPhrase.phraseId.message,
-        author: existingUserPhrase.phraseId.author,
+        status:  "Ok",
+        message: existing.phraseId.message,
+        author:  existing.phraseId.author
       });
     }
 
-    // Obtener la última frase vista por el usuario
-    const lastUserPhrase = await UserPhrase.findOne({ userId }).sort({
-      assignedDate: -1,
-    });
-    console.log(
-      "Última frase vista por el usuario:",
-      lastUserPhrase
-        ? lastUserPhrase.phraseId
-        : "Ninguna frase asignada anteriormente."
-    );
+    // 2. Cargamos todas las frases y el historial completo del usuario
+    const allPhrases  = await PhraseOfTheDay.find({}, "_id message author").lean();
+    const seenRecords = await UserPhrase.find({ userId }, "phraseId").lean();
+    const seenIds     = seenRecords.map(r => r.phraseId.toString());
 
-    // Excluir la última frase de la selección aleatoria
-    const matchQuery = lastUserPhrase
-      ? { _id: { $ne: lastUserPhrase.phraseId } } // Excluye la frase anterior
-      : {};
+    // 3. Filtrar las frases que el usuario aún no ha visto
+    const unseen = allPhrases.filter(f => !seenIds.includes(f._id.toString()));
 
-    // Seleccionar una nueva frase aleatoria que no sea la última vista
-    const randomPhrase = await PhraseOfTheDay.aggregate([
-      { $match: matchQuery },
-      { $sample: { size: 1 } }, // Selecciona una frase aleatoria
-      { $project: { message: 1, author: 1 } },
-    ]);
-
-    if (randomPhrase.length === 0) {
-      console.log("No hay frases disponibles en la base de datos.");
-      return res
-        .status(404)
-        .send({ status: "Error", message: "No hay frases disponibles." });
+    // 4. Si no quedan frases nuevas, informamos al usuario
+    if (unseen.length === 0) {
+      return res.send({
+        status:  "Ok",
+message: "🚀 ¡Felicidades! Has recorrido todas nuestras frases. Pronto cargaremos más para ti. 🔜",
+        author:  " "
+      });
     }
 
-    console.log("Nueva frase seleccionada:", randomPhrase[0].message);
+    // 5. Elegir aleatoriamente de las no vistas
+    const choice = unseen[Math.floor(Math.random() * unseen.length)];
 
-    // Crear un registro en la colección UserPhrase
-    const newUserPhrase = new UserPhrase({
+    // 6. Guardar en historial
+    await new UserPhrase({
       userId,
-      phraseId: randomPhrase[0]._id,
-      assignedDate: today,
+      phraseId:     choice._id,
+      assignedDate: today
+    }).save();
+
+    // 7. Devolver la frase escogida
+    return res.send({
+      status:  "Ok",
+      message: choice.message,
+      author:  choice.author
     });
 
-    await newUserPhrase.save();
-    console.log("Frase guardada correctamente en el historial del usuario.");
-
-    // Devolver la frase al cliente
-    res.send({
-      status: "Ok",
-      message: randomPhrase[0].message,
-      author: randomPhrase[0].author,
-    });
-  } catch (error) {
-    console.error("Error al obtener la frase del día:", error.message);
-    return res
-      .status(500)
-      .send({ status: "Error", error: "Error al obtener la frase del día." });
+  } catch (err) {
+    console.error("Error al obtener frase del día:", err);
+    return res.status(500).send({ status: "Error", error: err.message });
   }
 };
-
-/* const getRandomPhraseOfTheDay = async (req, res) => {
-    try {
-        const data = await PhraseOfTheDay.aggregate([
-            { $sample: { size: 1 } },
-            { $project: { message: 1, author: 1 } }
-        ]);
-        if (data.length > 0) {
-            res.send({ status: "Ok", message: data[0].message, author: data[0].author });
-        } else {
-            res.send({ status: "Error", message: "No phraseOfTheDay found" });
-        }
-    } catch (error) {
-        return res.send({ status: "Error", error: error.message });
-    }
-}; */
 
 module.exports = {
   getPhraseOfTheDay,
