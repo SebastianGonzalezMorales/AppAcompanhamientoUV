@@ -255,8 +255,8 @@ const verifyResetToken = async (req, res) => {
 const getResetPasswordToken = async (req, res) => {
   const { email } = req.body; // Obtiene el correo electrónico del cuerpo de la solicitud
 
-  // Expresión regular para validar el formato nombre.apellido@alumnos.uv.cl
-  const emailRegex = /^[a-z]+\.[a-z]+@alumnos\.uv\.cl$/;
+  // Expresión regular para validar el formato nombre.apellido@estudiantes.uv.cl
+  const emailRegex = /^[a-z]+\.[a-z]+@estudiantes\.uv\.cl$/;
 
   // Verifica que el formato del correo sea correcto
   if (!emailRegex.test(email)) {

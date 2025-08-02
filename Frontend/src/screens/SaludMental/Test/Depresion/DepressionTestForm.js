@@ -1,3 +1,4 @@
+
 // react imports
 import { Alert, FlatList, Text, View } from "react-native";
 import React, { useEffect, useState } from "react";
@@ -24,6 +25,9 @@ import SmallFormButton from "../../../../components/buttons/SmallFormButton";
 import FormStyle from "../../../../assets/styles/FormStyle";
 import GlobalStyle from "../../../../assets/styles/GlobalStyle";
 
+// helper for PHQ-9 severity
+import { getSeverity } from "../../../../utils/phq9";
+
 const DepressionTestForm = ({ navigation }) => {
   // states
   const [questions, setQuestions] = useState([]);
@@ -42,13 +46,11 @@ const DepressionTestForm = ({ navigation }) => {
         const token = await AsyncStorage.getItem("token");
 
         if (token) {
-          const response = await api.get(`${API_URL}/questions/get-questions?code=PHQ9`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          const questions = response.data;
-          setQuestions(questions);
+          const response = await api.get(
+            `${API_URL}/questions/get-questions?code=PHQ9`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setQuestions(response.data);
         } else {
           console.log("No se encontró el token. Por favor, inicia sesión.");
         }
@@ -83,26 +85,15 @@ const DepressionTestForm = ({ navigation }) => {
       }
     });
 
-    let severity = "";
-    if (totalScore >= 0 && totalScore <= 4) {
-      severity = "Normal";
-    } else if (totalScore > 4 && totalScore < 10) {
-      severity = "Leve";
-    } else if (totalScore >= 10 && totalScore < 15) {
-      severity = "Moderado";
-    } else if (totalScore >= 15 && totalScore < 20) {
-      severity = "Moderadamente grave";
-    } else {
-      severity = "Grave";
-    }
-
-    setSeverity(severity);
+    // determine severity using helper
+    const computedSeverity = getSeverity(totalScore);
+    setSeverity(computedSeverity);
     setScore(totalScore);
     setShowResults(true);
 
     // Generar la fecha en español
-    const date = format(new Date(), "dd 'de' MMMM", { locale: es });
-    setDate(date);
+    const formattedDate = format(new Date(), "dd 'de' MMMM", { locale: es });
+    setDate(formattedDate);
 
     try {
       const token = await AsyncStorage.getItem("token");
@@ -110,34 +101,24 @@ const DepressionTestForm = ({ navigation }) => {
       if (token) {
         const userResponse = await api.post(
           `${API_URL}/tokens/userid`,
-          { token: `${token}` },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          { token },
+          { headers: { Authorization: `Bearer ${token}` } }
         );
 
         const userId = userResponse.data.userId;
 
-        const response = await api.post(
+        await api.post(
           `${API_URL}/resultsTests/post-resultsTest`,
           {
             userId,
-            code: "PHQ9", 
+            code: "PHQ9",
             totalScore,
-            severity,
-            date,
+            severity: computedSeverity,
+            date: formattedDate,
             created: new Date(),
           },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-
-        console.log("Datos enviados correctamente:", response.data);
       }
     } catch (error) {
       console.error("Error al enviar datos:", error);

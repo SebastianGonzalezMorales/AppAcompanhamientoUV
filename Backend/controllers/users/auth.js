@@ -490,4 +490,4 @@ const logoutUser = (req, res) => {
   }
 };
 
-module.exports = { loginUser, registerUser, verifyEmail, logoutUser };
+module.exports = { loginUser, registerUser, verifyEmail, logoutUser, isStrongPassword };

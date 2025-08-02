@@ -1,5 +1,11 @@
 {
     "name": "app-root",
     "version": "1.0.0",
-    "description": "Root package for Heroku deployment"
+    "description": "Root package for Heroku deployment",
+    "devDependencies": {
+        "@testing-library/jest-native": "^5.4.3",
+        "@testing-library/react-native": "^13.2.2",
+        "jest": "^29.7.0",
+        "jest-expo": "^53.0.9"
+    }
 }

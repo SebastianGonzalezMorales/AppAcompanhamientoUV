@@ -144,7 +144,7 @@ function Tne({ navigation }) {
     </Text>
     <TouchableOpacity
       style={[styles.emailButton, { marginTop: 4 }]} // Reduce el espacio entre el texto y el botón
-      onPress={() => Linking.openURL('mailto:tne.postgrado@alumnos.uv.cl')}
+      onPress={() => Linking.openURL('mailto:tne.postgrado@uv.cl')}
     >
       <Icon name="email" size={20} color="white" style={{ marginRight: 8 }} />
       <Text style={styles.emailButtonText}>Enviar correo</Text>

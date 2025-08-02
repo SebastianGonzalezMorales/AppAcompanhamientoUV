@@ -225,7 +225,7 @@ const Register = ({ navigation }) => {
   };
 
   const validateEmail = (email) => {
-    const uvEmailPattern = /^[a-zA-Z]+\.[a-zA-Z]+@alumnos\.uv\.cl$/;
+    const uvEmailPattern = /^[a-zA-Z]+\.[a-zA-Z]+@estudiantes\.uv\.cl$/;
     return uvEmailPattern.test(email);
   };
 
@@ -351,7 +351,7 @@ const Register = ({ navigation }) => {
       if (!validateEmail(email)) {
         Alert.alert(
           "Error",
-          "Correo electrónico inválido. Por favor, utiliza el formato nombre.apellido@alumnos.uv.cl.",
+          "Correo electrónico inválido. Por favor, utiliza el formato nombre.apellido@estudiantes.uv.cl.",
           [{ text: "OK" }]
         );
         return;
