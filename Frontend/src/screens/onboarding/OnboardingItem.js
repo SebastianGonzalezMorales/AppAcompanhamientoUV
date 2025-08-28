@@ -5,7 +5,6 @@ import {
   Text,
   useWindowDimensions,
 } from 'react-native';
-import React from 'react';
 
 const OnboardingItem = ({ item }) => {
   // Obtiene el ancho de la pantalla

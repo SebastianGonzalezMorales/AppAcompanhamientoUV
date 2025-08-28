@@ -1,5 +1,6 @@
 // React imports
 import React, { useState, useEffect, useCallback } from "react";
+import { Alert } from "react-native";
 import {
   SafeAreaView,
   Text,
@@ -121,12 +122,18 @@ const HomeMood = ({ navigation }) => {
         setMessage("Sesión expirada. Por favor, vuelve a iniciar sesión.");
       }
     } catch (error) {
-      console.error("Error al obtener los estados de ánimo:", error);
-      setMoods([]);
-      setMessage(
-        "No se pudo establecer conexión con el servidor.\n Revisa tu conexión a Internet e inténtalo nuevamente. 🌐"
-      );
-    } finally {
+  console.error("Error al obtener los estados de ánimo:", error);
+  setMoods([]);
+  setMessage(
+    "No se pudo establecer conexión con el servidor.\n Revisa tu conexión a Internet e inténtalo nuevamente. 🌐"
+  );
+
+  Alert.alert(
+    "Sin conexión",
+    "Parece que perdiste la conexión a Internet. Verifica tu red e inténtalo de nuevo.",
+    [{ text: "OK" }]
+  );
+}finally {
       setLoading(false); // esto asegura que siempre se actualice
     }
   };
@@ -215,7 +222,13 @@ const HomeMood = ({ navigation }) => {
     } catch (error) {
       console.error("Error al obtener los estados de ánimo:", error);
       setLoading(false);
-    }
+    
+     Alert.alert(
+      "Sin conexión",
+      "No pudimos cargar tus estadísticas porque no hay conexión a Internet.",
+      [{ text: "OK" }]
+    );
+  }
   };
 
   // Función para eliminar un elemento (a completar según tus necesidades)
@@ -468,16 +481,18 @@ const HomeMood = ({ navigation }) => {
        * ***** Section 2 *****
        * *********************
        */}
-
       <View style={GlobalStyle.rowTwo}>
         {/* Botón “Estadísticas del último mes” */}
-        <View style={GlobalStyle.statsContainer}>
-          <HistoryButton
-            onPress={() => navigation.navigate("MoodStats")}
-            textLeft="Estadísticas del último mes"
-            textRight="Ver todo"
-          />
-        </View>
+        {moods.length > 0 && (
+          <View style={GlobalStyle.statsContainer}>
+            <HistoryButton
+              onPress={() => navigation.navigate("MoodStats")}
+              textLeft="Estadísticas del último mes"
+              textRight="Ver todo"
+            />
+          </View>
+        )}
+       
 
         <View style={FormStyle.flexContainer}></View>
 
@@ -520,7 +535,7 @@ const HomeMood = ({ navigation }) => {
         )}
 
         {/* ───── “Recientes” y lista: SOLO si no hay error ni carga ───── */}
-        {message === "" && !loading && (
+        {message === "" && !loading && moods.length > 0 && (
           <>
             <HistoryButton
               onPress={() => navigation.navigate("MoodHistory")}

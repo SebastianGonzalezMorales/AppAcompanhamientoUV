@@ -24,9 +24,6 @@
         "buildType": "app-bundle"
       }
     }
-    //Production tiene que ser aab(Android App Bundle) para subirse a google play, luego google play genera un apk optimizado.
-    //Production tiene que distribution:Store, si se deja como distribution:internal, se toma por omisión
-    // el perfil "Preview".
   },
   "submit": {
     "production": {}

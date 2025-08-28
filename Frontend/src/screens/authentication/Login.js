@@ -232,7 +232,7 @@ const Login = ({ navigation }) => {
             </Text>
             <SmallAuthButton
               text="Regístrate"
-              onPress={() => navigation.replace('Register')}
+              onPress={() => navigation.replace('Policy')}
             />
           </View>
 

@@ -1,5 +1,5 @@
 // react imports
-import { Image, Text, TextInput, View, TouchableOpacity } from "react-native";
+import { Image, Text, TextInput, View, TouchableOpacity, ActivityIndicator, Platform, Alert } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import React, { useState } from "react";
 import Svg, { Circle } from "react-native-svg";
@@ -8,8 +8,6 @@ import api from "../../utils/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import RNPickerSelect from "react-native-picker-select";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Platform } from "react-native";
-import { Alert } from "react-native";
 
 import { format } from "date-fns";
 
@@ -33,6 +31,7 @@ import facultiesData from "../../assets/data/facultades.json"; // Importamos el 
 
 const Register = ({ navigation }) => {
   // states
+  const [loading, setLoading] = useState(false);
   const [fullName, setFullName] = useState("");
   const [rut, setRut] = useState("");
   const [email, setEmail] = useState("");
@@ -47,7 +46,7 @@ const Register = ({ navigation }) => {
   const [careersAvailable, setCareersAvailable] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("+569 "); // Inicializa con el prefijo
-
+  
   /*
    * *******************
    * **** Functions ****
@@ -225,7 +224,7 @@ const Register = ({ navigation }) => {
   };
 
   const validateEmail = (email) => {
-    const uvEmailPattern = /^[a-zA-Z]+\.[a-zA-Z]+@alumnos\.uv\.cl$/;
+    const uvEmailPattern = /^[a-zA-Z]+\.[a-zA-Z]+@estudiantes\.uv\.cl$/;
     return uvEmailPattern.test(email);
   };
 
@@ -266,6 +265,7 @@ const Register = ({ navigation }) => {
     confirmPassword
   ) => {
     try {
+      setLoading(true);
       console.log(" ");
       console.log(fullName);
       console.log(rut);
@@ -351,7 +351,7 @@ const Register = ({ navigation }) => {
       if (!validateEmail(email)) {
         Alert.alert(
           "Error",
-          "Correo electrónico inválido. Por favor, utiliza el formato nombre.apellido@alumnos.uv.cl.",
+          "Correo electrónico inválido. Por favor, utiliza el formato nombre.apellido@estudiantes.uv.cl.",
           [{ text: "OK" }]
         );
         return;
@@ -429,7 +429,9 @@ const Register = ({ navigation }) => {
           { text: "OK" },
         ]);
       }
-    }
+    }finally {
+    setLoading(false); 
+  }
   };
 
   /*
@@ -439,6 +441,27 @@ const Register = ({ navigation }) => {
    */
 
   return (
+    <View style={{ flex: 1 }}>
+    {/* Loader */}
+    {loading && (
+      <View
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0,0,0,0.4)",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 1000,
+        }}
+      >
+        <ActivityIndicator size="large" color="#5da5a9" />
+        <Text style={{ color: "#fff", marginTop: 10 }}>Registrando...</Text>
+      </View>
+    )}
+
     <KeyboardAwareScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <View style={AuthStyle.container}>
         {/* section one */}
@@ -535,6 +558,7 @@ const Register = ({ navigation }) => {
               placeholderTextColor="#92959f"
               selectionColor="#5da5a9"
               style={AuthStyle.input}
+              
             />
           </View>
 
@@ -736,6 +760,7 @@ const Register = ({ navigation }) => {
         </View>
       </View>
     </KeyboardAwareScrollView>
+    </View>
   );
 };
 

@@ -32,7 +32,7 @@ const Onboarding = ({ navigation }) => {
     try {
       await AsyncStorage.setItem('@viewedOnboarding', 'true');
         console.log('completed');
-        navigation.navigate('Policy');
+        navigation.navigate('Login');
 
     } catch (err){
         console.log('Error @setItem:', err);
