@@ -12,13 +12,8 @@ export default function App() {
       Constants?.manifest?.extra?.API_URL ??
       'NO_API_URL_FOUND';
 
-    const baseUrl =
-      Constants?.expoConfig?.extra?.BASE_URL ??
-      Constants?.manifest?.extra?.BASE_URL ??
-      'NO_BASE_URL_FOUND';
 
-    console.log('API_URL:', apiUrl);
-    console.log('BASE_URL:', baseUrl);
+    //console.log('API_URL:', apiUrl);
   }, []);
 
   return (

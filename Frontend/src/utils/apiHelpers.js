@@ -10,7 +10,7 @@ export const fetchWithToken = async (endpoint, method = 'GET', data = null, para
   try {
     // Obtener el token desde AsyncStorage
     const token = await AsyncStorage.getItem('token');
-    console.log(token)
+    //console.log(token)
     if (!token) {
       throw new Error('No se encontró el token. Por favor, inicia sesión.');
     }
@@ -27,7 +27,7 @@ export const fetchWithToken = async (endpoint, method = 'GET', data = null, para
     };
 
         // Log para verificar qué devuelve la API
-        console.log('Respuesta completa de la API:', response);
+        //console.log('Respuesta completa de la API:', response);
     // Realizar la solicitud
     const response = await axios(config);
     

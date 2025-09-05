@@ -137,7 +137,7 @@ const DepressionTestForm = ({ navigation }) => {
           }
         );
 
-        console.log("Datos enviados correctamente:", response.data);
+        console.log("Datos enviados correctamente");
       }
     } catch (error) {
       console.error("Error al enviar datos:", error);

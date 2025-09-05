@@ -1,6 +1,5 @@
 // React imports
 import {
-  FlatList,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -9,7 +8,7 @@ import {
   TouchableWithoutFeedback,
   View,
   ActivityIndicator,
-  ScrollView, // Importamos ScrollView
+  ScrollView,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 
@@ -34,7 +33,6 @@ const { API_URL } = Constants.expoConfig?.extra || {};
 import Activity from "../Activities";
 
 const MoodDetails = ({ route, navigation }) => {
-  // Obtener el ID del estado de ánimo desde la ruta
   const { moodId } = route.params;
 
   // Estados
@@ -45,37 +43,29 @@ const MoodDetails = ({ route, navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Cargar los datos desde el backend
+  // Cargar datos del backend
   useEffect(() => {
     const fetchMoodDetails = async () => {
       try {
-        const token = await AsyncStorage.getItem("token"); // Obtener token del almacenamiento
+        const token = await AsyncStorage.getItem("token");
         if (!token) {
           setErrorMessage("Token no encontrado. Por favor, inicia sesión.");
           return;
         }
 
-        // Solicitar detalles del estado de ánimo
         const response = await api.get(
           `${API_URL}/moodState/get-MoodStatesById/${moodId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         const data = response.data.data;
 
-        // Establecer los datos obtenidos
         setMood(data.moodState || "Estado no definido");
         setTitle(data.title || "No registraste información sobre tu día.");
+        setComments(
+          data.comments || "No se agregaron detalles importantes."
+        );
 
-        // Verificar campo de comentarios
-        if (data.comments) {
-          setComments(data.comments);
-        } else {
-          setComments("No se agregaron detalles importantes.");
-        }
-
-        // Actualizar las actividades seleccionadas
+        // marcar actividades seleccionadas
         const updatedActivities = Activity.map((activity) => {
           if (data.activities.includes(activity.activity)) {
             return { ...activity, selected: true };
@@ -89,21 +79,15 @@ const MoodDetails = ({ route, navigation }) => {
           "Error al cargar los datos del estado de ánimo. Por favor, inténtalo de nuevo."
         );
       } finally {
-        setIsLoading(false); // Ocultar indicador de carga
+        setIsLoading(false);
       }
     };
 
     fetchMoodDetails();
   }, [moodId]);
 
-  // keyboard offset
   const keyboardVerticalOffset = Platform.OS === "ios" ? 80 : 0;
 
-  /*
-   * ****************
-   * **** Screen ****
-   * ****************
-   */
   if (isLoading) {
     return (
       <View style={[FormStyle.container, GlobalStyle.androidSafeArea]}>
@@ -120,177 +104,192 @@ const MoodDetails = ({ route, navigation }) => {
     );
   }
 
+  // Filtrar actividades seleccionadas
+  const selectedActivities = activities.filter((item) => item.selected);
+
   return (
-    <SafeAreaView style={[FormStyle.container, GlobalStyle.androidSafeArea]}>
+    <SafeAreaView
+      style={[
+        FormStyle.container,
+        GlobalStyle.androidSafeArea,
+        { backgroundColor: "#000C7B" },
+      ]}
+    >
       {/* Header */}
-      <View style={FormStyle.flexContainer}>
+      <View style={{ flexDirection: "row", alignItems: "center", padding: 16 }}>
         <BackButton onPress={() => navigation.goBack()} />
-        <Text style={FormStyle.title}>{mood}</Text>
+        <Text
+          style={{
+            fontSize: 26,
+            fontWeight: "700",
+            color: "#fff",
+            marginLeft: 12,
+          }}
+        >
+          {mood}
+        </Text>
       </View>
 
       <KeyboardAvoidingView
-        behavior="padding"
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={keyboardVerticalOffset}
         style={{ flex: 1 }}
       >
-        {/* Se agrega ScrollView para permitir desplazarse hasta abajo */}
-        <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}>
-          <View style={FormStyle.formContainer}>
-            {/* Activities */}
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Text
-                style={[
-                  GlobalStyle.subtitle,
-                  {
-                    textAlign: "left",
-                    fontFamily: "CustomFontForQuestion", // Estilo específico para el signo de pregunta
-                  },
-                ]}
-              >
-                ¿
-              </Text>
-              <Text
-                style={[
-                  GlobalStyle.subtitle, // Manteniendo el estilo original
-                  {
-                    textAlign: "left",
-                    marginLeft: -60, // Ajuste fino para eliminar el espacio grande
-                  },
-                ]}
-              >
-                Qué has estado haciendo?
-              </Text>
-            </View>
-
-            <View style={FormStyle.flatListContainer}>
-              <FlatList
-                data={activities}
-                scrollEnabled={false}
-                numColumns={4}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => {
-                  let iconName = "";
-                  // Asignar iconos basados en el id de la actividad
-                  switch (item.id) {
-                    case 1:
-                      iconName = "thought-bubble";
-                      break;
-                    case 2:
-                      iconName = "emoticon-confused";
-                      break;
-                    case 3:
-                      iconName = "account-group";
-                      break;
-                    case 4:
-                      iconName = "emoticon-sad";
-                      break;
-                    case 5:
-                      iconName = "book-check";
-                      break;
-                    case 6:
-                      iconName = "tea";
-                      break;
-                    case 7:
-                      iconName = "school";
-                      break;
-                    case 8:
-                      iconName = "run";
-                      break;
-                    case 9:
-                      iconName = "briefcase-check";
-                      break;
-                    case 10:
-                      iconName = "calendar-clock";
-                      break;
-                    case 11:
-                      iconName = "lightbulb-on";
-                      break;
-                    case 12:
-                      iconName = "home-heart";
-                      break;
-                    case 13:
-                      iconName = "emoticon-happy";
-                      break;
-                    case 14:
-                      iconName = "arm-flex";
-                      break;
-                    case 15:
-                      iconName = "heart";
-                      break;
-                    case 16:
-                      iconName = "dots-horizontal";
-                      break;
-                    default:
-                      iconName = "alert-circle";
-                      break;
-                  }
-
-                  return (
-                    <View style={FormStyle.activitiesContainer}>
-                      <View
-                        style={[
-                          FormStyle.activityContainer,
-                          {
-                            backgroundColor: item.selected
-                              ? "white"
-                              : "transparent",
-                          },
-                        ]}
-                      >
-                        <MaterialCommunityIcons
-                          name={iconName}
-                          size={24}
-                          style={[
-                            FormStyle.activityIcon,
-                            {
-                              color: item.selected ? "#5da5a9" : "#f2f2f2",
-                            },
-                          ]}
-                        />
-                        <Text
-                          style={[
-                            FormStyle.activityText,
-                            {
-                              color: item.selected ? "#5da5a9" : "#f2f2f2",
-                            },
-                          ]}
-                        >
-                          {item.activity}
-                        </Text>
-                      </View>
-                    </View>
-                  );
-                }}
-              />
-            </View>
-
-            {/* Se ha eliminado el texto "Desliza para ver más" */}
-
-            {/* Inputs */}
-            <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-              <View style={FormStyle.inputContainer}>
-                {/* Título */}
-                <Text style={FormStyle.text}>Mi día hasta ahora</Text>
-                <View pointerEvents="none">
-                  <InputButton
-                    value={title}
-                    editable={true}
-                    autoCorrect={false}
-                  />
-                </View>
-
-                {/* Nota */}
-                <Text style={FormStyle.text}>Detalles importantes</Text>
-                <View pointerEvents="none">
-                  <InputButton
-                    value={comments}
-                    editable={true}
-                    autoCorrect={false}
-                  />
-                </View>
-              </View>
-            </TouchableWithoutFeedback>
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, padding: 16 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Activities */}
+          <View style={{ alignItems: "center", marginBottom: 20 }}>
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "600",
+                color: "#eeebebff",
+              }}
+            >
+              ¿Qué has estado haciendo?
+            </Text>
           </View>
+
+          {selectedActivities.length === 0 ? (
+            <Text
+              style={{
+                fontSize: 14,
+                color: "#fff",
+                textAlign: "center",
+                marginBottom: 20,
+              }}
+            >
+              No seleccionaste ningún estado en específico
+            </Text>
+          ) : (
+            <View
+              style={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                justifyContent: "space-between",
+              }}
+            >
+              {selectedActivities.map((item) => {
+                let iconName = "";
+                switch (item.id) {
+                  case 1: iconName = "thought-bubble"; break;
+                  case 2: iconName = "emoticon-confused"; break;
+                  case 3: iconName = "account-group"; break;
+                  case 4: iconName = "emoticon-sad"; break;
+                  case 5: iconName = "book-check"; break;
+                  case 6: iconName = "tea"; break;
+                  case 7: iconName = "school"; break;
+                  case 8: iconName = "run"; break;
+                  case 9: iconName = "briefcase-check"; break;
+                  case 10: iconName = "calendar-clock"; break;
+                  case 11: iconName = "lightbulb-on"; break;
+                  case 12: iconName = "home-heart"; break;
+                  case 13: iconName = "emoticon-happy"; break;
+                  case 14: iconName = "arm-flex"; break;
+                  case 15: iconName = "heart"; break;
+                  case 16: iconName = "dots-horizontal"; break;
+                }
+
+                return (
+                  <View
+                    key={item.id}
+                    style={{
+                      width: "23%",
+                      marginBottom: 16,
+                      borderRadius: 12,
+                      backgroundColor: "#5da5a9",
+                      alignItems: "stretch",
+                      justifyContent: "center",
+                      padding: 12,
+                      shadowColor: "#000",
+                      shadowOpacity: 0.1,
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowRadius: 4,
+                      elevation: 3,
+                    }}
+                  >
+                    <MaterialCommunityIcons
+                      name={iconName}
+                      size={28}
+                      color="#fff"
+                      style={{ alignSelf: "center" }}
+                    />
+                    <Text
+                      style={{
+                        marginTop: 6,
+                        fontSize: 9,
+                        color: "#fff",
+                        textAlign: "center",
+                        width: "100%",
+                      }}
+                    >
+                      {item.activity}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+          )}
+
+          {/* Inputs (solo lectura) */}
+          <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+            <View style={{ marginTop: 16 }}>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: "600",
+                  marginBottom: 8,
+                  color: "#eeebebff",
+                }}
+              >
+                Mi día hasta ahora
+              </Text>
+              <View pointerEvents="none">
+                <InputButton
+                  value={title}
+                  editable={false}
+                  autoCorrect={false}
+                  inputStyle={{
+                    backgroundColor: "#fff",
+                    borderRadius: 12,
+                    padding: 12,
+                    fontSize: 14,
+                    borderWidth: 1,
+                    borderColor: "#ddd",
+                  }}
+                />
+              </View>
+
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: "600",
+                  marginBottom: 8,
+                  marginTop: 16,
+                  color: "#eeebebff",
+                }}
+              >
+                Detalles importantes
+              </Text>
+              <View pointerEvents="none">
+                <InputButton
+                  value={comments}
+                  editable={false}
+                  autoCorrect={false}
+                  inputStyle={{
+                    backgroundColor: "#fff",
+                    borderRadius: 12,
+                    padding: 12,
+                    fontSize: 14,
+                    borderWidth: 1,
+                    borderColor: "#ddd",
+                  }}
+                />
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

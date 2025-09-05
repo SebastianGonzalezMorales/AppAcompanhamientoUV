@@ -360,43 +360,59 @@ const verifyEmail = async (req, res) => {
   console.log("Verifying email with token:", token);
 
   try {
-    // Comprobar el token JWT y normalizar el correo
+    // Verificar el token
     const { email } = jwt.verify(token, secret);
     const normalizedEmail = email.toLowerCase();
 
-    // Buscar el usuario temporal con ese token
+    // Buscar usuario temporal
     const tempUser = await TempUser.findOne({ verificationToken: token });
-    if (!tempUser) {
-      console.log("No temporary user found or token expired.");
-      return res.status(400).send(`
-                <html>
-                    <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: Arial, sans-serif;">
-                        <h1 style="font-size: 64px; color: #000C7B; text-align: justify; line-height: 1.3; max-width: 90%; padding: 0 20px;">
-                        Token de verificación no válido o caducado.</h1>
-                    </body>
-                </html>
-            `);
-    }
 
-    //  Calcular los hashes que se usarán como clave única
+    // Calcular hashes
     const emailHash = crypto
       .createHash("sha256")
       .update(normalizedEmail)
       .digest("hex");
-    const rutHash = crypto
-      .createHash("sha256")
-      .update(tempUser.rut)
-      .digest("hex");
 
-    let user = await User.findOne({ emailHash });
+    const user = await User.findOne({ emailHash });
 
-    if (user) {
-      // Ya existe ⇒ sólo marca como verificado
+    // 🔹 Caso 1: El usuario ya existe y está verificado
+    if (user && user.verified) {
+      console.log("User already verified.");
+      return res.send(`
+        <html>
+          <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: Arial, sans-serif;">
+            <h1 style="font-size: 64px; color: #000C7B; text-align: justify; line-height: 1.3; max-width: 90%; padding: 0 20px;">
+              Su cuenta fue verificada y se encuentra activa.</h1>
+          </body>
+        </html>
+      `);
+    }
+
+    // 🔹 Caso 2: No hay tempUser ⇒ token inválido
+    if (!tempUser && !user) {
+      console.log("No temporary user found or token expired.");
+      return res.status(400).send(`
+        <html>
+          <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: Arial, sans-serif;">
+            <h1 style="font-size: 64px; color: #000C7B; text-align: justify; line-height: 1.3; max-width: 90%; padding: 0 20px;">
+              Token de verificación no válido o caducado.</h1>
+          </body>
+        </html>
+      `);
+    }
+
+    // 🔹 Caso 3: Usuario existe pero no estaba verificado ⇒ lo marcamos como verificado
+    if (user && !user.verified) {
       user.verified = true;
-      await user.save(); // mongoose-encryption cifra si faltaba
-    } else {
-      // No existía ⇒ crear documento nuevo
-      user = new User({
+      await user.save();
+    } else if (!user) {
+      // 🔹 Caso 4: Crear usuario desde tempUser
+      const rutHash = crypto
+        .createHash("sha256")
+        .update(tempUser.rut)
+        .digest("hex");
+
+      const newUser = new User({
         name: tempUser.name,
         email: tempUser.email,
         rut: tempUser.rut,
@@ -411,58 +427,36 @@ const verifyEmail = async (req, res) => {
         emailHash,
         rutHash,
       });
-      await user.save(); // ← los campos sensibles se guardan cifrados
+      await newUser.save();
     }
 
-    //  Borrar el usuario temporal
-    try {
-      const deleteResult = await TempUser.deleteOne({
-        verificationToken: token,
-      });
-      if (deleteResult.deletedCount === 0) {
-        console.error("Failed to delete temporary user");
-        return res.status(500).send(`
-                    <html>
-                        <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: Arial, sans-serif;">
-                            <h1 style="font-size: 64px; color: #000C7B; text-align: justify; line-height: 1.3; max-width: 90%; padding: 0 20px;">
-                            Hubo un problema al eliminar el usuario temporal. Por favor, intenta nuevamente.</h1>
-                        </body>
-                    </html>
-                `);
-      }
-      console.log("Temporary user deleted successfully");
-    } catch (error) {
-      console.error("Error during temporary user deletion:", error.message);
-      return res.status(500).send(`
-                <html>
-                    <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: Arial, sans-serif;">
-                        <h1 style="font-size: 64px; color: #000C7B; text-align: justify; line-height: 1.3; max-width: 90%; padding: 0 20px;">
-                        Error al eliminar el usuario temporal. Intenta nuevamente más tarde.</h1>
-                    </body>
-                </html>
-            `);
+    // 🔹 Eliminar usuario temporal si existía
+    if (tempUser) {
+      await TempUser.deleteOne({ verificationToken: token });
     }
-    //  Respuesta de éxito
+
+    // 🔹 Respuesta de éxito
     return res.send(`
-            <html>
-                <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: Arial, sans-serif;">
-                    <h1 style="font-size: 64px; color: #000C7B; text-align: justify; line-height: 1.3; max-width: 90%; padding: 0 20px;">
-                    El correo electrónico se ha verificado correctamente. Su cuenta ya está activa.</h1>
-                </body>
-            </html>
-        `);
+      <html>
+        <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: Arial, sans-serif;">
+          <h1 style="font-size: 64px; color: #000C7B; text-align: justify; line-height: 1.3; max-width: 90%; padding: 0 20px;">
+            El correo electrónico se ha verificado correctamente. Su cuenta ya está activa.</h1>
+        </body>
+      </html>
+    `);
   } catch (error) {
     console.error("Error during email verification:", error.message);
     return res.status(400).send(`
-            <html>
-                <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: Arial, sans-serif;">
-                    <h1 style="font-size: 64px; color: #000C7B; text-align: justify; line-height: 1.3; max-width: 90%; padding: 0 20px;">
-                    Enlace de verificación no válido o vencido.</h1>
-                </body>
-            </html>
-        `);
+      <html>
+        <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: Arial, sans-serif;">
+          <h1 style="font-size: 64px; color: #000C7B; text-align: justify; line-height: 1.3; max-width: 90%; padding: 0 20px;">
+            Enlace de verificación no válido o vencido.</h1>
+        </body>
+      </html>
+    `);
   }
 };
+
 
 let revokedTokens = [];
 

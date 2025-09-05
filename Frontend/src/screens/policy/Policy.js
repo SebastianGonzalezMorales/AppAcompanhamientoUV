@@ -22,7 +22,7 @@ const Policy = ({ navigation }) => {
   };
 
   const handleBackToOnboarding = () => {
-    navigation.navigate('Onboarding'); // Navegar de vuelta al Onboarding
+    navigation.navigate('Login'); // Navegar de vuelta al Onboarding
   };
 
   return (

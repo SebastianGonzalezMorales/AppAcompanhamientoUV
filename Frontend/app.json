@@ -19,12 +19,12 @@
       }
     },
     "android": {
+      "minSdkVersion": 29,
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/images/Icon_Application_Blue.png",
         "backgroundColor": "#000C7B"
       },
       "permissions": [
-        "INTERNET",
         "INTERNET"
       ],
       "usesCleartextTraffic": true,

@@ -15,10 +15,10 @@ export const AuthProvider = ({ children }) => {
         const token = await AsyncStorage.getItem('token');
 
         if (token) {
-          console.log(" ")
-          console.log('Token:', token);
+          //console.log(" ")
+          //console.log('Token:', token);
           const decodedToken = jwtDecode(token);
-          console.log('Decoded Token:', decodedToken);
+          //console.log('Decoded Token:', decodedToken);
         
           const currentTime = Math.floor(Date.now() / 1000);
           if (decodedToken.exp < currentTime) {

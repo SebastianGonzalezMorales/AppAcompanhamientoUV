@@ -1,5 +1,5 @@
 // react imports
-import { Image, Text, TextInput, TouchableOpacity, View, Alert } from 'react-native';
+import { ActivityIndicator, Image, Text, TextInput, TouchableOpacity, View, Alert } from 'react-native';
 import React, { useState, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Svg, { Circle } from 'react-native-svg';
@@ -32,6 +32,7 @@ const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   /*
  * *******************
@@ -51,6 +52,7 @@ const Login = ({ navigation }) => {
   // Login function
   const handleLogin = async (email, password) => {
     try {
+       setIsLoading(true);
       // Convertir el correo electrónico a minúsculas
       const lowercaseEmail = email.toLowerCase();
       const response = await api.post(`${API_URL}/auth/login`, { email: lowercaseEmail, password }
@@ -96,7 +98,9 @@ const Login = ({ navigation }) => {
           onPress: () => console.log("Usuario presionó OK en el alerta de error"),
         },
       ]);
-    }
+    }finally {
+    setIsLoading(false); // desactiva la pantalla de carga
+  }
   }
 
   /*
@@ -106,6 +110,28 @@ const Login = ({ navigation }) => {
    */
 
   return (
+    <View style={{ flex: 1 }}>
+    {isLoading && (
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 9999,
+        }}
+      >
+        <ActivityIndicator size="large" color="#fff" />
+        <Text style={{ color: '#fff', marginTop: 10, fontSize: 16 }}>
+          Ingresando...
+        </Text>
+      </View>
+    )}
+
     <KeyboardAwareScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <View style={AuthStyle.container}>
         {/*
@@ -253,6 +279,7 @@ const Login = ({ navigation }) => {
         </View>
       </View>
     </KeyboardAwareScrollView>
+    </View>
   );
 };
 

@@ -91,7 +91,7 @@ const Register = ({ navigation }) => {
     }
 
     const formattedNumber = `+569 ${numbersOnly}`;
-    console.log("Número actualizado correctamente:", formattedNumber); // Log adicional
+    //console.log("Número actualizado correctamente:", formattedNumber); // Log adicional
     setPhoneNumber(formattedNumber);
   };
 
@@ -194,24 +194,28 @@ const Register = ({ navigation }) => {
   };
 
   const formatRut = (rut) => {
-    // Elimina cualquier carácter que no sea un número, punto o guion
-    let cleanRut = rut.replace(/[^0-9kK.-]/g, "");
+  // Elimina cualquier carácter que no sea número o K/k
+  let cleanRut = rut.replace(/[^0-9kK]/g, "").toUpperCase();
 
-    // Añade puntos y guion si no están presentes
-    if (cleanRut.length > 1) {
-      if (cleanRut.length > 2 && cleanRut[2] !== ".") {
-        cleanRut = cleanRut.slice(0, 2) + "." + cleanRut.slice(2);
-      }
-      if (cleanRut.length > 6 && cleanRut[6] !== ".") {
-        cleanRut = cleanRut.slice(0, 6) + "." + cleanRut.slice(6);
-      }
-      if (cleanRut.length > 10 && cleanRut[10] !== "-") {
-        cleanRut = cleanRut.slice(0, 10) + "-" + cleanRut.slice(10);
-      }
+  if (cleanRut.length <= 1) return cleanRut;
+
+  // Separa el cuerpo del dígito verificador (DV)
+  const cuerpo = cleanRut.slice(0, -1);
+  const dv = cleanRut.slice(-1);
+
+  // Formatea el cuerpo con puntos cada 3 dígitos desde el final
+  const reversed = cuerpo.split("").reverse();
+  let cuerpoConPuntos = "";
+  for (let i = 0; i < reversed.length; i++) {
+    if (i > 0 && i % 3 === 0) {
+      cuerpoConPuntos = "." + cuerpoConPuntos;
     }
+    cuerpoConPuntos = reversed[i] + cuerpoConPuntos;
+  }
 
-    return cleanRut.toUpperCase(); // Devuelve el RUT formateado
-  };
+  // Une cuerpo con DV mediante guion
+  return `${cuerpoConPuntos}-${dv}`;
+};
 
   const handleRutChange = (text) => {
     // Aplica formateo solo si el usuario está ingresando caracteres, no borrando
@@ -266,6 +270,7 @@ const Register = ({ navigation }) => {
   ) => {
     try {
       setLoading(true);
+      /*
       console.log(" ");
       console.log(fullName);
       console.log(rut);
@@ -277,9 +282,12 @@ const Register = ({ navigation }) => {
       console.log(password);
       console.log(confirmPassword);
       console.log(" ");
+      */
 
       // Validación de nombre y apellido
+      console.log("Validando información registrada. . .")
       if (!validateFullName(fullName)) {
+        console.log("No se ha ingresado un nombre y apellido")
         Alert.alert("Error", "Por favor, ingresa tu nombre y apellido.", [
           { text: "OK" },
         ]);
@@ -302,6 +310,7 @@ const Register = ({ navigation }) => {
       }
 
       if (!faculty) {
+        console.log("No se ha seleccionado ninguna facultad")
         Alert.alert("Error", "Por favor, selecciona una facultad.", [
           { text: "OK" },
         ]);
@@ -309,6 +318,7 @@ const Register = ({ navigation }) => {
       }
 
       if (!career) {
+        console.log("No se ha seleccionado ninguna carrera")
         Alert.alert("Error", "Por favor, selecciona una carrera.", [
           { text: "OK" },
         ]);
@@ -317,22 +327,15 @@ const Register = ({ navigation }) => {
 
       // Validar que la fecha de nacimiento no esté vacía
       if (!birthdate || birthdate.trim() === "") {
+        console.log("No se ha seleccionado una fecha de nacimiento")
         Alert.alert("Error", "Por favor, selecciona tu fecha de nacimiento.", [
           { text: "OK" },
         ]);
         return;
       }
 
-      // Verifica si se aceptó la política
-      const accepted = await AsyncStorage.getItem("policyAccepted");
-      console.log("Policy Accepted:", accepted); // Verificar en consola
-
-      if (accepted !== "true") {
-        alert("Debes aceptar la política de privacidad para continuar.");
-        return; // Detenemos el registro si no se aceptó la política
-      }
-
       if (!validateRut(rut)) {
+        console.log("Rut ingresado no válido")
         Alert.alert(
           "Error",
           "Rut inválido. Por favor, verifica el rut ingresado.",
@@ -342,6 +345,7 @@ const Register = ({ navigation }) => {
       }
 
       if (!email.trim()) {
+        console.log("No se ha ingresado ningún correo")
         Alert.alert("Error", "Por favor, ingresa tu correo electrónico.", [
           { text: "OK" },
         ]);
@@ -349,6 +353,7 @@ const Register = ({ navigation }) => {
       }
 
       if (!validateEmail(email)) {
+        console.log("Correo electrónico ingresado no válido")
         Alert.alert(
           "Error",
           "Correo electrónico inválido. Por favor, utiliza el formato nombre.apellido@estudiantes.uv.cl.",
@@ -358,6 +363,7 @@ const Register = ({ navigation }) => {
       }
 
       const trimmedPassword = password.trim();
+      console.log("La contraseña debe tener al menos 8 caracteres, incluyendo una letra mayúscula, una letra minúscula, un número y un símbolo.")
       if (!isStrongPassword(trimmedPassword)) {
         Alert.alert(
           "Error",
@@ -368,6 +374,7 @@ const Register = ({ navigation }) => {
       }
 
       if (password !== confirmPassword) {
+        console.log("Las contraseñas ingresadas no coinciden")
         Alert.alert(
           "Error",
           "Las contraseñas no coinciden. Por favor, verifica que ambas sean iguales.",
@@ -375,6 +382,17 @@ const Register = ({ navigation }) => {
         );
         return;
       }
+
+       // Verifica si se aceptó la política
+      const accepted = await AsyncStorage.getItem("policyAccepted");
+      console.log("Policy Accepted:", accepted); // Verificar en consola
+
+      if (accepted !== "true") {
+        alert("Debes aceptar la política de privacidad para continuar.");
+        return; // Detenemos el registro si no se aceptó la política
+      }
+
+      console.log("Datos validados y aceptadosInformación ingresada válida y contraseñas coinciden. Iniciando registro . . .")
 
       // Datos a enviar al backend
       const userData = {
@@ -389,20 +407,20 @@ const Register = ({ navigation }) => {
         phoneNumber: phoneNumber.replace(" ", ""), // Elimina el espacio
         policyAccepted: accepted,
       };
-      console.log("Datos enviados al backend:", userData);
 
       // Realizar la solicitud POST al backend
       const response = await api.post(`${API_URL}/auth/register`, userData);
-      console.log("Datos enviados al backend:", userData);
 
       // Verificar la respuesta del servidor
       if (response.status === 201) {
+        console.log("Datos enviados al servidor correctamente");
         Alert.alert(
           "Registro exitoso",
           "¡Tu cuenta ha sido creada correctamente! Verifica tu correo electrónico para activarla.",
           [{ text: "OK", onPress: () => navigation.navigate("Login") }]
         );
       } else {
+        console.log("Hubo un error al enviar el registro")
         Alert.alert(
           "Error en el registro",
           `Registro fallido: ${response.data}`,

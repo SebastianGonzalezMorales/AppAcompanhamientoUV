@@ -147,7 +147,7 @@ const HomeMood = ({ navigation }) => {
 
       const moodData = moodDataResponse.data;
 
-      console.log("Datos recibidos de la API:", moodData);
+      console.log("Datos recibidos de la API:", !!moodData);
 
       let mal = 0;
       let regular = 0;
@@ -162,7 +162,7 @@ const HomeMood = ({ navigation }) => {
         const entryYear = entryDate.getFullYear(); // Extraer año de la fecha
 
         if (entryMonth === currentMonth && entryYear === currentYear) {
-          console.log(`Estado de ánimo detectado (${entryDate}):`, moodState);
+          console.log(`Estado de ánimo detectado (${entryDate}):`, !!moodState);
 
           switch (moodState) {
             case "Mal":
@@ -216,7 +216,7 @@ const HomeMood = ({ navigation }) => {
         },
       ];
 
-      console.log("Datos procesados para el gráfico:", data);
+      console.log("Datos procesados para el gráfico:", !!data);
       setPieChartData(data);
       setLoading(false);
     } catch (error) {
@@ -255,7 +255,7 @@ const HomeMood = ({ navigation }) => {
             },
           }
         );
-        console.log(`token: ${token}`);
+        console.log("Token válido: ", !!token);
         const { message, author } = response.data;
         console.log(`Mensaje: ${message}`);
         console.log(`Autor: ${author}`);
