@@ -8,9 +8,10 @@ const tempUserSchema = new mongoose.Schema({
   emailHash: { type: String, unique: true, required: true }, // Para búsquedas
   rut: { type: String, required: true },
   rutHash: { type: String, unique: true, sparse: true }, // Para búsquedas
-  birthdate: { type: Date, required: true },
-  faculty: { type: String, required: true },
-  career: { type: String, required: true },
+  role: { type: String, required: false},
+  birthdate: { type: Date, required: false },
+  faculty: { type: String, required: false },
+  career: { type: String, required: false },
   passwordHash: { type: String, required: true },
   phoneNumber: { type: String, required: true },
   verificationToken: { type: String, required: true }, // Token de verificación

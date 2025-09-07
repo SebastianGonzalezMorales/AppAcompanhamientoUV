@@ -24,7 +24,7 @@ if (!baseUrl) {
 const authJwt = jwt({
     secret: secret,
     algorithms: ["HS256"],
-    isRevoked: async (req, token) => undefined
+    isRevoked: isRevoked
 }).unless({
     path: [
         // **Rutas de Autenticación (`/auth`)**
@@ -60,10 +60,19 @@ const authJwt = jwt({
 });
 
 async function isRevoked(req, token) {
-  if(!token.payload.isAdmin) {
-       return true
-   }
-    return undefined;
+  // Si el token no tiene role, lo revocamos
+  if (!token.payload.role) {
+    return true;
+  }
+
+  // Si es administrador → acceso completo
+  if (token.payload.role === "administrador") {
+    return false;
+  }
+
+  // Para otros roles (estudiante, funcionario), no revocamos aquí
+  // El control fino se hará en los controladores o middlewares específicos
+  return false;
 }
 
 module.exports = authJwt;

@@ -105,14 +105,22 @@ const getResultsTestByMonth = async (req, res) => {
 /*----------------------------------------------------------
   Todos los resultados
 ----------------------------------------------------------*/
-const getAllResultsTests = async (_req, res) => {
+const getAllResultsTests = async (req, res) => {
   try {
+    // Verificar que el usuario sea administrador
+    if (req.auth.role !== "administrador") {
+      return res
+        .status(403)
+        .json({ error: "Acceso denegado. Solo administradores." });
+    }
+
     const results = await ResultsTests.find();
-    res.status(200).json(results);
+    res.status(200).json({ status: "Ok", data: results });
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error al obtener resultados", error: err.message });
+    res.status(500).json({
+      message: "Error al obtener resultados",
+      error: err.message,
+    });
   }
 };
 

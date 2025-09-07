@@ -1,17 +1,19 @@
 const { MoodState } = require("../models/moodState");
 
-//const { authJwt }
-
 // Controlador para obtener todos los estados de ánimo
 const getMoodStates = async (req, res) => {
   try {
-    const moodState = await MoodState.find();
-    if (!moodState) {
-      return res.status(500).json({ success: false });
+    // Verificar que el usuario sea administrador
+    if (req.auth.role !== "administrador") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Acceso denegado. Solo administradores." });
     }
-    res.send(moodState);
+
+    const moodStates = await MoodState.find();
+    res.status(200).json({ status: "Ok", data: moodStates });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -98,6 +100,7 @@ const getMoodStateById = async (req, res) => {
     });
   }
 };
+
 const calculateWeeklyStreak = async (req, res) => {
   try {
     // Obtener los estados de ánimo del usuario

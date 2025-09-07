@@ -392,7 +392,7 @@ const Register = ({ navigation }) => {
         return; // Detenemos el registro si no se aceptó la política
       }
 
-      console.log("Datos validados y aceptadosInformación ingresada válida y contraseñas coinciden. Iniciando registro . . .")
+      console.log("Información ingresada válida y contraseñas coinciden. Iniciando registro . . .")
 
       // Datos a enviar al backend
       const userData = {

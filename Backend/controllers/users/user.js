@@ -1,4 +1,6 @@
 const User = require('../../models/user');
+const ResultadoTest = require('../../models/resultsTests');
+const EstadoDeAnimo = require('../../models/moodState');
 const jwt = require("jsonwebtoken");
 const crypto = require('crypto');
 
@@ -11,12 +13,16 @@ if (!secret) {
 
 // Controlador para obtener todos los usuarios
 const getAllUsers = async (req, res) => {
-    try {
-        const data = await User.find({});
-        res.send({ status: "Ok", data: data });
-    } catch (error) {
-        return res.send({ error: error });
+  try {
+    if (req.auth.role !== "administrador") {
+      return res.status(403).json({ error: "Acceso denegado. Solo administradores." });
     }
+
+    const data = await User.find({});
+    res.send({ status: "Ok", data });
+  } catch (error) {
+    return res.status(500).send({ error: error.message });
+  }
 };
 
 
@@ -43,13 +49,32 @@ const updateUser = async (req, res) => {
 // Controlador para eliminar un usuario
 // Falta probar
 const deleteUser = async (req, res) => {
-    const { id } = req.body;
-    try {
-        await User.deleteOne({ _id: id });
-        res.send({ status: "Ok", data: "User Deleted" });
-    } catch (error) {
-        return res.send({ error: error });
+  try {
+    const userFromToken = req.auth;
+
+    // 🔹 Solo administrador puede eliminar
+    if (userFromToken.role !== "administrador") {
+      return res
+        .status(403)
+        .json({ error: "No tienes permiso para eliminar usuarios." });
     }
+
+    const userId = req.body.id;
+
+    // 🔹 Primero eliminar dependencias
+    await ResultadoTest.deleteMany({ userId });
+    await EstadoDeAnimo.deleteMany({ userId });
+
+    // 🔹 Ahora eliminar el usuario
+    await User.deleteOne({ _id: userId });
+
+    res.send({
+      status: "Ok",
+      data: "Usuario y todos sus registros relacionados eliminados",
+    });
+  } catch (error) {
+    return res.status(500).send({ error: error.message });
+  }
 };
 
 // Controlador para obtener un usuario aleatorio
@@ -78,16 +103,21 @@ const getUserData = async (req, res) => {
     }
 
     try {
-        const user = jwt.verify(token, secret);
-        const useremail = user.email;
-        
-        // Calcular el hash del email (asegúrate de que coincida con la normalización que usas en el pre-save)
+        const decoded = jwt.verify(token, secret);
+        const { email, role, userId } = decoded;
+
+        // 🔹 Si no es administrador y quiere ver un usuario distinto al suyo => denegar
+        if (role !== "administrador" && req.params.id && req.params.id !== userId) {
+            return res.status(403).send({ error: "Acceso denegado. Solo puedes ver tus propios datos." });
+        }
+
+        // Calcular el hash del email (asegúrate de que coincida con el pre-save)
         const emailHash = crypto.createHash('sha256')
-            .update(useremail.toLowerCase())
+            .update(email.toLowerCase())
             .digest('hex');
 
         // Buscar usando el emailHash
-        const data = await User.findOne({ emailHash: emailHash });
+        const data = await User.findOne({ emailHash });
 
         if (!data) {
             return res.status(404).send({ status: "Error", message: "Usuario no encontrado" });
@@ -104,7 +134,6 @@ const getUserData = async (req, res) => {
         res.status(500).send({ error: error.message });
     }
 };
-
 
 const testUser = (req, res) => {
     if (req.user) {

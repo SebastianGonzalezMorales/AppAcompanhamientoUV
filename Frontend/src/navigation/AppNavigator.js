@@ -11,6 +11,7 @@ import { AuthContext } from '../context/AuthContext';
 
 // Importa tus pantallas de autenticación
 import Onboarding from '../screens/onboarding/Onboarding';
+import SelectedRol from '../screens/authentication/SelectedRol';
 import Policy from '../screens/policy/Policy';
 import Login from '../screens/authentication/Login';
 import Register from '../screens/authentication/Register';
@@ -95,6 +96,7 @@ const AppNavigator = () => {
         {!userToken ? (
           <>
             <Stack.Screen name="Onboarding" component={Onboarding} />
+            <Stack.Screen name="SelectedRol" component={SelectedRol} />
             <Stack.Screen name="Policy" component={Policy} />
             <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="Register" component={Register} />

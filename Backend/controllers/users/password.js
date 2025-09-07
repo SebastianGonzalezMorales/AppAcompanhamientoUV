@@ -169,6 +169,10 @@ const changePassword = async (req, res) => {
     user.resetPasswordToken = null; // Invalidar el token después de usarlo
     user.resetPasswordExpires = null; // Borrar la expiración del token
     user.canResetPassword = false; // Prevenir el uso repetido del enlace
+
+    //Resetear bloqueo por intentos fallidos
+    user.failedLoginAttempts = 0;
+    user.blockUntil = null;
     await user.save();
 
     res.status(200).json({

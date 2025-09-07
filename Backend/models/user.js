@@ -10,10 +10,15 @@ const usersSchema = new mongoose.Schema({
   email: { type: String, required: true },
   emailHash: { type: String, unique: true, required: true }, // Para búsquedas por email
   passwordHash: { type: String, required: true },
-  birthdate: { type: Date, required: true },
-  faculty: { type: String, required: true },
-  career: { type: String, required: true },
-  isAdmin: { type: Boolean, default: false },
+  birthdate: { type: Date, required: false },
+  faculty: { type: String, required: false },
+  career: { type: String, required: false },
+  role: {
+  type: String,
+  enum: ["estudiante", "funcionario", "administrador"], // valores válidos
+  default: "estudiante", // valor por defecto
+  required: true
+},
   verified: { type: Boolean, default: false },
   canResetPassword: { type: Boolean, default: false },
   resetPasswordToken: { type: String, default: null },
@@ -21,6 +26,8 @@ const usersSchema = new mongoose.Schema({
   policyAccepted: { type: Boolean, default: false },
   policyAcceptedAt: { type: Date, default: null },
   phoneNumber: { type: String, required: true },
+  failedLoginAttempts: { type: Number, default: 0 },
+  blockUntil: { type: Date, default: null },
 });
 
 /**
@@ -68,6 +75,7 @@ usersSchema.plugin(encrypt, {
   signingKey: signingKeyBuffer,
   encryptedFields: ["name", "rut", "email", "phoneNumber"],
   encryptOnly: true,
+
 });
 
 module.exports = mongoose.model("User", usersSchema);

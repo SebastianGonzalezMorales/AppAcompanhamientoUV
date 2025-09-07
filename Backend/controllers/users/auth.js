@@ -19,11 +19,8 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
     const normalizedEmail = email.toLowerCase();
-
-    // Calcular hash determinista del email para buscar
     const emailHash = sha256(normalizedEmail);
 
-    // Verifica si existe un usuario temporal pendiente de verificación
     const tempUser = await TempUser.findOne({ emailHash });
     if (tempUser) {
       return res.status(403).json({
@@ -33,7 +30,6 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Buscar usuario usando el hash del email
     const user = await User.findOne({ emailHash });
     if (!user) {
       return res.status(400).json({
@@ -51,29 +47,52 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Validar la contraseña
+    // ⚠ Verificar bloqueo temporal
+    if (user.blockUntil && user.blockUntil > new Date()) {
+      return res.status(403).json({
+        success: false,
+        message: `Usuario bloqueado temporalmente. Intenta nuevamente después de ${user.blockUntil.toLocaleTimeString()}.`,
+      });
+    }
+
+    // Validar contraseña
     if (bcrypt.compareSync(password, user.passwordHash)) {
+      // Login exitoso: resetear intentos
+      user.failedLoginAttempts = 0;
+      user.blockUntil = null;
+      await user.save();
+
       const token = jwt.sign(
-        {
-          userId: user.id,
-          email: user.email, // Desencriptado automáticamente por mongoose-encryption
-          isAdmin: user.isAdmin,
-        },
+        { userId: user.id, email: user.email, role: user.role },
         secret,
         { expiresIn: "4d" }
       );
+
       return res.status(200).json({
         success: true,
         name: user.name,
         user: user.email,
         rut: user.rut,
         phoneNumber: user.phoneNumber,
+        role: user.role,
         token,
       });
     } else {
+      // Contraseña incorrecta: incrementar contador
+      user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+
+      // Bloquear temporalmente si supera 5 intentos
+      if (user.failedLoginAttempts >= 5) {
+        user.blockUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 min de bloqueo
+      }
+
+      await user.save();
+
       return res.status(400).json({
         success: false,
-        message: "La contraseña es incorrecta.",
+        message: user.blockUntil
+          ? "Has excedido el número de intentos. Tu cuenta está bloqueada temporalmente por 15 minutos."
+          : "La contraseña es incorrecta.",
       });
     }
   } catch (error) {
@@ -97,6 +116,7 @@ const registerUser = async (req, res) => {
       career,
       phoneNumber,
       password,
+      role,
       confirmPassword,
       policyAccepted,
     } = req.body;
@@ -106,15 +126,12 @@ const registerUser = async (req, res) => {
     const rutHash = sha256(rut);
 
     // Debug: Verificar que los datos lleguen correctamente
-    console.log("Datos de registro recibidos:", req.body);
+    console.log("Se reciben datos correctamente");
 
     if (
       !name ||
       !normalizedEmail ||
       !rut ||
-      !birthdate ||
-      !faculty ||
-      !career ||
       !phoneNumber ||
       !password ||
       !confirmPassword
@@ -153,8 +170,10 @@ const registerUser = async (req, res) => {
     }
 
     // Convertir la fecha de nacimiento a formato YYYY-MM-DD
+    let formattedBirthdate;
+    if (birthdate){
     const [day, month, year] = birthdate.split("-").map(Number);
-    const formattedBirthdate = `${year}-${String(month).padStart(
+    formattedBirthdate = `${year}-${String(month).padStart(
       2,
       "0"
     )}-${String(day).padStart(2, "0")}`;
@@ -172,6 +191,7 @@ const registerUser = async (req, res) => {
         message: "La fecha de nacimiento no es válida.",
       });
     }
+  }
     if (!policyAccepted) {
       return res.status(400).json({
         success: false,
@@ -235,7 +255,7 @@ const registerUser = async (req, res) => {
         ],
       });
 
-      return res.status(200).json({
+      return res.status(400).json({
         success: true,
         message:
           "Ya existía una solicitud pendiente. Se ha reenviado el enlace de verificación.",
@@ -261,6 +281,27 @@ const registerUser = async (req, res) => {
     const verificationToken = jwt.sign({ email: normalizedEmail }, secret, {
       expiresIn: "1h",
     });
+    // Antes de crear tempUser
+if (role === "administrador") {
+  const existingAdmin = await User.findOne({ role: "administrador" });
+  if (existingAdmin) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Ya existe un administrador registrado. Solo se permite un administrador.",
+    });
+  }
+
+  // Además, revisa usuarios temporales pendientes de verificación
+  const pendingAdmin = await TempUser.findOne({ role: "administrador" });
+  if (pendingAdmin) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Ya hay un administrador en proceso de registro. Espera a que verifique su correo.",
+    });
+  }
+}
 
     // Crear un usuario temporal para verificación
     const tempUser = new TempUser({
@@ -272,6 +313,7 @@ const registerUser = async (req, res) => {
       birthdate: formattedBirthdate,
       faculty,
       career,
+      role,
       phoneNumber,
       passwordHash: bcrypt.hashSync(password, 8),
       verificationToken,
@@ -426,6 +468,7 @@ const verifyEmail = async (req, res) => {
         verified: true,
         emailHash,
         rutHash,
+        role: tempUser.role,
       });
       await newUser.save();
     }
