@@ -1,77 +1,106 @@
-// react imports
+import React from 'react';
 import {
   SafeAreaView,
   Text,
   ScrollView,
   Image,
   View,
-  Dimensions
+  Dimensions,
+  StyleSheet,
 } from 'react-native';
-
-// customisation
 import GlobalStyle from '../../../assets/styles/GlobalStyle';
-
-//Components
 import BackButton from '../../../components/buttons/BackButton';
 import SettingsButton from '../../../components/buttons/SettingsButton';
 
-const { width, height } = Dimensions.get('window'); // Obtener las dimensiones de la pantalla
+const { height } = Dimensions.get('window');
 
 function SaludMental({ navigation }) {
   return (
     <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
-      <BackButton onPress={() => navigation.goBack()} />
+      
+      {/* Encabezado azul */}
+      <View style={styles.headerContainer}>
+        <View style={styles.headerRow}>
+          <BackButton onPress={() => navigation.goBack()} />
+          <Text style={styles.headerTitle}>Test psicológicos</Text>
+        </View>
 
-      {/* ************* Section 1 ************* */}
-      <View style={{ height: height * 0.5, padding: 10 }}>
-        <Text style={GlobalStyle.welcomeText}>Salud mental</Text>
-        <Text style={GlobalStyle.subtitle}>Tests psicológicos</Text>
-        <Text style={[GlobalStyle.text, { textAlign: 'justify' }]}>
-          A continuación, podrás realizar diferentes tests psicológicos para
-          conocer mejor tu bienestar emocional y recibir orientación sobre tu
-          estado de ánimo.
+        <Text style={[GlobalStyle.text, styles.headerDescription]}>
+          A continuación, podrás realizar diferentes tests psicológicos para conocer mejor tu bienestar emocional y recibir orientación sobre tu estado de ánimo.
         </Text>
 
-        {/* Imagen con altura ajustada */}
         <Image
           source={require('../../../assets/images/SlidesOnboarding/test.png')}
-          style={{
-            width: '100%',
-            height: height * 0.2,
-            resizeMode: 'contain',
-            marginTop: 11,
-          }}
+          style={styles.headerImage}
         />
       </View>
 
-      {/* ************* Section 2 ************* */}
-      <View style={GlobalStyle.rowTwo}>
-        <ScrollView>
-          <View style={{ marginTop: 10 }}>
-            <SettingsButton
-              text="Depresión"
-              onPress={() => navigation.navigate('DepressionTestMain')}
-            />
+      {/* Sección blanca con scroll de botones */}
+      <View style={styles.whiteSection}>
+        <ScrollView contentContainerStyle={{ padding: 20, flexGrow: 1 }} showsVerticalScrollIndicator={true}>
+          <SettingsButton
+            text="Depresión"
+            onPress={() => navigation.navigate('DepressionTestMain')}
+          />
 
-            {/* Mensaje debajo del único test visible */}
-            <Text
-              style={[
-                GlobalStyle.text,
-                { 
-                  textAlign: 'center',
-                  marginTop: 20,
-                  fontStyle: 'italic',
-                  color: '#333' // o usa un tono oscuro
-                },
-              ]}
-            >
-              Estamos trabajando en nuevos test psicológicos. Agradecemos su paciencia...
-            </Text>
-          </View>
+          {/* Mensaje debajo del único test visible */}
+          <Text
+            style={[
+              GlobalStyle.text,
+              {
+                textAlign: 'center',
+                marginTop: 20,
+                fontStyle: 'italic',
+                color: '#333',
+              },
+            ]}
+          >
+            Estamos trabajando en nuevos test psicológicos. Agradecemos su paciencia...
+          </Text>
         </ScrollView>
       </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  headerContainer: {
+    padding: 16,
+    backgroundColor: '#000C7B',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    flex: 1,
+    marginLeft: 12,
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '700',
+    textAlign: 'center',
+    flexWrap: 'wrap',
+    flexShrink: 1,
+  },
+  headerDescription: {
+    marginTop: 10,
+    color: '#FFFFFF',
+    textAlign: 'justify',
+  },
+  headerImage: {
+    width: '80%',
+    height: height * 0.2,
+    resizeMode: 'contain',
+    alignSelf: 'center',
+    marginTop: 15,
+  },
+  whiteSection: {
+    flex: 1,
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    overflow: 'hidden',
+  },
+});
 
 export default SaludMental;

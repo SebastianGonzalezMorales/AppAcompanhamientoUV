@@ -8,6 +8,7 @@ import {
   Alert,
   ScrollView,
   Platform,
+  ActivityIndicator
 } from "react-native";
 import React, { useState } from "react";
 import Activity from "../Activities";
@@ -28,6 +29,7 @@ const { API_URL } = Constants.expoConfig?.extra || {};
 
 const MoodTrack = ({ route, navigation }) => {
   const { mood, value } = route.params;
+  const [isLoading, setIsLoading] = useState(false);
 
   const [title, setTitle] = useState("");
   const [quickNote, setQuickNote] = useState("");
@@ -44,6 +46,7 @@ const MoodTrack = ({ route, navigation }) => {
 
   const saveMoodTrack = async () => {
     try {
+      setIsLoading(true);
       const token = await AsyncStorage.getItem("token");
       if (token) {
         const selectedActivities = activities
@@ -76,7 +79,9 @@ const MoodTrack = ({ route, navigation }) => {
         );
 
         Alert.alert("Consejo para ti", tip, [
-          { text: "OK", onPress: () => navigation.navigate("HomeMood") },
+          { text: "OK", onPress: () => {setIsLoading(false); navigation.navigate("HomeMood") 
+          }
+          },
         ]);
       }
     } catch (error) {
@@ -88,6 +93,7 @@ const MoodTrack = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={[FormStyle.container, GlobalStyle.androidSafeArea, { backgroundColor: "#000C7B" }]}>
+      
       {/* Header */}
       <View style={{ flexDirection: "row", alignItems: "center", padding: 16 }}>
         <BackButton onPress={deleteDocument} />
@@ -207,6 +213,27 @@ const MoodTrack = ({ route, navigation }) => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+       {isLoading && (
+    <View
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 9999,
+        elevation: 9999, // 👈 Android necesita esto
+      }}
+    >
+      <ActivityIndicator size="large" color="#fff" />
+      <Text style={{ color: '#fff', marginTop: 10, fontSize: 16 }}>
+        Subiendo estado . . .
+      </Text>
+    </View>
+  )}
     </SafeAreaView>
   );
 };

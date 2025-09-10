@@ -1,7 +1,19 @@
-import { SafeAreaView, Text, View, ScrollView, TouchableOpacity, Image, Linking } from 'react-native';
-import React from 'react';
-import GlobalStyle from '../../../assets/styles/GlobalStyle';
-import BackButton from '../../../components/buttons/BackButton';
+import React from "react";
+import {
+  SafeAreaView,
+  Text,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  Dimensions,
+  StyleSheet,
+  Linking,
+} from "react-native";
+import GlobalStyle from "../../../assets/styles/GlobalStyle";
+import BackButton from "../../../components/buttons/BackButton";
+
+const { width, height } = Dimensions.get("window");
 
 const openInstagram = (url) => {
   Linking.openURL(url);
@@ -10,98 +22,99 @@ const openInstagram = (url) => {
 const RedesSociales = ({ navigation }) => {
   return (
     <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
-      {/* Sección superior azul con el botón, título y subtítulo */}
-      <View style={{ height: 220 }}>
-        <BackButton onPress={() => navigation.goBack()} />
-        <Text style={GlobalStyle.welcomeText}>Espacio UV </Text>
-        <Text style={[GlobalStyle.subtitle, { textAlign: 'left' }]}>Explora lo más reciente de la UV</Text>
-        <Text style={[GlobalStyle.text, { textAlign: 'justify' }]}>
+      {/* Header azul */}
+      <View style={styles.headerContainer}>
+        <View style={styles.headerRow}>
+          <BackButton onPress={() => navigation.goBack()} />
+          <Text style={styles.headerTitle}>Redes Sociales</Text>
+        </View>
+        <Text style={[GlobalStyle.text, styles.headerDescription]}>
           Entérate de lo que pasa en la UV con un solo clic. Accede a las redes sociales oficiales y mantente al tanto de actividades y novedades.
         </Text>
       </View>
 
-      {/* Ajuste de ScrollView para fondo blanco */}
-      <View style={{ flex: 1, backgroundColor: 'white', borderTopLeftRadius: 20, borderTopRightRadius: 20, overflow: 'hidden' }}>
-        <ScrollView contentContainerStyle={{ padding: 20 }}>
-          {/* Sección Vida Estudiantil y Apoyo */}
+      {/* Contenedor blanco */}
+      <View style={styles.whiteSection}>
+        <ScrollView contentContainerStyle={{ padding: width * 0.05 }}>
+          {/* Secciones de redes */}
           <Text style={GlobalStyle.titleWhite}>Vida estudiantil y apoyo</Text>
           <View style={GlobalStyle.storiesContainer}>
-            <TouchableOpacity onPress={() => openInstagram('https://www.instagram.com/daeuvalpo/')}>
+            <TouchableOpacity onPress={() => openInstagram("https://www.instagram.com/daeuvalpo/")}>
               <View style={GlobalStyle.outerContainer}>
                 <Image
-                  source={require('./../../../assets/images/Instagram/DaeUV.jpeg')}
+                  source={require("./../../../assets/images/Instagram/DaeUV.jpeg")}
                   style={GlobalStyle.storyImage}
                 />
               </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => openInstagram('https://www.instagram.com/buentratoyconvivenciauv/')}>
+
+            <TouchableOpacity onPress={() => openInstagram("https://www.instagram.com/buentratoyconvivenciauv/")}>
               <View style={GlobalStyle.outerContainer}>
                 <Image
-                  source={require('./../../../assets/images/Instagram/BuenTratoYConvivenciaUV.jpeg')}
+                  source={require("./../../../assets/images/Instagram/BuenTratoYConvivenciaUV.jpeg")}
                   style={GlobalStyle.storyImage}
                 />
               </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => openInstagram('https://www.instagram.com/conectadosuv_dae/')}>
+
+            <TouchableOpacity onPress={() => openInstagram("https://www.instagram.com/conectadosuv_dae/")}>
               <View style={GlobalStyle.outerContainer}>
                 <Image
-                  source={require('./../../../assets/images/Instagram/ConectadosUV1.png')}
+                  source={require("./../../../assets/images/Instagram/ConectadosUV1.png")}
                   style={GlobalStyle.storyImage}
                 />
               </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => openInstagram('https://www.instagram.com/viveuv.saludable/')}>
+
+            <TouchableOpacity onPress={() => openInstagram("https://www.instagram.com/viveuv.saludable/")}>
               <View style={GlobalStyle.outerContainer}>
                 <Image
-                  source={require('./../../../assets/images/Instagram/ViveUVSaludable.png')}
+                  source={require("./../../../assets/images/Instagram/ViveUVSaludable.png")}
                   style={GlobalStyle.storyImage}
                 />
               </View>
             </TouchableOpacity>
           </View>
 
-          {/* Secciones adicionales */}
-          {/* Sección Institucional y Universitario */}
           <Text style={GlobalStyle.titleWhite}>Institucional y universitario</Text>
           <View style={GlobalStyle.storiesContainer}>
-            <TouchableOpacity onPress={() => openInstagram('https://www.instagram.com/uvalpochile/')}>
+            <TouchableOpacity onPress={() => openInstagram("https://www.instagram.com/uvalpochile/")}>
               <View style={GlobalStyle.outerContainer}>
                 <Image
-                  source={require('./../../../assets/images/Instagram/UValpoChile.jpeg')}
+                  source={require("./../../../assets/images/Instagram/UValpoChile.jpeg")}
                   style={GlobalStyle.storyImage}
                 />
               </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => openInstagram('https://www.instagram.com/federacionuv/')}>
+
+            <TouchableOpacity onPress={() => openInstagram("https://www.instagram.com/federacionuv/")}>
               <View style={GlobalStyle.outerContainer}>
                 <Image
-                  source={require('./../../../assets/images/Instagram/FeUV.png')}
+                  source={require("./../../../assets/images/Instagram/FeUV.png")}
                   style={GlobalStyle.storyImage}
                 />
               </View>
             </TouchableOpacity>
           </View>
 
-          {/* Sección Deporte y Recreación */}
           <Text style={GlobalStyle.titleWhite}>Deporte y recreación</Text>
           <View style={GlobalStyle.storiesContainer}>
-            <TouchableOpacity onPress={() => openInstagram('https://www.instagram.com/deportesyrecreacionuv/?hl=es')}>
+            <TouchableOpacity onPress={() => openInstagram("https://www.instagram.com/deportesyrecreacionuv/?hl=es")}>
               <View style={GlobalStyle.outerContainer}>
                 <Image
-                  source={require('./../../../assets/images/Instagram/Druv.jpeg')}
+                  source={require("./../../../assets/images/Instagram/Druv.jpeg")}
                   style={GlobalStyle.storyImage}
                 />
               </View>
             </TouchableOpacity>
           </View>
 
-          {/* Sección Ciencia y Conocimiento */}
           <Text style={GlobalStyle.titleWhite}>Ciencia y conocimiento</Text>
           <View style={GlobalStyle.storiesContainer}>
-            <TouchableOpacity onPress={() => openInstagram('https://www.instagram.com/cienciaabiertauv/')}>
+            <TouchableOpacity onPress={() => openInstagram("https://www.instagram.com/cienciaabiertauv/")}>
               <View style={GlobalStyle.outerContainer}>
                 <Image
-                  source={require('./../../../assets/images/Instagram/CienciaAbiertaUV.jpeg')}
+                  source={require("./../../../assets/images/Instagram/CienciaAbiertaUV.jpeg")}
                   style={GlobalStyle.storyImage}
                 />
               </View>
@@ -112,5 +125,45 @@ const RedesSociales = ({ navigation }) => {
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  headerContainer: {
+    padding: 16,
+    backgroundColor: "#000C7B",
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  headerTitle: {
+    flex: 1,
+    marginLeft: 12,
+    color: "#FFFFFF",
+    fontSize: 20,
+    fontWeight: "700",
+    textAlign: "center",
+    flexWrap: "wrap",
+    flexShrink: 1,
+  },
+  headerSubtitle: {
+    marginTop: 5,
+    color: "#FFFFFF",
+    fontSize: 16,
+  },
+  headerDescription: {
+    marginTop: 8,
+    color: "#FFFFFF",
+    fontSize: 14,
+    textAlign: "justify",
+  },
+  whiteSection: {
+    flex: 1,
+    backgroundColor: "white",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    marginTop: 10,
+  },
+});
 
 export default RedesSociales;

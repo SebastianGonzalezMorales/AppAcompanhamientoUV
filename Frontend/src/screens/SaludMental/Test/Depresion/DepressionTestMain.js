@@ -277,7 +277,10 @@ function DepressionTestMain({ navigation }) {
 
   return (
     <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
-      <BackButton onPress={() => navigation.goBack()} />
+      <View style={styles.headerRow}>
+                <BackButton onPress={() => navigation.goBack()} />
+                <Text style={styles.headerTitle}>Test PHQ-9</Text>
+              </View>
 
       {graveCount >= 1 && (
         <View style={styles.alertContainer}>
@@ -369,56 +372,20 @@ function DepressionTestMain({ navigation }) {
         </View>
       )}
 
-      <View style={{ height: 320 }}>
-        <Text style={GlobalStyle.welcomeText}>Test PHQ-9</Text>
-        <Text style={[GlobalStyle.subtitle, { marginTop: -10 }]}>
-          Test de depresión
-        </Text>
+      <View style={styles.headerContainer}>
 
-        <Text style={[GlobalStyle.text, { textAlign: "justify" }]}>
-          El cuestionario PHQ-9 es una herramienta que se utiliza para medir la
-          gravedad de la depresión a través de nueve preguntas. Ayuda a
-          identificar a las personas que pueden requerir una evaluación o
-          tratamiento adicional para la depresión.
-        </Text>
+    <Text style={styles.headerDescription}>
+      El cuestionario{" "}
+      <Text
+        style={{ color: "#1E90FF", textDecorationLine: "underline" }}
+        onPress={handleLinkPress}
+      >
+        PHQ-9
+      </Text>{" "}
+      es una herramienta que se utiliza para medir la gravedad de la depresión a través de nueve preguntas. Ayuda a identificar a las personas que pueden requerir una evaluación o tratamiento adicional para la depresión.
+    </Text>
 
-        {/* Contenedor del botón con margen izquierdo igual al del texto */}
-        <View
-          style={{
-            marginTop: 5,
-            paddingLeft: GlobalStyle.text.paddingLeft || 16, // Asegúrate de que coincida con el padding del texto
-            // Si `GlobalStyle.text` no tiene `paddingLeft`, ajusta el valor según corresponda
-          }}
-        >
-          <TouchableOpacity
-            onPress={handleLinkPress}
-            style={{
-              backgroundColor: "#E6F0FF",
-              paddingVertical: 4, // Aumenté el padding para mejor apariencia
-              paddingHorizontal: 12,
-              borderRadius: 4,
-              flexDirection: "row",
-              alignItems: "center",
-              borderWidth: 1,
-              borderColor: "#B0C4DE",
-              alignSelf: "flex-start", // Alinea el botón al inicio del contenedor
-            }}
-          >
-            <Ionicons name="link" size={14} color="#1E90FF" />
-            <Text
-              style={{
-                color: "#1E90FF",
-                fontSize: 12,
-                marginLeft: 4,
-                fontWeight: "500",
-              }}
-            >
-              Fuente
-            </Text>
-          </TouchableOpacity>
-        </View>
 
-        <View style={GlobalStyle.line} />
 
         <Text style={[GlobalStyle.text, { textAlign: "left" }]}>
           Última prueba realizada:{" "}
@@ -610,6 +577,29 @@ function DepressionTestMain({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  headerContainer: {
+    padding: 16,
+    backgroundColor: '#000C7B',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    flex: 1,
+    marginLeft: 12,
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '700',
+    textAlign: 'center',
+    flexWrap: 'wrap',
+    flexShrink: 1,
+  },
+  headerDescription: {
+    marginTop: 10,
+    color: '#FFFFFF',
+    textAlign: 'justify',
+  },
   floatingButtonContainer: {
     position: "absolute",
     bottom: 22,

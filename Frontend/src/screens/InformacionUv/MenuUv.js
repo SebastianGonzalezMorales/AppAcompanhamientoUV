@@ -1,82 +1,80 @@
-// react imports
-import {
-  SafeAreaView,
-  Text,
-  ScrollView,
-  View,
-  Image,
-  Dimensions
-} from 'react-native';
+import React from "react";
+import { SafeAreaView, Text, ScrollView, View, Image, Dimensions, StyleSheet } from "react-native";
+import GlobalStyle from "../../assets/styles/GlobalStyle";
+import SettingsButton from "../../components/buttons/SettingsButton";
 
-// customisation
-import GlobalStyle from '../../assets/styles/GlobalStyle';
-
-// Components
-import CustomButton from '../../components/buttons/CustomButton';
-import SettingsButton from '../../components/buttons/SettingsButton';
-import AuthButton from '../../components/buttons/AuthButton';
-
-const { width, height } = Dimensions.get('window'); // Obtener las dimensiones de la pantalla
-
+const { height } = Dimensions.get("window");
 
 function MenuUv({ navigation }) {
   return (
     <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
-
-      {/* Sección superior azul con título y subtítulo */}
-      <View style={{ height: height * 0.45, padding: 10 }}>
-        <Text style={GlobalStyle.welcomeText}>Espacio UV</Text>
-        <Text style={[GlobalStyle.text, { textAlign: 'justify', color: '#FFFFFF' }]}>
-          Descubre novedades eventos y toda la información sobre salud mental de la Universidad de Valparaíso.
+      {/* Encabezado azul sin botón */}
+      <View style={styles.headerContainer}>
+        <Text style={styles.headerTitle}>Espacio UV</Text>
+        <Text style={[GlobalStyle.text, styles.headerDescription]}>
+          Descubre novedades, eventos y toda la información sobre salud mental de la Universidad de Valparaíso.
         </Text>
 
-        {/* Imagen con altura ajustada */}
         <Image
-            source={require('../../assets/images/Uv_Logo_White.png')}
-          style={{
-            width: '100%',
-            height: height * 0.15, // Ajustar la altura de la imagen al 20% de la pantalla
-            resizeMode: 'contain', // Cambiar a 'contain' para evitar recortes
-            marginTop: 40
-          }}
+          source={require("../../assets/images/Uv_Logo_White.png")}
+          style={styles.headerImage}
         />
       </View>
 
-
-      {/* Contenedor de la segunda sección con fondo blanco y bordes redondeados */}
-      <View style={{ flex: 1, backgroundColor: 'white', borderTopLeftRadius: 20, borderTopRightRadius: 20, overflow: 'hidden' }}>
-        {/* Imagen de encabezado opcional */}
-
-
-        {/* ScrollView para botones y contenido adicional */}
-        <ScrollView contentContainerStyle={{ padding: 20 }}>
-          <View style={{ marginTop: 2 }}>
-            <SettingsButton
-              text="Accede a servicios y apoyo estudiantil"
-              onPress={() => navigation.navigate('InformacionUv')}
-            />
-            <SettingsButton
-              text="Explora lo más reciente de la UV"
-              onPress={() => navigation.navigate('RedesSociales')}
-              textStyle={{
-                color: '#d85a77', // Personaliza el color del texto
-                fontSize: 16, // Disminuir tamaño de la letra
-                textAlign: 'left', // Alinear texto a la izquierda
-              }}
-            />
-            <SettingsButton
-              text="Contactarse con apoyo UV"
-              onPress={() => navigation.navigate('ContactarseConApoyoUV')}
-              backgroundColor="#fbcdd1" // Un rojo más presente y vibrante en el fondo
-              textColor="#F20C0C"       // Un rojo más oscuro para el texto
-              iconColor="#c62828"       // El mismo rojo oscuro para el icono
-            />
-            
-          </View>
+      {/* Sección blanca con scroll de botones */}
+      <View style={styles.whiteSection}>
+        <ScrollView contentContainerStyle={{ padding: 20 }} showsVerticalScrollIndicator={true}>
+          <SettingsButton
+            text="Accede a servicios y apoyo estudiantil"
+            onPress={() => navigation.navigate("InformacionUv")}
+          />
+          <SettingsButton
+            text="Explora lo más reciente de la UV"
+            onPress={() => navigation.navigate("RedesSociales")}
+          />
+          <SettingsButton
+            text="Contactarse con apoyo UV"
+            onPress={() => navigation.navigate("ContactarseConApoyoUV")}
+            backgroundColor="#fbcdd1"
+            textColor="#F20C0C"
+            iconColor="#c62828"
+          />
         </ScrollView>
       </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  headerContainer: {
+    padding: 16,
+    backgroundColor: "#000C7B",
+    alignItems: "center", // Centrar título
+  },
+  headerTitle: {
+    color: "#FFFFFF",
+    fontSize: 20,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+  headerDescription: {
+    marginTop: 10,
+    color: "#FFFFFF",
+    textAlign: "justify",
+  },
+  headerImage: {
+    width: "80%",
+    height: height * 0.15,
+    resizeMode: "contain",
+    marginTop: 15,
+  },
+  whiteSection: {
+    flex: 1,
+    backgroundColor: "white",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    overflow: "hidden",
+  },
+});
 
 export default MenuUv;

@@ -1,4 +1,3 @@
-// React imports
 import React from 'react';
 import {
   SafeAreaView,
@@ -6,102 +5,115 @@ import {
   ScrollView,
   View,
   Image,
-  Dimensions
+  Dimensions,
+  StyleSheet,
 } from 'react-native';
-
-// Custom styles
 import GlobalStyle from '../../../assets/styles/GlobalStyle';
-
-// Components
 import BackButton from '../../../components/buttons/BackButton';
 import SettingsButton from '../../../components/buttons/SettingsButton';
 
-const { width, height } = Dimensions.get('window'); // Obtener las dimensiones de la pantalla
+const { height } = Dimensions.get('window');
 
 function AprendeSobreSaludMental({ navigation }) {
   return (
     <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
+      {/* Encabezado azul */}
+      <View style={styles.headerContainer}>
+        <View style={styles.headerRow}>
+          <BackButton onPress={() => navigation.goBack()} />
+          <Text style={styles.headerTitle}>Salud mental</Text>
+        </View>
 
-      {/* Sección Azul del Encabezado */}
-      <View style={{ height: height * 0.48, padding: 15 }}>
-        {/* Altura ajustada al 50% del tamaño de la pantalla */}
-        <BackButton onPress={() => navigation.goBack()} />
-
-        {
-          <Text
-            style={[
-              GlobalStyle.welcomeText,
-              { color: '#FFFFFF', marginTop: -10 } // Ajusta el margen superior
-            ]}
-          >
-            Salud mental
-          </Text>
-        }
-        
-        <Text style={[GlobalStyle.subtitleMenu, { color: '#FFFFFF', marginTop: -15 }]}>
-          Aprende sobre salud mental
+        <Text style={[GlobalStyle.text, styles.headerDescription]}>
+          Encuentra herramientas y recursos destinados a fortalecer tu salud
+          mental y emocional como estudiante.
         </Text>
 
-        <Text style={[GlobalStyle.text, { textAlign: 'justify', color: '#FFFFFF', marginTop: -10 }]}>
-          Encuentra herramientas y recursos destinados a fortalecer tu salud mental y emocional como estudiante.
-        </Text>
-
-        {/* Imagen con altura ajustada */}
         <Image
           source={require('./../../../assets/images/Menu/salud_Mental.png')}
-          style={{
-            width: '100%',
-            height: height * 0.10, // Ajustar la altura de la imagen al 20% de la pantalla
-            resizeMode: 'contain', // Cambiar a 'contain' para evitar recortes
-            marginTop: 3
-          }}
+          style={styles.headerImage}
         />
-
-        {/* Texto adicional */}
-        {/*          <Text style={[GlobalStyle.welcomeText, { color: '#FFFFFF', fontSize: 16, textAlign: 'center', marginTop: 10 }]}>
-          ¡ NO HAY SALUD SIN SALUD MENTAL !
-        </Text>  */}
       </View>
 
-      {/* Sección de Botones de Navegación */}
-      <View style={[GlobalStyle.rowTwo, { marginTop: -10 }]}>
-        <ScrollView contentContainerStyle>
-          <View style={{ marginTop: 2 }}>
-            <SettingsButton
-              text="Información"
-              onPress={() => navigation.navigate('Informacion')}
-            />
-            <SettingsButton
-              text="Consejos"
-              onPress={() => navigation.navigate('Consejos')}
-            />
-            <SettingsButton
-              text="Consejos de estudiantes"
-              onPress={() => navigation.navigate('ConsejosDeEstudiantes')}
-            />
-            <SettingsButton
-              text="Redes de apoyo"
-              onPress={() => navigation.navigate('RedesDeApoyo')}
-              backgroundColor="#FFE0B2" // Naranja claro y cálido
-              textColor="#FF762C"       // Naranja oscuro para texto
-              iconColor="#E65100"       // Naranja oscuro para icono
-            />
-            <SettingsButton
-              text="Contactarse con apoyo UV"
-              onPress={() => navigation.navigate('ContactarseConApoyoUV')}
-              backgroundColor="#fbcdd1" // Un rojo más presente y vibrante en el fondo
-              textColor="#F20C0C"       // Un rojo más oscuro para el texto
-              iconColor="#c62828"       // El mismo rojo oscuro para el icono
-            />
-
-
-
-          </View>
+      {/* Sección blanca con scroll de botones */}
+      <View style={styles.whiteSection}>
+        <ScrollView contentContainerStyle={{ padding: 20, flexGrow: 1 }} showsVerticalScrollIndicator={true}>
+          <SettingsButton
+            text="Información"
+            onPress={() => navigation.navigate('Informacion')}
+          />
+          <SettingsButton
+            text="Consejos"
+            onPress={() => navigation.navigate('Consejos')}
+          />
+          <SettingsButton
+            text="Consejos de estudiantes"
+            onPress={() => navigation.navigate('ConsejosDeEstudiantes')}
+          />
+          <SettingsButton
+            text="Redes de apoyo"
+            onPress={() => navigation.navigate('RedesDeApoyo')}
+            backgroundColor="#FFE0B2"
+            textColor="#FF762C"
+            iconColor="#E65100"
+          />
+          <SettingsButton
+            text="Contactarse con apoyo UV"
+            onPress={() => navigation.navigate('ContactarseConApoyoUV')}
+            backgroundColor="#fbcdd1"
+            textColor="#F20C0C"
+            iconColor="#c62828"
+          />
         </ScrollView>
       </View>
-
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  headerContainer: {
+    padding: 16,
+    backgroundColor: '#000C7B',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    flex: 1,
+    marginLeft: 12,
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '700',
+    textAlign: 'center',
+    flexWrap: 'wrap',
+    flexShrink: 1,
+  },
+  headerSubtitle: {
+    marginTop: 5,
+    color: '#FFFFFF',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  headerDescription: {
+    marginTop: 10,
+    color: '#FFFFFF',
+    textAlign: 'justify',
+  },
+  headerImage: {
+    width: '80%',
+    height: height * 0.12,
+    resizeMode: 'contain',
+    alignSelf: 'center',
+    marginTop: 15,
+  },
+  whiteSection: {
+    flex: 1,
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    overflow: 'hidden',
+  },
+});
 
 export default AprendeSobreSaludMental;

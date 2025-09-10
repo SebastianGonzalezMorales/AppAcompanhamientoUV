@@ -222,11 +222,10 @@ const DepressionTestForm = ({ navigation }) => {
 
   return (
     <SafeAreaView style={[FormStyle.container, GlobalStyle.androidSafeArea]}>
-      <View style={FormStyle.flexContainer}>
-        <BackButton onPress={() => navigation.goBack()} />
-
-        <Text style={FormStyle.title}>PHQ-9</Text>
-      </View>
+      <View style={styles.headerRow}>
+                <BackButton onPress={() => navigation.goBack()} />
+                <Text style={styles.headerTitle}>PHQ-9</Text>
+              </View>
 
       <FlatList
         data={questions}
@@ -307,5 +306,6 @@ const DepressionTestForm = ({ navigation }) => {
     </SafeAreaView>
   );
 };
+
 
 export default DepressionTestForm;

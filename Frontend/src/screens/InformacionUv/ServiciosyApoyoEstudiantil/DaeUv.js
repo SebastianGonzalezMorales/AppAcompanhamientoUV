@@ -8,59 +8,59 @@ import {
   StyleSheet,
   TouchableOpacity,
   Linking,
+  ScrollView,
 } from 'react-native';
 import YoutubePlayer from 'react-native-youtube-iframe';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
-// Importación de estilos personalizados y componentes
 import GlobalStyle from '../../../assets/styles/GlobalStyle';
 import BackButton from '../../../components/buttons/BackButton';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-// Obtener dimensiones de la pantalla
 const { width, height } = Dimensions.get('window');
 
-// Datos de los videos de los estudiantes
 const studentVideos = [
   { id: 2, videoId: 'k7LKQ6YYm_U', type: 'video' },
 ];
 
-function DaeUv({ navigation }) {
+const DaeUv = ({ navigation }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollX = useRef(new Animated.Value(0)).current;
-  const [playingIndex, setPlayingIndex] = useState(null);
 
-  // Datos de contacto
-  const phoneNumber = '32-2507291';
-  const phoneNumberOne= '32-2507772';
+  const phoneNumbers = ['322507291', '322507772'];
   const email = 'dae@uv.cl';
 
-  // Manejar llamadas y correos
-  const handleCall = () => {
-    Linking.openURL(`tel:${phoneNumber}`);
+  const handleCall = (number) => {
+    Linking.openURL(`tel:${number}`).catch(() =>
+      alert('No se pudo realizar la llamada. Verifica tu dispositivo.')
+    );
   };
 
   const handleEmail = () => {
-    Linking.openURL(`mailto:${email}`);
+    const mailtoURL = `mailto:${email}?subject=${encodeURIComponent(
+      '[Apoyo estudiantil - DAE UV]'
+    )}&body=${encodeURIComponent('Hola, quisiera contactar con DAE UV para solicitar apoyo. Gracias.')}`;
+    Linking.openURL(mailtoURL).catch(() =>
+      alert('No se pudo abrir el cliente de correo.')
+    );
   };
 
   return (
     <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
-      {/* Sección Azul del Encabezado */}
-      <View style={{ height: 230, padding: 15 }}>
-        <BackButton onPress={() => navigation.goBack()} />
-        <Text style={GlobalStyle.welcomeText}>Espacio UV</Text>
-        <Text style={[GlobalStyle.subtitleMenu, { color: '#FFFFFF' }]}>
-          Servicios y apoyo estudiantil
-        </Text>
-        <Text style={[GlobalStyle.text, { textAlign: 'justify', color: '#FFFFFF' }]}>
-          DAE - Dirección de asuntos estudiantiles
+      {/* Header azul */}
+      <View style={styles.headerContainer}>
+        <View style={styles.headerRow}>
+          <BackButton onPress={() => navigation.goBack()} />
+          <Text style={styles.headerTitle}>DAE UV</Text>
+        </View>
+        <Text style={[GlobalStyle.text, styles.headerDescription]}>
+          Dirección de Asuntos Estudiantiles - DAE. Si tienes dudas o necesitas ayuda, contáctanos mediante los siguientes medios.
         </Text>
       </View>
 
-      {/* Contenedor para el Carrusel de Videos */}
-      <View style={[GlobalStyle.rowTwo, styles.centeredContainer]}>
-        <View style={styles.carouselWrapper}>
-          <View style={styles.scrollContainer}>
+      {/* Contenedor blanco con ScrollView */}
+      <View style={styles.whiteSection}>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          {/* Carrusel de videos */}
+          <View style={styles.carouselWrapper}>
             <Animated.ScrollView
               horizontal
               pagingEnabled
@@ -69,52 +69,87 @@ function DaeUv({ navigation }) {
             >
               {studentVideos.map((item) => (
                 <View key={item.id} style={styles.slide}>
-          
-                  <YoutubePlayer height={height * 0.33} width={width * 0.8} videoId={item.videoId} />
+                  <YoutubePlayer
+                    height={height * 0.33}
+                    width={width * 0.8}
+                    videoId={item.videoId}
+                  />
                 </View>
               ))}
             </Animated.ScrollView>
           </View>
-        </View>  
-              <Text style={[styles.infoText,{ marginTop: -40}]}>
-          Si tienes dudas o necesitas ayuda, contáctanos mediante los siguientes medios:
-        </Text>
-        <TouchableOpacity style={styles.callButton} onPress={handleCall}>
-          <MaterialCommunityIcons name="phone" size={18} color="#FFF" />
-          <Text style={styles.callButtonText}>Llamar a N.°1</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.callButton} onPress={handleCall}>
-          <MaterialCommunityIcons name="phone" size={18} color="#FFF" />
-          <Text style={styles.callButtonText}>Llamar a N.°2</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.emailButton} onPress={handleEmail}>
-          <MaterialCommunityIcons name="email" size={20} color="#FFF" />
-          <Text style={styles.emailButtonText}>Enviar correo</Text>
-        </TouchableOpacity>
- 
+
+          {/* Texto justo debajo del video */}
+          <Text style={styles.infoText}>
+            Si tienes dudas o necesitas ayuda, contáctanos mediante los siguientes medios:
+          </Text>
+
+          {/* Botones de llamada */}
+          {phoneNumbers.map((number, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[styles.button, { backgroundColor: '#4CAF50' }]}
+              onPress={() => handleCall(number)}
+            >
+              <MaterialCommunityIcons name="phone" size={20} color="#FFF" style={{ marginRight: 8 }} />
+              <Text style={styles.buttonText}>Llamar a N.°{index + 1}</Text>
+            </TouchableOpacity>
+          ))}
+
+          {/* Botón de correo */}
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: '#2196F3' }]}
+            onPress={handleEmail}
+          >
+            <MaterialCommunityIcons name="email" size={20} color="#FFF" style={{ marginRight: 8 }} />
+            <Text style={styles.buttonText}>Enviar correo</Text>
+          </TouchableOpacity>
+        </ScrollView>
       </View>
-
-      {/* Botones de contacto */}
-  
-
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  centeredContainer: {
-    justifyContent: 'center',
+  headerContainer: {
+    padding: 16,
+    backgroundColor: '#000C7B',
+  },
+  headerRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+  },
+  headerTitle: {
     flex: 1,
-    marginTop: 20,
+    marginLeft: 12,
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '700',
+    textAlign: 'center',
+    flexWrap: 'wrap',
+    flexShrink: 1,
+  },
+  headerDescription: {
+    marginTop: 10,
+    color: '#FFFFFF',
+    textAlign: 'justify',
+  },
+  whiteSection: {
+    flex: 1,
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    marginTop: 10,
+    width: '100%',
+  },
+  scrollContent: {
+    alignItems: 'center',
+    paddingVertical: 20,
   },
   carouselWrapper: {
     width: width * 0.8,
-    height: height * 0.4,
-  },
-  scrollContainer: {
-    width: '100%',
-    height: '100%',
+    height: height * 0.35,
+    marginBottom: 0, // Sin espacio muerto
   },
   carouselContainer: {
     alignItems: 'center',
@@ -123,58 +158,30 @@ const styles = StyleSheet.create({
     width: width * 0.8,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FFF',
     borderRadius: 10,
-    paddingTop: 20,
-  },
-  videoTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#5c6169',
-    marginBottom: 5,
-    textAlign: 'center',
-  },
-  infoBox: {
-    backgroundColor: '#E3F2FD',
-    padding: 15,
-    borderRadius: 10,
-    margin: 20,
-    alignItems: 'center',
+    paddingVertical: 0,
   },
   infoText: {
-    fontSize: 14,
-    color: '#333',
-    lineHeight: 20,
     textAlign: 'center',
-    marginBottom: 15,
+    fontSize: 14,
+    marginVertical: 15,
+    paddingHorizontal: 20,
+    color: '#000',
   },
-  callButton: {
+  button: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#4CAF50',
-    borderRadius: 20,
-    paddingVertical: 8,
-    paddingHorizontal: 15,
+    justifyContent: 'center',
+    borderRadius: 10,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    width: '80%',
     marginVertical: 5,
   },
-  callButtonText: {
+  buttonText: {
     color: '#FFF',
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginLeft: 8,
-  },
-  emailButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#2196F3',
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    marginVertical: 5,
-  },
-  emailButtonText: {
-    color: '#FFF',
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 8,
   },

@@ -7,17 +7,15 @@ import {
   View,
   Image,
   Dimensions,
-  StyleSheet
+  StyleSheet,
 } from 'react-native';
 
 // Custom styles
 import GlobalStyle from '../../../assets/styles/GlobalStyle';
 import BackButton from '../../../components/buttons/BackButton';
 
-// Obtener dimensiones de la pantalla
 const { width, height } = Dimensions.get('window');
 
-// Datos de los consejos (solo las imágenes)
 const adviceImages = [
   require('../../../assets/images/Consejos/1.png'),
   require('../../../assets/images/Consejos/2.png'),
@@ -29,37 +27,38 @@ const adviceImages = [
   require('../../../assets/images/Consejos/8.png'),
   require('../../../assets/images/Consejos/9.png'),
   require('../../../assets/images/Consejos/10.png'),
-  // Añade más imágenes según sea necesario
 ];
 
 function Consejos({ navigation }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Función para manejar el cambio de página en el carrusel
   const handleScroll = (event) => {
-    const slideIndex = Math.round(event.nativeEvent.contentOffset.x / (width * 0.8));
+    const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
     setCurrentIndex(slideIndex);
   };
 
   return (
     <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
-      
       {/* Sección Azul del Encabezado */}
-      <View style={{ height: 260, padding: 15 }}>
-        <BackButton onPress={() => navigation.goBack()} />
-        <Text style={[GlobalStyle.welcomeText, { color: '#FFFFFF' }]}>Aprende sobre salud mental</Text>
-        <Text style={[GlobalStyle.subtitleMenu, { color: '#FFFFFF' }]}>
-          Consejos
-        </Text>
-        
-        {/* Descripción debajo del título */}
-        <Text style={[GlobalStyle.text, { textAlign: 'justify' }]}>
-        A continuación, te ofrecemos algunos consejos extraídos de la Red de Salud Digital de las Universidades del Estado (RSDUE) para apoyar tu bienestar emocional y salud mental.
+      <View style={styles.headerContainer}>
+        <View style={styles.headerRow}>
+          <BackButton onPress={() => navigation.goBack()} />
+          <Text style={styles.headerTitle}>
+            Consejos
+          </Text>
+        </View>
+
+        <Text style={[GlobalStyle.text, styles.headerDescription]}>
+          A continuación, te ofrecemos algunos consejos extraídos de la Red de Salud Digital de las Universidades del Estado (RSDUE) para apoyar tu bienestar emocional y salud mental.
         </Text>
       </View>
 
-      {/* Contenedor para el Carrusel de Imágenes */}
-      <View style={[GlobalStyle.rowTwo, styles.centeredContainer]}>
+      {/* Sección Blanca con Scroll */}
+      <ScrollView
+        style={styles.whiteSection}
+        contentContainerStyle={{ paddingVertical: 20 }}
+        showsVerticalScrollIndicator={true}
+      >
         <View style={styles.scrollContainer}>
           <ScrollView
             horizontal
@@ -67,7 +66,7 @@ function Consejos({ navigation }) {
             showsHorizontalScrollIndicator={false}
             onScroll={handleScroll}
             scrollEventThrottle={16}
-            contentContainerStyle={styles.carouselContainer}
+            contentContainerStyle={{ paddingEnd: width * 0.1 }}
           >
             {adviceImages.map((image, index) => (
               <View key={index} style={styles.slide}>
@@ -75,54 +74,69 @@ function Consejos({ navigation }) {
               </View>
             ))}
           </ScrollView>
-        </View>
 
-        {/* Puntos de Paginación fijos debajo del carrusel */}
-        <View style={styles.pagination}>
-          {adviceImages.map((_, index) => (
-            <View
-              key={index}
-              style={[
-                styles.dot,
-                { backgroundColor: index === currentIndex ? '#000C7B' : '#D1D5DB' }
-              ]}
-            />
-          ))}
+          {/* Puntos de Paginación */}
+          <View style={styles.pagination}>
+            {adviceImages.map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.dot,
+                  { backgroundColor: index === currentIndex ? '#000C7B' : '#D1D5DB' },
+                ]}
+              />
+            ))}
+          </View>
         </View>
-      </View>
-      
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  description: {
-    fontSize: 14,
-    textAlign: 'left',
-    marginTop: 10,
-    marginHorizontal: 15, // Margen horizontal para evitar que el texto toque los bordes
+  headerContainer: {
+    padding: 16,
+    backgroundColor: '#000C7B',
   },
-  centeredContainer: {
-    justifyContent: 'center', // Centra verticalmente el contenedor
+  headerRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginLeft: 12,
     flex: 1,
-    marginTop: 20, // Ajuste para bajar todo el contenedor del carrusel
+    textAlign: 'center',
+    flexShrink: 1,
+  },
+  headerDescription: {
+    color: '#FFFFFF',
+    marginTop: 5,
+    textAlign: 'justify',
+  },
+  whiteSection: {
+    flex: 1,
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    overflow: 'hidden',
   },
   scrollContainer: {
-    width: width * 0.8, // Limita el ancho del ScrollView al 80% de la pantalla
-    height: height * 0.4, // Fija la altura para mantener la barra de desplazamiento cerca de la imagen
-  },
-  carouselContainer: {
+    width: width,
+    marginTop: 20,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   slide: {
-    width: width * 0.8, // Cada slide ocupa el 80% del ancho de la pantalla
+    width: width,
     justifyContent: 'center',
     alignItems: 'center',
   },
   image: {
-    width: '100%', // La imagen ocupa el 100% del ancho del slide
-    height: '100%', // La imagen ocupa el 100% de la altura del contenedor scrollContainer
+    width: width * 0.9,
+    height: height * 0.45,
     resizeMode: 'contain',
     borderRadius: 30,
   },
@@ -130,7 +144,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 30, // Espacio justo debajo de la imagen
+    marginTop: 15,
   },
   dot: {
     width: 10,
