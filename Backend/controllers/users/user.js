@@ -1,6 +1,7 @@
 const User = require('../../models/user');
-const ResultadoTest = require('../../models/resultsTests');
-const EstadoDeAnimo = require('../../models/moodState');
+const mongoose = require("mongoose");
+const { ResultsTests: ResultadoTest } = require('../../models/resultsTests');
+const { MoodState: EstadoDeAnimo } = require('../../models/moodState');
 const jwt = require("jsonwebtoken");
 const crypto = require('crypto');
 
@@ -48,25 +49,40 @@ const updateUser = async (req, res) => {
 
 // Controlador para eliminar un usuario
 // Falta probar
+
 const deleteUser = async (req, res) => {
   try {
     const userFromToken = req.auth;
 
-    // 🔹 Solo administrador puede eliminar
+    // Solo administrador puede ejecutar la acción
     if (userFromToken.role !== "administrador") {
       return res
         .status(403)
         .json({ error: "No tienes permiso para eliminar usuarios." });
     }
 
-    const userId = req.body.id;
+    const userId = req.params.id;
 
-    // 🔹 Primero eliminar dependencias
-    await ResultadoTest.deleteMany({ userId });
-    await EstadoDeAnimo.deleteMany({ userId });
+    // Buscar usuario a eliminar
+    const userToDelete = await User.findById(userId);
 
-    // 🔹 Ahora eliminar el usuario
-    await User.deleteOne({ _id: userId });
+    if (!userToDelete) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+    // Evitar eliminar administradores
+    if (userToDelete.role === "administrador") {
+      return res
+        .status(403)
+        .json({ error: "No puedes eliminar a un administrador." });
+    }
+
+    // Eliminar dependencias
+    await ResultadoTest.deleteMany({ userId: new mongoose.Types.ObjectId(userId) });
+    await EstadoDeAnimo.deleteMany({ userId: new mongoose.Types.ObjectId(userId) });
+
+    // Eliminar usuario
+    await User.findByIdAndDelete(userId);
 
     res.send({
       status: "Ok",
@@ -76,6 +92,7 @@ const deleteUser = async (req, res) => {
     return res.status(500).send({ error: error.message });
   }
 };
+
 
 // Controlador para obtener un usuario aleatorio
 const getRandomUser = async (req, res) => {

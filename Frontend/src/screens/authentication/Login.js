@@ -200,11 +200,20 @@ const Login = ({ navigation }) => {
             <TextInput
               autoCapitalize="none"
               keyboardType="email-address"
-              onChangeText={(text) => setEmail(text)} // every time the text changes, we can set the email to that text (callback function)
+              value={email} // aquí guardaremos el correo completo
+              onChangeText={(text) => {
+                // Limpiar cualquier intento de escribir el @
+                const cleanText = text.replace(/@.*/, "");
+                setEmail(`${cleanText}@estudiantes.uv.cl`);
+              }}
               placeholder="Correo institucional"
               placeholderTextColor="#92959f"
               selectionColor="#5da5a9"
               style={AuthStyle.input}
+              selection={{
+                start: email ? email.indexOf("@") : 0, // cursor siempre antes del "@"
+                end: email ? email.indexOf("@") : 0,
+              }}
             />
           </View>
           <View style={AuthStyle.inputContainer}>

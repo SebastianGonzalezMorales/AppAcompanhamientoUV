@@ -1,5 +1,5 @@
 // react imports
-import { Image, Text, TextInput, TouchableOpacity, Alert, View } from 'react-native';
+import { Image, Text, TextInput, TouchableOpacity, Alert, View, ActivityIndicator  } from 'react-native';
 import React, { useState } from 'react';
 import api from '../../utils/api';
 import Svg, { Circle } from 'react-native-svg';
@@ -26,6 +26,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 const ForgotPassword = ({ navigation }) => {
   // states
   const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
 
   /*
    * *******************
@@ -54,6 +55,8 @@ const ForgotPassword = ({ navigation }) => {
       
       // Convertir el correo electrónico a minúsculas
       const lowercaseEmail = email.toLowerCase();
+
+      setLoading(true);
       
     // Enviar la solicitud al backend
     const response = await api.post(`${API_URL}/password/forgot-password`, { email: lowercaseEmail });
@@ -87,6 +90,8 @@ const ForgotPassword = ({ navigation }) => {
   Alert.alert('Error', 'No se pudo conectar con el servidor. Por favor, revisa tu conexión.');
 }
 console.log('Error @handlePasswordRecovery:', error.response || error.message);
+  }finally {
+    setLoading(false); // desactiva la pantalla de carga
   }
 };
   /*
@@ -96,6 +101,27 @@ console.log('Error @handlePasswordRecovery:', error.response || error.message);
    */
 
   return (
+    <View style={{ flex: 1 }}>
+    {loading && (
+          <View
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: 9999,
+            }}
+          >
+            <ActivityIndicator size="large" color="#fff" />
+            <Text style={{ color: '#fff', marginTop: 10, fontSize: 16 }}>
+              Verficando información . . .
+            </Text>
+          </View>
+        )}
     <KeyboardAwareScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <View style={AuthStyle.container}>
         {/* Background styling with SVG */}
@@ -126,14 +152,23 @@ console.log('Error @handlePasswordRecovery:', error.response || error.message);
               style={AuthStyle.icon}
             />
             <TextInput
-              autoCapitalize="none"
-              keyboardType="email-address"
-              onChangeText={(text) => setEmail(text)}
-              placeholder="Correo institucional"
-              placeholderTextColor="#92959f"
-              selectionColor="#5da5a9"
-              style={AuthStyle.input}
-            />
+                          autoCapitalize="none"
+                          keyboardType="email-address"
+                          value={email} // aquí guardaremos el correo completo
+                          onChangeText={(text) => {
+                            // Limpiar cualquier intento de escribir el @
+                            const cleanText = text.replace(/@.*/, "");
+                            setEmail(`${cleanText}@estudiantes.uv.cl`);
+                          }}
+                          placeholder="Correo institucional"
+                          placeholderTextColor="#92959f"
+                          selectionColor="#5da5a9"
+                          style={AuthStyle.input}
+                          selection={{
+                            start: email ? email.indexOf("@") : 0, // cursor siempre antes del "@"
+                            end: email ? email.indexOf("@") : 0,
+                          }}
+                        />
           </View>
 
           {/* Recover Password Button */}
@@ -158,6 +193,7 @@ console.log('Error @handlePasswordRecovery:', error.response || error.message);
         </View>
       </View>
     </KeyboardAwareScrollView>
+    </View>
   );
 };
 

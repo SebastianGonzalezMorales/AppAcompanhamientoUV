@@ -39,7 +39,7 @@ function Crisis({ navigation }) {
           <Text style={styles.headerTitle}>Aprende sobre las crisis</Text>
         </View>
 
-        <Text style={[GlobalStyle.text, styles.headerDescription]}>A continuación, encuentra información sobre cómo afrontar una crisis..</Text>
+        <Text style={[GlobalStyle.text, styles.headerDescription]}>A continuación, encuentra información sobre cómo afrontar una crisis.</Text>
       </View>
 
       {/* Sección blanca con carrusel */}

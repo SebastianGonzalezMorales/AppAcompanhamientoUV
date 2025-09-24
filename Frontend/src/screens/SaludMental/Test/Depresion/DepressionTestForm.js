@@ -1,5 +1,5 @@
 // react imports
-import { Alert, FlatList, Text, View } from "react-native";
+import { Alert, FlatList, Text, View, ActivityIndicator  } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import api from "../../../../utils/api";
@@ -149,12 +149,29 @@ const DepressionTestForm = ({ navigation }) => {
   };
 
   if (questions.length === 0) {
-    return (
-      <View>
-        <Text>Cargando...</Text>
-      </View>
-    );
-  }
+  return (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#f5f5f5", // color de fondo suave
+      }}
+    >
+      <ActivityIndicator size="large" color="#1E90FF" />
+      <Text
+        style={{
+          marginTop: 20,
+          fontSize: 18,
+          fontWeight: "600",
+          color: "#333",
+        }}
+      >
+        Generando test...
+      </Text>
+    </View>
+  );
+}
 
   if (showResults) {
     return (
@@ -222,10 +239,11 @@ const DepressionTestForm = ({ navigation }) => {
 
   return (
     <SafeAreaView style={[FormStyle.container, GlobalStyle.androidSafeArea]}>
-      <View style={styles.headerRow}>
-                <BackButton onPress={() => navigation.goBack()} />
-                <Text style={styles.headerTitle}>PHQ-9</Text>
-              </View>
+      <View style={FormStyle.flexContainer}>
+              <BackButton onPress={() => navigation.goBack()} />
+      
+              <Text style={FormStyle.title}>PHQ-9</Text>
+            </View>
 
       <FlatList
         data={questions}

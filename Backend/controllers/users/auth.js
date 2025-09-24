@@ -82,7 +82,7 @@ const loginUser = async (req, res) => {
       user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
 
       // Bloquear temporalmente si supera 5 intentos
-      if (user.failedLoginAttempts >= 5) {
+      if (user.failedLoginAttempts >= 3) {
         user.blockUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 min de bloqueo
       }
 
@@ -153,7 +153,6 @@ const registerUser = async (req, res) => {
           "Número de celular inválido. Debe seguir el formato +569 XXXXXXXX.",
       });
     }
-    console.log("Número de celular recibido:", phoneNumber);
 
     // Validar fortaleza y confirmación de contraseña
     if (!isStrongPassword(password)) {
@@ -399,7 +398,7 @@ const isStrongPassword = (password) => {
 
 const verifyEmail = async (req, res) => {
   const { token } = req.query;
-  console.log("Verifying email with token:", token);
+  console.log("Verifying email with token:", !!token);
 
   try {
     // Verificar el token

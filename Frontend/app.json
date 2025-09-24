@@ -27,7 +27,7 @@
       "permissions": [
         "INTERNET"
       ],
-      "usesCleartextTraffic": true,
+      "usesCleartextTraffic": false,
       "package": "com.sebastian2040.AppAcompanhamientoUVdevelopment_build",
       "runtimeVersion": "1.0.0"
     },

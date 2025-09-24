@@ -294,16 +294,29 @@ const Register = ({ navigation }) => {
         return;
       }
 
-      if (!/^\+569 \d{8}$/.test(phoneNumber.trim())) {
-        console.log(
-          "Número de teléfono inválido (detalles):",
-          phoneNumber.trim(),
-          "Longitud:",
-          phoneNumber.trim().length
-        );
+      if (!validateRut(rut)) {
+        console.log("Rut ingresado no válido")
         Alert.alert(
           "Error",
-          "El número ingresado no es válido. Asegúrate de usar el formato +569 XXXXXXXX.",
+          "Rut inválido. Por favor, verifica el rut ingresado.",
+          [{ text: "OK" }]
+        );
+        return;
+      }
+
+       if (!email.trim()) {
+        console.log("No se ha ingresado ningún correo")
+        Alert.alert("Error", "Por favor, ingresa tu correo electrónico.", [
+          { text: "OK" },
+        ]);
+        return;
+      }
+
+      if (!validateEmail(email)) {
+        console.log("Correo electrónico ingresado no válido")
+        Alert.alert(
+          "Error",
+          "Correo electrónico inválido. Por favor, utiliza el formato nombre.apellido@estudiantes.uv.cl.",
           [{ text: "OK" }]
         );
         return;
@@ -334,37 +347,25 @@ const Register = ({ navigation }) => {
         return;
       }
 
-      if (!validateRut(rut)) {
-        console.log("Rut ingresado no válido")
+      if (!/^\+569 \d{8}$/.test(phoneNumber.trim())) {
+        console.log(
+          "Número de teléfono inválido (detalles):",
+          phoneNumber.trim(),
+          "Longitud:",
+          phoneNumber.trim().length
+        );
         Alert.alert(
           "Error",
-          "Rut inválido. Por favor, verifica el rut ingresado.",
+          "El número ingresado no es válido. Asegúrate de usar el formato +569 XXXXXXXX.",
           [{ text: "OK" }]
         );
         return;
       }
 
-      if (!email.trim()) {
-        console.log("No se ha ingresado ningún correo")
-        Alert.alert("Error", "Por favor, ingresa tu correo electrónico.", [
-          { text: "OK" },
-        ]);
-        return;
-      }
-
-      if (!validateEmail(email)) {
-        console.log("Correo electrónico ingresado no válido")
-        Alert.alert(
-          "Error",
-          "Correo electrónico inválido. Por favor, utiliza el formato nombre.apellido@estudiantes.uv.cl.",
-          [{ text: "OK" }]
-        );
-        return;
-      }
 
       const trimmedPassword = password.trim();
-      console.log("La contraseña debe tener al menos 8 caracteres, incluyendo una letra mayúscula, una letra minúscula, un número y un símbolo.")
       if (!isStrongPassword(trimmedPassword)) {
+        console.log("La contraseña debe tener al menos 8 caracteres, incluyendo una letra mayúscula, una letra minúscula, un número y un símbolo.")
         Alert.alert(
           "Error",
           "La contraseña debe tener al menos 8 caracteres, incluyendo una letra mayúscula, una letra minúscula, un número y un símbolo.",
@@ -429,12 +430,21 @@ const Register = ({ navigation }) => {
       }
     } catch (error) {
       if (error.response) {
-        // Extraer la propiedad "message" del objeto devuelto por el backend
-        const errorMessage =
-          error.response.data.message || "Ha ocurrido un error inesperado.";
+    const status = error.response.status;
+    const errorMessage =
+      error.response.data.message || "Ha ocurrido un error inesperado.";
 
-        Alert.alert("Error en el registro", errorMessage, [{ text: "OK" }]);
-      } else if (error.request) {
+    if (
+      status === 400 &&
+      errorMessage.includes(
+        "Ya existía una solicitud pendiente. Se ha reenviado el enlace de verificación."
+      )
+    ) {
+      // Redirigir al login al aceptar la alerta
+      Alert.alert("Registro pendiente", errorMessage, [
+        { text: "OK", onPress: () => navigation.navigate("Login") },
+      ]);
+    } } else if (error.request) {
         // Error de conexión
         Alert.alert(
           "Error de conexión",
@@ -562,23 +572,32 @@ const Register = ({ navigation }) => {
             />
           </View>
 
-          <View style={AuthStyle.inputContainer}>
-            <MaterialCommunityIcons
-              name="email-outline"
-              size={23}
-              style={AuthStyle.icon}
-            />
-            <TextInput
-              autoCapitalize="none"
-              keyboardType="Email address"
-              onChangeText={(text) => setEmail(text)} // every time the text changes, we can set the email to that text (callback function)
-              placeholder="Correo institucional"
-              placeholderTextColor="#92959f"
-              selectionColor="#5da5a9"
-              style={AuthStyle.input}
-              
-            />
-          </View>
+         <View style={AuthStyle.inputContainer}>
+  <MaterialCommunityIcons
+    name="email-outline"
+    size={23}
+    style={AuthStyle.icon}
+  />
+
+  <TextInput
+  autoCapitalize="none"
+  keyboardType="email-address"
+  value={email} // aquí guardaremos el correo completo
+  onChangeText={(text) => {
+    // Limpiar cualquier intento de escribir el @
+    const cleanText = text.replace(/@.*/, "");
+    setEmail(`${cleanText}@estudiantes.uv.cl`);
+  }}
+  placeholder="Correo institucional"
+  placeholderTextColor="#92959f"
+  selectionColor="#5da5a9"
+  style={AuthStyle.input}
+  selection={{
+    start: email ? email.indexOf("@") : 0, // cursor siempre antes del "@"
+    end: email ? email.indexOf("@") : 0,
+  }}
+/>
+</View>
 
           {/* Dropdown para Facultad */}
           <View style={[AuthStyle.inputContainer, { position: "relative" }]}>
