@@ -396,19 +396,13 @@ const Register = ({ navigation }) => {
       console.log("Datos enviados al backend:", userData);
 
       // Verificar la respuesta del servidor
-      if (response.status === 201) {
+    
         Alert.alert(
           "Registro exitoso",
-          "¡Tu cuenta ha sido creada correctamente! Verifica tu correo electrónico para activarla.",
-          [{ text: "OK", onPress: () => navigation.navigate("Login") }]
-        );
-      } else {
-        Alert.alert(
-          "Error en el registro",
-          `Registro fallido: ${response.data}`,
-          [{ text: "OK" }]
-        );
-      }
+          response.data.message,
+  [{ text: "OK", onPress: () => navigation.navigate("Login") }]
+);
+ 
     } catch (error) {
       if (error.response) {
         // Extraer la propiedad "message" del objeto devuelto por el backend
