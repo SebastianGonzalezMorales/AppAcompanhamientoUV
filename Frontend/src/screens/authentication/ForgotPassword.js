@@ -34,7 +34,8 @@ const ForgotPassword = ({ navigation }) => {
    */
 
   const validateEmail = (email) => {
-    const emailRegex = /^[a-z]+\.[a-z]+@alumnos\.uv\.cl$/; // Formato institucional
+  const emailRegex = /^[a-zA-Z]+\.[a-zA-Z]+@estudiantes\.uv\.cl$/;
+
     return emailRegex.test(email);
   };
   
