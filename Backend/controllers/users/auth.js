@@ -336,7 +336,7 @@ const registerUser = async (req, res) => {
     res.status(201).json({
       success: true,
       message:
-        "¡Tu cuenta ha sido creada correctamente! Verifica tu correo electrónico para activarla.",
+        "¡Tu cuenta ha sido creada correctamente! Verifica tu correo electrónicogit  para activarla.",
     });
   } catch (error) {
     console.error("Error registering user:", error);
@@ -358,6 +358,13 @@ const isStrongPassword = (password) => {
 const verifyEmail = async (req, res) => {
   const { token } = req.query;
   console.log("Verifying email with token:", token);
+  console.log("  ");
+
+  console.log("VERIFY EMAIL HIT", {
+  time: new Date().toISOString(),
+  ip: req.headers["x-forwarded-for"] || req.ip,
+  userAgent: req.headers["user-agent"],
+});
 
   try {
     // Comprobar el token JWT y normalizar el correo
