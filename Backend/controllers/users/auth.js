@@ -336,7 +336,7 @@ const registerUser = async (req, res) => {
     res.status(201).json({
       success: true,
       message:
-        "¡Tu cuenta ha sido creada correctamente! Verifica tu correo electrónicogit  para activarla.",
+        "¡Tu cuenta ha sido creada correctamente! Verifica tu correo electrónico para activarla.",
     });
   } catch (error) {
     console.error("Error registering user:", error);
