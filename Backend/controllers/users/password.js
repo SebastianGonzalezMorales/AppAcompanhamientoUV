@@ -1,7 +1,7 @@
 const User = require('../../models/user');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const nodemailer = require('nodemailer'); // Servicio de correos
+const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 
 // Asignar la clave secreta desde las variables de entorno
@@ -11,47 +11,50 @@ if (!secret) {
   throw new Error('La clave secreta (SECRET) no está definida en las variables de entorno.');
 }
 
-// Función para restablecer la contraseña
+// Función para restablecer la contraseña (envía correo)
 const forgotPassword = async (req, res) => {
   const { email } = req.body;
-  const normalizedEmail = email.toLowerCase();
+  const normalizedEmail = (email || '').toLowerCase();
 
   try {
     // Calcular el hash del email
-    const emailHash = crypto.createHash('sha256')
-      .update(normalizedEmail)
-      .digest('hex');
+    const emailHash = crypto.createHash('sha256').update(normalizedEmail).digest('hex');
 
     // Buscar usando emailHash en lugar de email
-    const user = await User.findOne({ emailHash: emailHash });
+    const user = await User.findOne({ emailHash });
     if (!user) {
-      return res.status(404).json({ 
-        success: false, 
-        code: 'USER_NOT_FOUND', 
-        message: 'No se encontró una cuenta asociada a este correo. Por favor, verifica e intenta nuevamente.' 
+      return res.status(404).json({
+        success: false,
+        code: 'USER_NOT_FOUND',
+        message: 'No se encontró una cuenta asociada a este correo. Por favor, verifica e intenta nuevamente.',
       });
     }
+
     const firstName = user.name.split(' ')[0];
-    const resetToken = jwt.sign({ userId: user._id, email: user.email }, secret, { expiresIn: '1h' });
 
-    // Imprimir el token en la consola
-    console.log('Generated reset token:', resetToken);
+    const resetToken = jwt.sign(
+      { userId: user._id, email: user.email },
+      secret,
+      { expiresIn: '1h' }
+    );
 
+    // Guardar token y expiración
     user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = Date.now() + 3600000;
-    user.canResetPassword = false;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hora
+    user.canResetPassword = false; // Debe confirmarse manualmente con POST
     await user.save();
 
     const baseUrl = process.env.BASE_URL;
     const apiUrl = process.env.API_URL;
 
+    // Link apunta a verify-reset-token (GET)
     const resetLink = `${baseUrl}${apiUrl}/password/verify-reset-token?token=${resetToken}`;
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: process.env.EMAIL_USER, // Variable de entorno para el correo
-        pass: process.env.EMAIL_PASS, // Variable de entorno para la contraseña
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
 
@@ -63,7 +66,7 @@ const forgotPassword = async (req, res) => {
         <h2 style="color: #1d72b8; text-align: center;">Restablece tu Contraseña</h2>
         <p>Hola <strong>${firstName}</strong>,</p>
         <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en la <strong>App Acompañamiento UV</strong>.</p>
-        <p>Si realizaste esta solicitud, haz clic en el siguiente botón para restablecer tu contraseña:</p>
+        <p>Si realizaste esta solicitud, haz clic en el siguiente botón para continuar:</p>
         <div style="text-align: center; margin: 20px 0;">
           <a href="${resetLink}" style="background-color: #1d72b8; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Restablecer Contraseña</a>
         </div>
@@ -91,18 +94,23 @@ const forgotPassword = async (req, res) => {
       ],
     });
 
-    res.status(200).json({ success: true, message: 'Se ha enviado un correo para restablecer la contraseña. Por favor, revisa tu bandeja de entrada.' });
+    return res.status(200).json({
+      success: true,
+      message: 'Se ha enviado un correo para restablecer la contraseña. Por favor, revisa tu bandeja de entrada.',
+    });
   } catch (error) {
     console.error('Error al enviar el correo de restablecimiento:', error);
-    res.status(500).json({ success: false, message: 'Hubo un error interno. Por favor, intenta nuevamente más tarde.' });
+    return res.status(500).json({
+      success: false,
+      message: 'Hubo un error interno. Por favor, intenta nuevamente más tarde.',
+    });
   }
 };
 
-
+// Cambio real de contraseña (desde la app)
 const changePassword = async (req, res) => {
   const { token, newPassword, confirmPassword } = req.body;
 
-  // Verificar que el token esté presente
   if (!token) {
     return res.status(400).json({
       success: false,
@@ -111,18 +119,15 @@ const changePassword = async (req, res) => {
   }
 
   try {
-    // Decodificar el token
     const decoded = jwt.verify(token, secret);
     const userId = decoded.userId;
 
-    // Buscar al usuario en la base de datos
     const user = await User.findOne({
       _id: userId,
       resetPasswordToken: token,
-      resetPasswordExpires: { $gt: Date.now() }, // Verificar que el token no haya expirado
+      resetPasswordExpires: { $gt: Date.now() },
     });
 
-    // Si el usuario no existe o el token es inválido
     if (!user) {
       return res.status(400).json({
         success: false,
@@ -130,7 +135,7 @@ const changePassword = async (req, res) => {
       });
     }
 
-    // Verificar si el usuario no confirmó el enlace
+    // ✅ Ahora esto sí tiene sentido, porque SOLO se activa por POST manual
     if (!user.canResetPassword) {
       return res.status(400).json({
         success: false,
@@ -138,7 +143,6 @@ const changePassword = async (req, res) => {
       });
     }
 
-    // Verificar que las contraseñas estén presentes
     if (!newPassword || !confirmPassword) {
       return res.status(400).json({
         success: false,
@@ -146,7 +150,6 @@ const changePassword = async (req, res) => {
       });
     }
 
-    // Verificar que las contraseñas coincidan
     if (newPassword !== confirmPassword) {
       return res.status(400).json({
         success: false,
@@ -154,29 +157,28 @@ const changePassword = async (req, res) => {
       });
     }
 
-    // Validar la fuerza de la nueva contraseña
     const passwordRegex = /^(?=.*[!@#$%^&*()_+\-={}\[\]:;"'<>,.?\/\\|~`])[A-Za-z\d!@#$%^&*()_+\-={}\[\]:;"'<>,.?\/\\|~`áéíóúÁÉÍÓÚñÑ]{8,}$/;
     if (!passwordRegex.test(newPassword)) {
       return res.status(400).json({
         success: false,
-        message:
-          'La contraseña debe tener al menos 8 caracteres e incluir al menos un carácter especial (@, $, !, %, #, ?, &, etc).',
+        message: 'La contraseña debe tener al menos 8 caracteres e incluir al menos un carácter especial (@, $, !, %, #, ?, &, etc).',
       });
     }
 
-    // Actualizar la contraseña del usuario
     user.passwordHash = bcrypt.hashSync(newPassword, 8);
-    user.resetPasswordToken = null; // Invalidar el token después de usarlo
-    user.resetPasswordExpires = null; // Borrar la expiración del token
-    user.canResetPassword = false; // Prevenir el uso repetido del enlace
+
+    // Invalidar token y estado
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+    user.canResetPassword = false;
+
     await user.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: 'Contraseña actualizada con éxito. Ahora puedes iniciar sesión.',
     });
   } catch (error) {
-    // Manejo de errores al verificar el token
     if (error.name === 'JsonWebTokenError') {
       return res.status(400).json({
         success: false,
@@ -191,18 +193,79 @@ const changePassword = async (req, res) => {
       });
     }
 
-    // Cualquier otro error
     console.error('Error al cambiar la contraseña:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Error al procesar la solicitud. Por favor, inténtalo nuevamente.',
     });
   }
 };
 
-
+/**
+ * ✅ Router estilo verifyEmail:
+ * GET  -> renderiza página con botón (NO toca BD)
+ * POST -> confirma y recién ahí habilita canResetPassword
+ */
 const verifyResetToken = async (req, res) => {
+  if (req.method === 'GET') return renderResetPage(req, res);
+  if (req.method === 'POST') return confirmResetToken(req, res);
+  return res.status(405).send('Método no permitido');
+};
+
+// GET: Solo valida token (sin BD) y muestra botón
+const renderResetPage = async (req, res) => {
   const { token } = req.query;
+
+  if (!token) {
+    return res.status(400).send('Token no proporcionado.');
+  }
+
+  try {
+    jwt.verify(token, secret);
+  } catch (error) {
+    return res.status(400).send(`
+      <html>
+        <body style="display:flex;justify-content:center;align-items:center;height:100vh;margin:0;font-family:Arial,sans-serif;">
+          <h1 style="font-size:64px;color:#000C7B;text-align:justify;line-height:1.3;max-width:90%;padding:0 20px;">
+            El enlace de restablecimiento es inválido o ha caducado.
+          </h1>
+        </body>
+      </html>
+    `);
+  }
+
+  // ⚠️ Importante: NO tocar base de datos aquí
+  return res.send(`
+    <html>
+      <body style="display:flex;justify-content:center;align-items:center;height:100vh;margin:0;font-family:Arial,sans-serif;">
+        <div style="text-align:center;max-width:90%;">
+          <h1 style="font-size:64px;color:#000C7B;line-height:1.2;margin-bottom:30px;">
+            Restablecer contraseña
+          </h1>
+
+          <p style="font-size:28px;color:#000C7B;margin-bottom:40px;">
+            Para continuar, confirma tu solicitud.
+          </p>
+
+          <form method="POST" action="/api/v1/password/verify-reset-token">
+            <input type="hidden" name="token" value="${token}" />
+            <button style="background-color:#000C7B;color:#ffffff;border:none;padding:16px 32px;font-size:22px;border-radius:8px;cursor:pointer;">
+              Confirmar
+            </button>
+          </form>
+        </div>
+      </body>
+    </html>
+  `);
+};
+
+// POST: Aquí sí validas con BD y habilitas canResetPassword
+const confirmResetToken = async (req, res) => {
+  const { token } = req.body;
+
+  if (!token) {
+    return res.status(400).send('Token no proporcionado.');
+  }
 
   try {
     const decoded = jwt.verify(token, secret);
@@ -216,80 +279,94 @@ const verifyResetToken = async (req, res) => {
 
     if (!user) {
       return res.status(400).send(`
-          <html>
-              <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: Arial, sans-serif;">
-                  <h1 style="font-size: 64px; color: #000C7B; text-align: justify; line-height: 1.3; max-width: 90%; padding: 0 20px;">
-                  El enlace de restablecimiento es inválido o ha caducado.</h1>
-              </body>
-          </html>
+        <html>
+          <body style="display:flex;justify-content:center;align-items:center;height:100vh;margin:0;font-family:Arial,sans-serif;">
+            <h1 style="font-size:64px;color:#000C7B;text-align:justify;line-height:1.3;max-width:90%;padding:0 20px;">
+              El enlace de restablecimiento es inválido o ha caducado.
+            </h1>
+          </body>
+        </html>
       `);
     }
 
-    // Marcar que el usuario puede restablecer la contraseña
+    // ✅ Evita loop: si ya estaba confirmado, no repitas el mismo mensaje
+    if (user.canResetPassword === true) {
+      return res.status(200).send(`
+        <html>
+          <body style="display:flex;justify-content:center;align-items:center;height:100vh;margin:0;font-family:Arial,sans-serif;">
+            <div style="text-align:center;max-width:90%;">
+              <h1 style="font-size:64px;color:#000C7B;line-height:1.2;margin-bottom:30px;">
+                Enlace ya confirmado
+              </h1>
+              <p style="font-size:28px;color:#000C7B;line-height:1.4;">
+                Ya puedes volver a tu aplicación móvil para restablecer tu contraseña.
+              </p>
+            </div>
+          </body>
+        </html>
+      `);
+    }
+
     user.canResetPassword = true;
     await user.save();
 
-
-    // Si el token es válido, responder al frontend indicando que puede cambiar su contraseña
-    res.status(200).send(`
+    return res.status(200).send(`
       <html>
-          <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: Arial, sans-serif;">
-              <h1 style="font-size: 64px; color: #000C7B; text-align: justify; line-height: 1.3; max-width: 90%; padding: 0 20px;">
-              El token es válido. Puedes restablecer tu contraseña ahora, volviendo a tu aplicación móvil</h1>
-          </body>
+        <body style="display:flex;justify-content:center;align-items:center;height:100vh;margin:0;font-family:Arial,sans-serif;">
+          <div style="text-align:center;max-width:90%;">
+            <h1 style="font-size:64px;color:#000C7B;line-height:1.2;margin-bottom:30px;">
+              Solicitud confirmada
+            </h1>
+            <p style="font-size:28px;color:#000C7B;line-height:1.4;">
+              Ahora vuelve a tu aplicación móvil para restablecer tu contraseña.
+            </p>
+          </div>
+        </body>
       </html>
-  `);
+    `);
   } catch (error) {
-    console.error('Error al verificar el token:', error);
-    res.status(400).send(`
+    console.error('Error al confirmar el token:', error);
+    return res.status(400).send(`
       <html>
-          <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: Arial, sans-serif;">
-              <h1 style="font-size: 64px; color: #000C7B; text-align: justify; line-height: 1.3; max-width: 90%; padding: 0 20px;">
-              El enlace de restablecimiento es inválido o ha caducado.</h1>
-          </body>
+        <body style="display:flex;justify-content:center;align-items:center;height:100vh;margin:0;font-family:Arial,sans-serif;">
+          <h1 style="font-size:64px;color:#000C7B;text-align:justify;line-height:1.3;max-width:90%;padding:0 20px;">
+            El enlace de restablecimiento es inválido o ha caducado.
+          </h1>
+        </body>
       </html>
-  `);
+    `);
   }
 };
+
 // Controlador para obtener el token de restablecimiento de contraseña
 const getResetPasswordToken = async (req, res) => {
-  const { email } = req.body; // Obtiene el correo electrónico del cuerpo de la solicitud
+  const { email } = req.body;
 
-  // Expresión regular para validar el formato nombre.apellido@estudiantes.uv.cl
   const emailRegex = /^[a-z]+\.[a-z]+@estudiantes\.uv\.cl$/;
 
-  // Verifica que el formato del correo sea correcto
   if (!emailRegex.test(email)) {
-    return res.status(400).send({ message: "El correo electrónico no tiene el formato correcto" });
+    return res.status(400).send({ message: 'El correo electrónico no tiene el formato correcto' });
   }
 
   try {
-    // Genera el hash del email (igual que en el pre('save'))
-    const hashedEmail = crypto.createHash('sha256')
-      .update(email.toLowerCase())
-      .digest('hex');
+    const hashedEmail = crypto.createHash('sha256').update(email.toLowerCase()).digest('hex');
 
-    // Busca al usuario usando el emailHash
     const user = await User.findOne({ emailHash: hashedEmail });
 
     if (!user) {
-      return res.status(404).send({ message: "Usuario no encontrado" });
+      return res.status(404).send({ message: 'Usuario no encontrado' });
     }
 
-    // Verifica si hay un token de restablecimiento
     if (!user.resetPasswordToken) {
-      return res.status(400).send({ message: "No hay token de restablecimiento para este usuario" });
+      return res.status(400).send({ message: 'No hay token de restablecimiento para este usuario' });
     }
 
-    // Devuelve el token de restablecimiento
     return res.status(200).send({
-      message: "Token encontrado",
-      resetPasswordToken: user.resetPasswordToken
+      message: 'Token encontrado',
+      resetPasswordToken: user.resetPasswordToken,
     });
-
   } catch (error) {
-    // Manejo de errores
-    return res.status(500).send({ message: "Error del servidor", error: error.message });
+    return res.status(500).send({ message: 'Error del servidor', error: error.message });
   }
 };
 
