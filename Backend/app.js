@@ -8,6 +8,8 @@ const path = require('path');
 const favicon = require('serve-favicon');
 const dotenv = require('dotenv');
 const chalk = require('chalk');
+const listEndpoints = require('express-list-endpoints');
+
 
 // Cargar variables de entorno desde el archivo correspondiente
 const env = process.env.NODE_ENV || 'development';
@@ -68,6 +70,27 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 // Rutas principales
 const routes = require('./routes');
 routes(app);
+
+//Lo siguiente me permite ver los endpoint de la Api
+// ================= LISTADO DE ENDPOINTS =================
+/* 
+console.log();
+console.log(chalk.blue.bold('📌 ENDPOINTS REGISTRADOS EN LA API'));
+console.log(chalk.blue('================================='));
+
+listEndpoints(app).forEach(endpoint => {
+  endpoint.methods.forEach(method => {
+    console.log(
+      chalk.green(method.padEnd(6)),
+      chalk.white(endpoint.path)
+    );
+  });
+});
+
+console.log(chalk.blue('================================='));
+console.log();
+// ========================================================
+*/
 
 app.get('/', (req, res) => {
   res.send('<h1> Funcionando ! </h1>');
