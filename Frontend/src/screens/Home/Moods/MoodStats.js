@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -18,7 +18,6 @@ import GlobalStyle from "../../../assets/styles/GlobalStyle";
 import FormStyle from "../../../assets/styles/FormStyle";
 
 const MoodStats = ({ navigation }) => {
-  /* ──────────── Estados principales ──────────── */
   const [x, setX] = useState([]);
   const [y, setY] = useState([]);
 
@@ -30,62 +29,82 @@ const MoodStats = ({ navigation }) => {
   const [moodData, setMoodData] = useState([]);
   const [monthChart, setMonthChart] = useState("");
 
-  /* Estados de UI */
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMsg] = useState("");
   const [noData, setNoData] = useState(false);
 
-  /* Mes seleccionado */
   const currentMonth = getMonth();
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const months = getMonths();
 
-  /* ──────────── Datos para el pie chart ──────────── */
-  const pieChartData = [
-    {
-      name: "Mal",
-      count: malCounter,
-      color: "#F20C0C",
-      legendFontColor: "#7F7F7F",
-      legendFontSize: 14,
-    },
-    {
-      name: "Regular",
-      count: regularCounter,
-      color: "#F4D63D",
-      legendFontColor: "#7F7F7F",
-      legendFontSize: 14,
-    },
-    {
-      name: "Bien",
-      count: bienCounter,
-      color: "#2626D8",
-      legendFontColor: "#7F7F7F",
-      legendFontSize: 14,
-    },
-    {
-      name: "Excelente",
-      count: excelenteCounter,
-      color: "#32CD32",
-      legendFontColor: "#7F7F7F",
-      legendFontSize: 14,
-    },
-  ];
+  const pieChartData = useMemo(
+    () => [
+      {
+        name: "Mal",
+        count: malCounter,
+        color: "#F20C0C",
+        legendFontColor: "#7F7F7F",
+        legendFontSize: 14,
+      },
+      {
+        name: "Regular",
+        count: regularCounter,
+        color: "#F4D63D",
+        legendFontColor: "#7F7F7F",
+        legendFontSize: 14,
+      },
+      {
+        name: "Bien",
+        count: bienCounter,
+        color: "#2626D8",
+        legendFontColor: "#7F7F7F",
+        legendFontSize: 14,
+      },
+      {
+        name: "Excelente",
+        count: excelenteCounter,
+        color: "#32CD32",
+        legendFontColor: "#7F7F7F",
+        legendFontSize: 14,
+      },
+    ],
+    [malCounter, regularCounter, bienCounter, excelenteCounter]
+  );
 
-  /* ──────────── 1. Descarga de datos ──────────── */
+  const hasPieData = pieChartData.some((item) => Number(item.count) > 0);
+  const hasLineData = Array.isArray(y) && y.length > 1;
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       setErrorMsg("");
+      setNoData(false);
 
       try {
         const response = await fetchWithToken(
           "/moodState/get-MoodStatesByUserId"
         );
-        setMoodData(response.data || []);
+
+        console.log("Respuesta completa de la API:", response);
+
+        const safeData = Array.isArray(response?.data) ? response.data : [];
+
+        setMoodData(safeData);
+
+        if (safeData.length === 0) {
+          setNoData(true);
+          setX([]);
+          setY([]);
+          setMalCount(0);
+          setRegularCount(0);
+          setBienCount(0);
+          setExcelenteCount(0);
+          setMonthChart(selectedMonth);
+        }
       } catch (err) {
         console.error("Error al obtener los estados de ánimo:", err);
+        setMoodData([]);
+        setNoData(false);
         setErrorMsg(
           "No pudimos conectarnos. Revisa tu conexión a Internet e inténtalo nuevamente."
         );
@@ -95,41 +114,55 @@ const MoodStats = ({ navigation }) => {
     };
 
     fetchData();
-  }, []);
-
-  /* ──────────── 2. Filtrado según mes ──────────── */
+  }, [selectedMonth]);
 
   useEffect(() => {
-    if (moodData.length > 0) filterDataByMonth(selectedMonth);
+    if (!Array.isArray(moodData) || moodData.length === 0) {
+      setNoData(true);
+      setX([]);
+      setY([]);
+      setMalCount(0);
+      setRegularCount(0);
+      setBienCount(0);
+      setExcelenteCount(0);
+      setMonthChart(selectedMonth);
+      return;
+    }
+
+    filterDataByMonth(selectedMonth);
   }, [selectedMonth, moodData]);
 
   const filterDataByMonth = (monthLabel) => {
     const newX = [];
     const newY = [];
 
-    let mal = 0,
-      regular = 0,
-      bien = 0,
-      excelente = 0;
+    let mal = 0;
+    let regular = 0;
+    let bien = 0;
+    let excelente = 0;
 
     moodData.forEach(({ moodState, intensity, date }) => {
+      if (!date) return;
+
       const month = getMonthName(new Date(date).getMonth());
 
       if (monthLabel === month) {
-        /* Eje X se mantiene vacío (simples separadores) */
         newX.push("");
 
-        /* Intensidad (1-4) al eje Y */
         const intensidadValue =
           typeof intensity === "object"
-            ? intensity.value || intensity.label
+            ? intensity?.value ?? intensity?.label
             : intensity;
-        newY.push(Number(intensidadValue));
 
-        /* Contadores para pie chart */
+        const numericIntensity = Number(intensidadValue);
+
+        if (Number.isFinite(numericIntensity)) {
+          newY.push(numericIntensity);
+        }
+
         const moodStateValue =
           typeof moodState === "object"
-            ? moodState.value || moodState.label
+            ? moodState?.value ?? moodState?.label
             : moodState;
 
         switch (moodStateValue) {
@@ -145,28 +178,29 @@ const MoodStats = ({ navigation }) => {
           case "Excelente":
             excelente++;
             break;
+          default:
+            break;
         }
       }
     });
 
-    /* ¿Hay registros? */
-    if (newX.length === 0) {
+    const totalPie = mal + regular + bien + excelente;
+
+    if (newY.length === 0 || totalPie === 0) {
       setNoData(true);
-      /* Vaciar gráficos y contadores */
       setX([]);
       setY([]);
       setMalCount(0);
       setRegularCount(0);
       setBienCount(0);
       setExcelenteCount(0);
+      setMonthChart(monthLabel);
       return;
     }
 
-    /* Sí hay registros */
     setNoData(false);
-    newY.unshift(0); // para que el eje Y arranque en 0
     setX(newX);
-    setY(newY);
+    setY([0, ...newY]);
     setMalCount(mal);
     setRegularCount(regular);
     setBienCount(bien);
@@ -174,9 +208,7 @@ const MoodStats = ({ navigation }) => {
     setMonthChart(monthLabel);
   };
 
-  /* ──────────── 3. Render ──────────── */
   const renderContent = () => {
-    /* Cargando datos */
     if (isLoading) {
       return (
         <View
@@ -187,7 +219,6 @@ const MoodStats = ({ navigation }) => {
       );
     }
 
-    /* Error de red */
     if (errorMessage) {
       return (
         <View
@@ -212,8 +243,7 @@ const MoodStats = ({ navigation }) => {
       );
     }
 
-    /* Sin datos en ese mes */
-    if (noData) {
+    if (noData || !hasPieData || !hasLineData) {
       return (
         <View
           style={{
@@ -237,10 +267,8 @@ const MoodStats = ({ navigation }) => {
       );
     }
 
-    /*  Hay datos: mostramos gráficos + leyendas */
     return (
       <>
-        {/* Line chart */}
         <View>
           <LineChart
             data={{ labels: x, datasets: [{ data: y }] }}
@@ -274,7 +302,6 @@ const MoodStats = ({ navigation }) => {
           </Text>
         </View>
 
-        {/* Leyenda 1-4 */}
         <View style={ChartStyle.legendContainer}>
           <Text style={ChartStyle.legendtext}>1 - Mal</Text>
           <Text style={ChartStyle.legendtext}>2 - Regular</Text>
@@ -282,7 +309,6 @@ const MoodStats = ({ navigation }) => {
           <Text style={ChartStyle.legendtext}>4 - Excelente</Text>
         </View>
 
-        {/* Pie chart */}
         <View style={ChartStyle.pieChartContainer}>
           <PieChart
             data={pieChartData}
@@ -303,11 +329,8 @@ const MoodStats = ({ navigation }) => {
     );
   };
 
-  /* ──────────── UI superior (header + dropdown) ──────────── */
-
   return (
     <SafeAreaView style={[FormStyle.container, GlobalStyle.androidSafeArea]}>
-      {/* Header */}
       <View style={FormStyle.flexContainer}>
         <BackButton onPress={() => navigation.goBack()} />
         <Text style={[FormStyle.title, { left: 30 }]}>
@@ -315,7 +338,6 @@ const MoodStats = ({ navigation }) => {
         </Text>
       </View>
 
-      {/* Dropdown de mes */}
       <View style={{ paddingHorizontal: 30, marginVertical: 20 }}>
         <Dropdown
           placeholderStyle={{ color: "#f2f2f2", fontFamily: "DoppioOne" }}
@@ -336,7 +358,6 @@ const MoodStats = ({ navigation }) => {
         />
       </View>
 
-      {/* Contenido dinámico */}
       {renderContent()}
     </SafeAreaView>
   );
