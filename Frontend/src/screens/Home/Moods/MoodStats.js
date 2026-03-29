@@ -76,6 +76,7 @@ const MoodStats = ({ navigation }) => {
 
   useEffect(() => {
     const fetchData = async () => {
+      const loadStartedAt = Date.now();
       setIsLoading(true);
       setErrorMsg("");
       setNoData(false);
@@ -109,6 +110,15 @@ const MoodStats = ({ navigation }) => {
           "No pudimos conectarnos. Revisa tu conexión a Internet e inténtalo nuevamente."
         );
       } finally {
+        const elapsed = Date.now() - loadStartedAt;
+        const minimumLoaderTime = 350;
+
+        if (elapsed < minimumLoaderTime) {
+          await new Promise((resolve) =>
+            setTimeout(resolve, minimumLoaderTime - elapsed)
+          );
+        }
+
         setIsLoading(false);
       }
     };
@@ -352,7 +362,10 @@ const MoodStats = ({ navigation }) => {
           placeholder={currentMonth}
           data={months.map((m) => ({ label: m.label, value: m.label }))}
           value={selectedMonth}
-          onChange={(item) => setSelectedMonth(item.label)}
+          onChange={(item) => {
+            setIsLoading(true);
+            setSelectedMonth(item.label);
+          }}
           labelField="label"
           valueField="value"
         />
