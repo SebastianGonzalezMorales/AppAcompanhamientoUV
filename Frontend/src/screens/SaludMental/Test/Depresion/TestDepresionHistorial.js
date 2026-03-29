@@ -14,7 +14,7 @@ import { Dropdown } from "react-native-element-dropdown";
 import { getMonth, getMonths } from "../../../../utils/getMonths";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import ModalStyle from "../../../../assets/styles/ModalStyle";
-import CustomButton from "../../../../components/buttons/CustomButton";
+import DepressionResultButton from "../../../../components/buttons/DepressionResultButton";
 import GlobalStyles from "../../../../assets/styles/GlobalStyle";
 
 const { API_URL } = Constants.expoConfig?.extra || {};
@@ -216,7 +216,7 @@ const QuestionnaireHistory = ({ navigation }) => {
               const severityStyles = getSeverityStyles(item.severity);
 
               return (
-                <CustomButton
+                <DepressionResultButton
                   buttonStyle={{
                     backgroundColor: severityStyles.backgroundColor,
                   }}

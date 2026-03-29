@@ -28,7 +28,7 @@ const getCurrentMonthValue = () => {
 };
 
 const getScoreColor = (score, opacity = 1) => {
-  if (score >= 20) return `rgba(176, 0, 32, ${opacity})`;
+  if (score >= 20) return "rgba(255, 0, 0, 1)";
   if (score >= 15) return `rgba(255, 159, 67, ${opacity})`;
   if (score >= 10) return `rgba(255, 214, 10, ${opacity})`;
   if (score >= 5) return `rgba(35, 139, 223, ${opacity})`;
@@ -36,7 +36,7 @@ const getScoreColor = (score, opacity = 1) => {
 };
 
 const getScoreBaseColor = (score) => {
-  if (score >= 20) return "#ffc9d2";
+  if (score >= 20) return "#ff0000";
   if (score >= 15) return "#ffd7b0";
   if (score >= 10) return "#fff1a8";
   if (score >= 5) return "#d8eef7";

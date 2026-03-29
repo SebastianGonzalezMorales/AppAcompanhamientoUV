@@ -19,7 +19,7 @@ import Constants from "expo-constants";
 // Asigna API_URL desde la configuración
 const { API_URL } = Constants.expoConfig?.extra || {};
 
-import CustomButton from "../../../../components/buttons/CustomButton";
+import DepressionResultButton from "../../../../components/buttons/DepressionResultButton";
 import HistoryButton from "../../../../components/buttons/HistoryButton";
 import StatsButton from "../../../../components/buttons/StatsButton";
 import CircularButton from "../../../../components/buttons/CircularButton";
@@ -558,11 +558,9 @@ function DepressionTestMain({ navigation }) {
               const severityStyles = getSeverityStyles(item.severity);
 
               return (
-                <CustomButton
+                <DepressionResultButton
                   buttonStyle={{
                     backgroundColor: severityStyles.backgroundColor,
-                    paddingVertical: 15,
-                    paddingHorizontal: 20,
                     marginBottom: 10,
                     borderRadius: 10,
                   }}
