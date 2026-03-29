@@ -44,6 +44,7 @@ function DepressionTestMain({ navigation }) {
   const [userPhone, setUserPhone] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isAlertMinimized, setIsAlertMinimized] = useState(false);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -56,9 +57,29 @@ function DepressionTestMain({ navigation }) {
   const handleCloseAlert = async () => {
     try {
       await AsyncStorage.setItem("alertClosed", "true"); // Guarda el estado de cierre como cadena "true"
+      await AsyncStorage.removeItem("alertMinimized");
+      setIsAlertMinimized(false);
       setGraveCount(0); // Oculta la alerta en el estado local
     } catch (error) {
       console.error("Error al guardar el estado de la alerta:", error);
+    }
+  };
+
+  const handleMinimizeAlert = async () => {
+    try {
+      await AsyncStorage.setItem("alertMinimized", "true");
+      setIsAlertMinimized(true);
+    } catch (error) {
+      console.error("Error al minimizar la alerta:", error);
+    }
+  };
+
+  const handleExpandAlert = async () => {
+    try {
+      await AsyncStorage.removeItem("alertMinimized");
+      setIsAlertMinimized(false);
+    } catch (error) {
+      console.error("Error al restaurar la alerta:", error);
     }
   };
 
@@ -171,6 +192,19 @@ function DepressionTestMain({ navigation }) {
         }
       };
 
+      const checkMinimizedStatus = async () => {
+        try {
+          const alertMinimized = await AsyncStorage.getItem("alertMinimized");
+          return alertMinimized === "true";
+        } catch (error) {
+          console.error(
+            "Error al verificar el estado minimizado de la alerta:",
+            error
+          );
+          return false;
+        }
+      };
+
       const fetchData = async () => {
         try {
           setIsLoading(true);
@@ -228,6 +262,7 @@ function DepressionTestMain({ navigation }) {
           const currentGraveCount = graveResults.length;
 
           const isAlertClosed = await checkAlertStatus();
+          const isMinimized = await checkMinimizedStatus();
 
           if (currentGraveCount > 0) {
             if (currentGraveCount > previousGraveCount) {
@@ -235,13 +270,19 @@ function DepressionTestMain({ navigation }) {
                 "Nuevos resultados graves detectados. Reiniciando alerta."
               );
               await AsyncStorage.removeItem("alertClosed");
+              await AsyncStorage.removeItem("alertMinimized");
+              setIsAlertMinimized(false);
               setGraveCount(currentGraveCount); // Mostrar alerta de inmediato
             } else if (!isAlertClosed) {
+              setIsAlertMinimized(isMinimized);
               setGraveCount(currentGraveCount); // Mostrar alerta si no está cerrada
             } else {
+              setIsAlertMinimized(false);
               setGraveCount(0); // Ocultar alerta si está cerrada
             }
           } else {
+            await AsyncStorage.removeItem("alertMinimized");
+            setIsAlertMinimized(false);
             setGraveCount(0); // No hay resultados graves
           }
 
@@ -279,7 +320,7 @@ function DepressionTestMain({ navigation }) {
     <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
       <BackButton onPress={() => navigation.goBack()} />
 
-      {graveCount >= 1 && (
+      {graveCount >= 1 && !isAlertMinimized && (
         <View style={styles.alertContainer}>
           <View
             style={{
@@ -367,6 +408,26 @@ function DepressionTestMain({ navigation }) {
             </TouchableOpacity>
           </View>
         </View>
+      )}
+
+      {graveCount >= 1 && isAlertMinimized && (
+        <TouchableOpacity
+          onPress={handleExpandAlert}
+          style={styles.minimizedAlertContainer}
+        >
+          <MaterialCommunityIcons
+            name="alert-circle-outline"
+            size={15}
+            color="#e53935"
+            style={{ marginRight: 5 }}
+          />
+          <Text style={styles.minimizedAlertText}>Ver alerta</Text>
+          <MaterialCommunityIcons
+            name="chevron-down"
+            size={16}
+            color="#e53935"
+          />
+        </TouchableOpacity>
       )}
 
       <View style={{ height: 320 }}>
@@ -572,7 +633,7 @@ function DepressionTestMain({ navigation }) {
         <View style={styles.modalOverlay}>
           <View style={styles.customModal}>
             {/* Título del modal */}
-            <Text style={styles.modalTitle}>Cerrar alerta</Text>
+            <Text style={styles.modalTitle}>Opciones de alerta</Text>
 
             {/* Mensaje de confirmación */}
             <Text style={styles.modalMessage}>
@@ -581,7 +642,18 @@ function DepressionTestMain({ navigation }) {
 
             {/* Botones */}
             <View style={styles.modalButtonContainer}>
-              {/* Confirmar cerrar */}
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: "#F3E5AB" }]}
+                onPress={() => {
+                  setShowConfirmModal(false);
+                  handleMinimizeAlert();
+                }}
+              >
+                <Text style={[styles.modalButtonText, { color: "#7A5C00" }]}>
+                  Minimizar
+                </Text>
+              </TouchableOpacity>
+
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: "#E53935" }]}
                 onPress={() => {
@@ -623,7 +695,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
   },
-
   tooltipContainer: {
     position: "absolute",
     bottom: "12%",
@@ -773,13 +844,38 @@ const styles = StyleSheet.create({
   },
 
   alertContainer: {
-    padding: 10,
+    position: "absolute",
+    top: 72,
+    left: 64,
+    right: 16,
+    zIndex: 20,
+    elevation: 8,
     backgroundColor: "#fff3e0",
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "#ffd699",
-    paddingVertical: 10, // Ajusta la altura interna
-    paddingHorizontal: 25, // Reduce el margen lateral
+    padding: 10,
+  },
+  minimizedAlertContainer: {
+    position: "absolute",
+    top: 76,
+    right: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 248, 238, 0.96)",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#ffd699",
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    zIndex: 20,
+    elevation: 5,
+  },
+  minimizedAlertText: {
+    color: "#e53935",
+    fontSize: 13,
+    fontWeight: "600",
+    marginRight: 4,
   },
 });
 
