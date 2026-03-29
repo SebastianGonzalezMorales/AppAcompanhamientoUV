@@ -1,31 +1,28 @@
-// React imports
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   SafeAreaView,
   Text,
-  Animated,
   View,
   Dimensions,
   StyleSheet,
   TouchableOpacity,
   Linking,
+  ScrollView,
+  Animated,
 } from 'react-native';
 import YoutubePlayer from 'react-native-youtube-iframe';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-// Custom styles
 import GlobalStyle from '../../../assets/styles/GlobalStyle';
 import BackButton from '../../../components/buttons/BackButton';
 
-// Obtener dimensiones de la pantalla
 const { width, height } = Dimensions.get('window');
 
-// Datos de los videos
 const studentVideos = [
   { id: 1, videoId: 'oFv7tnu2dA0', title: 'UV Inclusiva' },
-  { id: 2, videoId: 'COxxvvwMGNw', title: 'Conceptos clave sobre Inclusión' },
+  { id: 2, videoId: 'COxxvvwMGNw', title: 'Conceptos clave sobre Inclusion' },
   { id: 3, videoId: 'Bvhpyb9pT4I', title: 'Beneficios de la Credencial de Discapacidad' },
-  { id: 4, videoId: 'Cnhru0OSNRE', title: 'Cómo Solicitar la Credencial de Discapacidad' },
+  { id: 4, videoId: 'Cnhru0OSNRE', title: 'Como Solicitar la Credencial de Discapacidad' },
 ];
 
 function UvInclusiva({ navigation }) {
@@ -34,124 +31,125 @@ function UvInclusiva({ navigation }) {
 
   return (
     <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
-      {/* Sección Azul del Encabezado */}
-      <View style={{ height: 190, padding: 15 }}>
-        <BackButton onPress={() => navigation.goBack()} />
-        <Text style={GlobalStyle.welcomeText}>Espacio UV</Text>
-        <Text style={[GlobalStyle.subtitleMenu, { color: '#FFFFFF' }]}>
-          Servicios y apoyo estudiantil
-        </Text>
-        <Text style={[GlobalStyle.text, { textAlign: 'justify', color: '#FFFFFF' }]}>
-          UV Inclusiva
-        </Text>
-      </View>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.heroSection}>
+          <BackButton onPress={() => navigation.goBack()} />
+          <Text style={GlobalStyle.welcomeText}>Espacio UV</Text>
+          <Text style={[GlobalStyle.subtitleMenu, styles.heroSubtitle]}>
+            Servicios y apoyo estudiantil
+          </Text>
+          <Text style={[GlobalStyle.text, styles.heroText]}>UV Inclusiva</Text>
+        </View>
 
-      {/* Carrusel de Videos */}
-      <View style={[GlobalStyle.rowTwo, styles.centeredContainer]}>
-        <View style={styles.carouselWrapper}>
-          <Animated.ScrollView
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onScroll={Animated.event(
-              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-              { useNativeDriver: false }
-            )}
-            scrollEventThrottle={16}
-            contentContainerStyle={styles.carouselContainer}
-            onMomentumScrollEnd={(event) => {
-              const slideIndex = Math.round(event.nativeEvent.contentOffset.x / (width * 0.8));
-              setCurrentIndex(slideIndex);
-            }}
-          >
-            {studentVideos.map((video, index) => (
-              <View key={video.id} style={styles.slide}>
-                <Text style={styles.videoTitle}>{video.title}</Text>
-                <YoutubePlayer
-                  height={height * 0.25}
-                  width={width * 0.8}
-                  videoId={video.videoId}
-                />
-              </View>
-            ))}
-          </Animated.ScrollView>
+        <View style={styles.contentCard}>
+          <View style={styles.carouselWrapper}>
+            <Animated.ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onScroll={Animated.event(
+                [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+                { useNativeDriver: false }
+              )}
+              scrollEventThrottle={16}
+              contentContainerStyle={styles.carouselContainer}
+              onMomentumScrollEnd={(event) => {
+                const slideIndex = Math.round(
+                  event.nativeEvent.contentOffset.x / (width * 0.82)
+                );
+                setCurrentIndex(slideIndex);
+              }}
+            >
+              {studentVideos.map((video) => (
+                <View key={video.id} style={styles.slide}>
+                  <Text style={styles.videoTitle}>{video.title}</Text>
+                  <YoutubePlayer
+                    height={Math.max(height * 0.22, 210)}
+                    width={width * 0.76}
+                    videoId={video.videoId}
+                  />
+                </View>
+              ))}
+            </Animated.ScrollView>
 
-          {/* Puntos de Paginación */}
-          <View style={styles.pagination}>
-            {studentVideos.map((_, index) => {
-              const opacity = scrollX.interpolate({
-                inputRange: [
-                  (index - 1) * width * 0.8,
-                  index * width * 0.8,
-                  (index + 1) * width * 0.8,
-                ],
-                outputRange: [0.3, 1, 0.3],
-                extrapolate: 'clamp',
-              });
-              return (
-                <Animated.View
+            <View style={styles.pagination}>
+              {studentVideos.map((_, index) => (
+                <View
                   key={index}
                   style={[
                     styles.dot,
-                    {
-                      opacity,
-                      backgroundColor: index === currentIndex ? '#000C7B' : '#D1D5DB',
-                    },
+                    { backgroundColor: index === currentIndex ? '#000C7B' : '#D1D5DB' },
                   ]}
                 />
-              );
-            })}
+              ))}
+            </View>
           </View>
+
+          <Text style={styles.infoText}>
+            Si tienes dudas o necesitas ayuda, contactanos mediante los
+            siguientes medios:
+          </Text>
+
+          <TouchableOpacity
+            style={[styles.actionButton, styles.callButton]}
+            onPress={() => Linking.openURL('tel:322995601')}
+          >
+            <MaterialCommunityIcons name="phone" size={20} color="#FFF" />
+            <Text style={styles.buttonText}>Llamar</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.actionButton, styles.emailButton]}
+            onPress={() => Linking.openURL('mailto:uv.inclusiva@uv.cl')}
+          >
+            <MaterialCommunityIcons name="email" size={20} color="#FFF" />
+            <Text style={styles.buttonText}>Enviar correo</Text>
+          </TouchableOpacity>
         </View>
-      {/* Texto y botones de contacto */}
-      <View style={styles.contactButtonsContainer}>
-        {/* Frase introductoria */}
-        
-        <Text style={styles.infoText}>
-          Si tienes dudas o necesitas ayuda, contáctanos mediante los siguientes medios:
-        </Text>
-
-        {/* Botón de llamada */}
-        <TouchableOpacity
-          style={styles.callButton}
-          onPress={() => Linking.openURL('tel:322995601')}
-        >
-          <MaterialCommunityIcons name="phone" size={20} color="#FFF" />
-          <Text style={styles.buttonText}>Llamar</Text>
-        </TouchableOpacity>
-
-        {/* Botón de correo */}
-        <TouchableOpacity
-          style={styles.emailButton}
-          onPress={() => Linking.openURL('mailto:uv.inclusiva@uv.cl')}
-        >
-          <MaterialCommunityIcons name="email" size={20} color="#FFF" />
-          <Text style={styles.buttonText}>Enviar correo</Text>
-        </TouchableOpacity>
-      </View>
-      </View>
-
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  centeredContainer: {
-    justifyContent: 'center',
+  scrollContent: {
+    flexGrow: 1,
+  },
+  heroSection: {
+    minHeight: 190,
+    padding: 15,
+    paddingBottom: 12,
+  },
+  heroSubtitle: {
+    color: '#FFFFFF',
+  },
+  heroText: {
+    textAlign: 'left',
+    color: '#FFFFFF',
+    lineHeight: 24,
+  },
+  contentCard: {
+    flexGrow: 1,
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     alignItems: 'center',
-    flex: 1,
-    marginTop: 20,
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 28,
   },
   carouselWrapper: {
-    position: 'relative',
-    width: width * 0.8,
-    height: height * 0.4,
+    width: width * 0.84,
+    minHeight: Math.max(height * 0.34, 320),
   },
   carouselContainer: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   slide: {
-    width: width * 0.8,
+    width: width * 0.82,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
@@ -161,23 +159,22 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 5,
-    padding: 10,
+    paddingTop: 14,
+    paddingBottom: 12,
   },
   videoTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#5c6169',
     marginBottom: 10,
     textAlign: 'center',
+    paddingHorizontal: 12,
   },
   pagination: {
-    position: 'absolute',
-    bottom: -5,
-    left: 0,
-    right: 0,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 14,
   },
   dot: {
     width: 10,
@@ -186,45 +183,39 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
     backgroundColor: '#D1D5DB',
   },
-  contactButtonsContainer: {
-    marginVertical: 20,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-  },
   infoText: {
     fontSize: 14,
     color: '#333',
     textAlign: 'center',
-    marginBottom: 15,
-    paddingHorizontal: 20,
+    marginTop: 18,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    lineHeight: 20,
+  },
+  actionButton: {
+    width: '85%',
+    minHeight: 48,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    marginTop: 12,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   callButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#4CAF50',
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginVertical: 10,
-    width: '40%',
-    justifyContent: 'center',
   },
   emailButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#2196F3',
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginVertical: 10,
-    width: '50%',
-    justifyContent: 'center',
   },
   buttonText: {
     color: '#FFF',
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 10,
+    flexShrink: 1,
+    textAlign: 'center',
   },
 });
 

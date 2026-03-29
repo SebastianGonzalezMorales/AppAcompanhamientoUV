@@ -1,137 +1,146 @@
-// React imports
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import {
   SafeAreaView,
   Text,
-  Animated,
   View,
   Dimensions,
   StyleSheet,
   TouchableOpacity,
   Linking,
+  ScrollView,
 } from 'react-native';
 import YoutubePlayer from 'react-native-youtube-iframe';
-
-// Custom styles
-import GlobalStyle from '../../../assets/styles/GlobalStyle';
-import BackButton from '../../../components/buttons/BackButton';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-// Obtener dimensiones de la pantalla
+import GlobalStyle from '../../../assets/styles/GlobalStyle';
+import BackButton from '../../../components/buttons/BackButton';
+
 const { width, height } = Dimensions.get('window');
 
-// Datos de los videos de los estudiantes
-const studentVideos = [
-  { id: 1, videoId: 'RER9MW267Js', title: '', type: 'video' }, // Eliminado título
-];
-
 function AppaUv({ navigation }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const scrollX = useRef(new Animated.Value(0)).current;
-
   return (
     <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
-      {/* Sección Azul del Encabezado */}
-      <View style={{ height: 215, padding: 15 }}>
-        <BackButton onPress={() => navigation.goBack()} />
-        <Text style={GlobalStyle.welcomeText}>Espacio UV</Text>
-        <Text style={[GlobalStyle.subtitleMenu, { color: '#FFFFFF' }]}>
-          Servicios y apoyo estudiantil
-        </Text>
-        <Text style={[GlobalStyle.text, { textAlign: 'justify', color: '#FFFFFF' }]}>
-          Appa UV - Programa de Atención Preferencial a los Primeros Años
-        </Text>
-      </View>
-
-      {/* Contenedor para el Video */}
-      <View style={[GlobalStyle.rowTwo, styles.centeredContainer]}>
-        <YoutubePlayer
-          height={height * 0.33}
-          width={width * 0.8} // Ajuste del ancho
-          videoId={studentVideos[0].videoId}
-        /> 
-             {/* Botones de llamada y correo */}
-   <View>
-    <Text>
-
-    </Text>
-   </View>
-        <View>
-        <Text style={[styles.infoText,{ marginTop: -35}, {textAlign: 'center'}]}>
-          Si tienes dudas o necesitas ayuda, contáctanos mediante los siguientes medios:
-        </Text>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.heroSection}>
+          <BackButton onPress={() => navigation.goBack()} />
+          <Text style={GlobalStyle.welcomeText}>Espacio UV</Text>
+          <Text style={[GlobalStyle.subtitleMenu, styles.heroSubtitle]}>
+            Servicios y apoyo estudiantil
+          </Text>
+          <Text style={[GlobalStyle.text, styles.heroText]}>
+            Appa UV - Programa de Atencion Preferencial a los Primeros Anos
+          </Text>
         </View>
-        <View>
-    <Text>
 
-    </Text>
-   </View>
-        {/* Botón de llamar */}
-        <TouchableOpacity
-        
-        
+        <View style={styles.contentCard}>
+          <View style={styles.videoCard}>
+            <YoutubePlayer
+              height={Math.max(height * 0.28, 220)}
+              width={width * 0.78}
+              videoId="RER9MW267Js"
+            />
+          </View>
 
-          style={styles.callButton}
-          onPress={() => Linking.openURL('tel:322500000')}
-        >
-          <MaterialCommunityIcons name="phone" size={20} color="#FFF" />
-          <Text style={styles.buttonText}>Llamar</Text>
-        </TouchableOpacity>
+          <Text style={styles.infoText}>
+            Si tienes dudas o necesitas ayuda, contactanos mediante los
+            siguientes medios:
+          </Text>
 
-        {/* Botón de correo */}
-        <TouchableOpacity
-          style={styles.emailButton}
-          onPress={() => Linking.openURL('mailto:appauv@uv.cl')}
-        >
-          <MaterialCommunityIcons name="email" size={20} color="#FFF" />
-          <Text style={styles.buttonText}>Enviar correo</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.callButton]}
+            onPress={() => Linking.openURL('tel:322500000')}
+          >
+            <MaterialCommunityIcons name="phone" size={20} color="#FFF" />
+            <Text style={styles.buttonText}>Llamar</Text>
+          </TouchableOpacity>
 
-      </View>
-
-
+          <TouchableOpacity
+            style={[styles.actionButton, styles.emailButton]}
+            onPress={() => Linking.openURL('mailto:appauv@uv.cl')}
+          >
+            <MaterialCommunityIcons name="email" size={20} color="#FFF" />
+            <Text style={styles.buttonText}>Enviar correo</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  centeredContainer: {
+  scrollContent: {
+    flexGrow: 1,
+  },
+  heroSection: {
+    minHeight: 215,
+    padding: 15,
+    paddingBottom: 12,
+  },
+  heroSubtitle: {
+    color: '#FFFFFF',
+  },
+  heroText: {
+    textAlign: 'left',
+    color: '#FFFFFF',
+    lineHeight: 24,
+  },
+  contentCard: {
+    flexGrow: 1,
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 28,
+  },
+  videoCard: {
+    width: width * 0.84,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#333',
+    lineHeight: 20,
+    textAlign: 'center',
+    marginTop: 18,
+    paddingHorizontal: 10,
+  },
+  actionButton: {
+    width: '85%',
+    minHeight: 48,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    marginTop: 12,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    flex: 1,
-    marginTop: 20,
-  },
-  contactContainer: {
-    alignItems: 'center',
-    marginTop: 20,
   },
   callButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#4CAF50', // Verde para botón de llamada
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginVertical: 10,
-    width: '80%',
-    justifyContent: 'center',
+    backgroundColor: '#4CAF50',
   },
   emailButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#2196F3', // Azul para botón de correo
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginVertical: 10,
-    width: '80%',
-    justifyContent: 'center',
+    backgroundColor: '#2196F3',
   },
   buttonText: {
     color: '#FFF',
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 10,
+    flexShrink: 1,
+    textAlign: 'center',
   },
 });
 

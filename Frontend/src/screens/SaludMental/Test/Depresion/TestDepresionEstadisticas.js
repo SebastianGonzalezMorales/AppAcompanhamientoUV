@@ -4,6 +4,8 @@ import {
   SafeAreaView,
   Text,
   View,
+  ScrollView,
+  StyleSheet,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { BarChart } from "react-native-chart-kit";
@@ -55,8 +57,6 @@ const QuestionnaireStats = ({ navigation }) => {
   const months = getMonths();
   const initialMonthValue = getCurrentMonthValue();
 
-  const chartwidth = Dimensions.get("window").width * 0.99;
-
   useEffect(() => {
     setSelectedMonth(initialMonthValue);
     fetchData(initialMonthValue);
@@ -69,7 +69,7 @@ const QuestionnaireStats = ({ navigation }) => {
 
     try {
       const token = await AsyncStorage.getItem("token");
-      if (!token) throw new Error("Sin token de autenticación");
+      if (!token) throw new Error("Sin token de autenticacion");
 
       const { data: userResponse } = await api.post(
         `${API_URL}/tokens/userid`,
@@ -78,7 +78,7 @@ const QuestionnaireStats = ({ navigation }) => {
       );
       const userId = userResponse.userId;
 
-      if (!userId) throw new Error("No se encontró userId");
+      if (!userId) throw new Error("No se encontro userId");
 
       const response = await api.post(
         `${API_URL}/resultsTests/get-resultsTestUser/${userId}`,
@@ -120,7 +120,7 @@ const QuestionnaireStats = ({ navigation }) => {
     } catch (error) {
       console.error("Error al obtener datos del cuestionario:", error);
       setErrorMessage(
-        "No pudimos conectarnos. Revisa tu conexión a Internet e inténtalo nuevamente."
+        "No pudimos conectarnos. Revisa tu conexion a Internet e intentalo nuevamente."
       );
     } finally {
       setIsLoading(false);
@@ -134,63 +134,50 @@ const QuestionnaireStats = ({ navigation }) => {
 
   return (
     <SafeAreaView style={[FormStyle.container, GlobalStyle.androidSafeArea]}>
-      <View style={FormStyle.flexContainer}>
-        <BackButton onPress={() => navigation.goBack()} />
-        <Text style={[FormStyle.title, { left: 40 }]}>Estadísticas por mes</Text>
-      </View>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={FormStyle.flexContainer}>
+          <BackButton onPress={() => navigation.goBack()} />
+          <Text style={[FormStyle.title, { left: 40 }]}>Estadisticas por mes</Text>
+        </View>
 
-      <View style={{ paddingHorizontal: 30, marginVertical: 20 }}>
-        <Dropdown
-          placeholderStyle={{ color: "#f2f2f2", fontFamily: "DoppioOne" }}
-          containerStyle={{ borderRadius: 10 }}
-          selectedTextStyle={{
-            color: "#f2f2f2",
-            fontFamily: "DoppioOne",
-            fontSize: 14,
-          }}
-          itemTextStyle={{ color: "#666a72", fontFamily: "DoppioOne" }}
-          iconStyle={{ tintColor: "#fff" }}
-          placeholder={currentMonth}
-          data={months}
-          value={selectedMonth}
-          onChange={(item) => handleMonthSelected(item)}
-          labelField="label"
-          valueField="value"
-        />
-      </View>
+        <View style={styles.dropdownContainer}>
+          <Dropdown
+            placeholderStyle={{ color: "#f2f2f2", fontFamily: "DoppioOne" }}
+            containerStyle={{ borderRadius: 10 }}
+            selectedTextStyle={{
+              color: "#f2f2f2",
+              fontFamily: "DoppioOne",
+              fontSize: 14,
+            }}
+            itemTextStyle={{ color: "#666a72", fontFamily: "DoppioOne" }}
+            iconStyle={{ tintColor: "#fff" }}
+            placeholder={currentMonth}
+            data={months}
+            value={selectedMonth}
+            onChange={(item) => handleMonthSelected(item)}
+            labelField="label"
+            valueField="value"
+          />
+        </View>
 
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        {isLoading ? (
-          <ActivityIndicator size="large" color="#5da5a9" />
-        ) : errorMessage ? (
-          <View style={{ paddingHorizontal: 20 }}>
-            <Text
-              style={{
-                color: "#666a72",
-                fontFamily: "DoppioOne",
-                fontSize: 16,
-                textAlign: "center",
-              }}
-            >
-              {errorMessage}
-            </Text>
-          </View>
-        ) : noData ? (
-          <View style={{ paddingHorizontal: 20 }}>
-            <Text
-              style={{
-                color: "#666a72",
-                fontFamily: "DoppioOne",
-                fontSize: 16,
-                textAlign: "center",
-              }}
-            >
-              No se encontraron registros de tests para este mes 😞.
-            </Text>
-          </View>
-        ) : (
-          <View style={{ alignItems: "center", marginTop: 16 }}>
-            <View style={{ position: "relative", alignItems: "center" }}>
+        <View style={styles.chartSection}>
+          {isLoading ? (
+            <ActivityIndicator size="large" color="#5da5a9" />
+          ) : errorMessage ? (
+            <View style={styles.feedbackWrapper}>
+              <Text style={styles.feedbackText}>{errorMessage}</Text>
+            </View>
+          ) : noData ? (
+            <View style={styles.feedbackWrapper}>
+              <Text style={styles.feedbackText}>
+                No se encontraron registros de tests para este mes.
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.chartWrapper}>
               <BarChart
                 data={{
                   labels: x,
@@ -203,8 +190,8 @@ const QuestionnaireStats = ({ navigation }) => {
                     },
                   ],
                 }}
-                width={Dimensions.get("window").width * 0.85}
-                height={275}
+                width={Dimensions.get("window").width * 0.82}
+                height={290}
                 chartConfig={{
                   barPercentage: 0.8,
                   backgroundGradientFrom: "#f2f2f2",
@@ -230,83 +217,115 @@ const QuestionnaireStats = ({ navigation }) => {
                 withCustomBarColorFromData={true}
               />
 
-              <Text
-                style={{
-                  position: "absolute",
-                  left: -16,
-                  top: "43%",
-                  color: "#000000",
-                  fontFamily: "DoppioOne",
-                  fontSize: 11,
-                  fontWeight: "700",
-                  transform: [{ rotate: "-90deg" }],
-                }}
-              >
-                Puntaje PHQ-9
-              </Text>
-
-              <Text
-                style={{
-                  position: "absolute",
-                  bottom: 10,
-                  alignSelf: "center",
-                  color: "#000000",
-                  fontFamily: "DoppioOne",
-                  fontSize: 12,
-                  fontWeight: "700",
-                }}
-              >
-                Día del mes
-              </Text>
+              <Text style={styles.yAxisLabel}>Puntaje PHQ-9</Text>
+              <Text style={styles.xAxisLabel}>Dia del mes</Text>
             </View>
-          </View>
-        )}
-      </View>
-
-      <View
-        style={[
-          FormStyle.tableSubContainer,
-          FormStyle.tableShadow,
-          {
-            width: chartwidth,
-            alignSelf: "center",
-            marginBottom: 50,
-          },
-        ]}
-      >
-        <View style={FormStyle.tableHeader}>
-          <Text style={FormStyle.tableHeaderTitle}>Clasificación del test</Text>
+          )}
         </View>
 
-        <View style={FormStyle.tableColumnHeader}>
-          <Text style={FormStyle.tableColumnText}>Estado</Text>
-          <Text style={FormStyle.tableColumnText}>Puntaje</Text>
-        </View>
-
-        {[
-          ["Normal", "0 - 4"],
-          ["Leve", "5 - 9"],
-          ["Moderado", "10 - 14"],
-          ["Moderadamente grave", "15 - 19"],
-          ["Grave", "20 - 27"],
-        ].map(([label, range], idx) => (
-          <View
-            key={label}
-            style={
-              idx % 2 === 0
-                ? FormStyle.tableRowOdd
-                : idx === 4
-                ? [FormStyle.tableRowOdd, FormStyle.tableRowEnd]
-                : FormStyle.tableRowEven
-            }
-          >
-            <Text style={FormStyle.tableText}>{label}</Text>
-            <Text style={FormStyle.tableText}>{range}</Text>
+        <View
+          style={[
+            FormStyle.tableSubContainer,
+            FormStyle.tableShadow,
+            styles.tableWrapper,
+          ]}
+        >
+          <View style={FormStyle.tableHeader}>
+            <Text style={FormStyle.tableHeaderTitle}>Clasificación del test</Text>
           </View>
-        ))}
-      </View>
+
+          <View style={FormStyle.tableColumnHeader}>
+            <Text style={[FormStyle.tableColumnText, styles.stateColumn]}>
+              Estado
+            </Text>
+            <Text style={FormStyle.tableColumnText}>Puntaje</Text>
+          </View>
+
+          {[
+            ["Normal", "0 - 4"],
+            ["Leve", "5 - 9"],
+            ["Moderado", "10 - 14"],
+            ["Moderadamente grave", "15 - 19"],
+            ["Grave", "20 - 27"],
+          ].map(([label, range], idx) => (
+            <View
+              key={label}
+              style={
+                idx % 2 === 0
+                  ? FormStyle.tableRowOdd
+                  : idx === 4
+                  ? [FormStyle.tableRowOdd, FormStyle.tableRowEnd]
+                  : FormStyle.tableRowEven
+              }
+            >
+              <Text style={[FormStyle.tableText, styles.stateColumn]}>{label}</Text>
+              <Text style={FormStyle.tableText}>{range}</Text>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
 export default QuestionnaireStats;
+
+const styles = StyleSheet.create({
+  scrollContent: {
+    paddingBottom: 40,
+  },
+  dropdownContainer: {
+    paddingHorizontal: 30,
+    marginVertical: 20,
+  },
+  chartSection: {
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 320,
+  },
+  feedbackWrapper: {
+    paddingHorizontal: 20,
+  },
+  feedbackText: {
+    color: "#666a72",
+    fontFamily: "DoppioOne",
+    fontSize: 16,
+    textAlign: "center",
+    lineHeight: 24,
+  },
+  chartWrapper: {
+    position: "relative",
+    alignItems: "center",
+    marginTop: 16,
+    paddingBottom: 10,
+    paddingLeft: 12,
+  },
+  yAxisLabel: {
+    position: "absolute",
+    left: -24,
+    top: "43%",
+    color: "#000000",
+    fontFamily: "DoppioOne",
+    fontSize: 11,
+    fontWeight: "700",
+    transform: [{ rotate: "-90deg" }],
+  },
+  xAxisLabel: {
+    position: "absolute",
+    bottom: 18,
+    alignSelf: "center",
+    color: "#000000",
+    fontFamily: "DoppioOne",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  tableWrapper: {
+    width: Dimensions.get("window").width * 0.96,
+    alignSelf: "center",
+    marginBottom: 24,
+  },
+  stateColumn: {
+    flex: 1,
+    paddingRight: 12,
+  },
+});

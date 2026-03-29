@@ -39,7 +39,7 @@ function Crisis({ navigation }) {
     <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
       
       {/* Sección Azul del Encabezado */}
-      <View style={{ height: 200, padding: 15 }}>
+      <View style={{ minHeight: 200, padding: 15, paddingBottom: 12 }}>
         <BackButton onPress={() => navigation.goBack()} />
         <Text style={[GlobalStyle.welcomeText, { color: '#FFFFFF' }]}>Aprende sobre salud mental</Text>
         <Text style={[GlobalStyle.subtitleMenu, { color: '#FFFFFF' }]}>

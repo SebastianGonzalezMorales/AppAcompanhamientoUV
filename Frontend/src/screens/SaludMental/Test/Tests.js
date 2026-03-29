@@ -1,95 +1,94 @@
 // react imports
 import {
-    SafeAreaView,
-    Text,
-    ScrollView,
-    Image,
-    View,
-    Dimensions
-  } from 'react-native';
-  
-  // customisation
-  import GlobalStyle from '../../../assets/styles/GlobalStyle';
+  SafeAreaView,
+  Text,
+  ScrollView,
+  Image,
+  View,
+  Dimensions,
+  StyleSheet,
+} from 'react-native';
 
+// customisation
+import GlobalStyle from '../../../assets/styles/GlobalStyle';
 
-  //Components
-  import BackButton from '../../../components/buttons/BackButton';
-  import CustomButton from '../../../components/buttons/CustomButton';
-  import SettingsButton from '../../../components/buttons/SettingsButton';
+// Components
+import BackButton from '../../../components/buttons/BackButton';
+import SettingsButton from '../../../components/buttons/SettingsButton';
 
-  const { width, height } = Dimensions.get('window'); // Obtener las dimensiones de la pantalla
-  
-  function SaludMental({ navigation }) {
-    return (
-      <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
+const { height } = Dimensions.get('window');
+
+function SaludMental({ navigation }) {
+  return (
+    <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.heroSection}>
           <BackButton onPress={() => navigation.goBack()} />
-      
-              {/*
-       * *********************
-       * ***** Section 1 *****
-       * *********************
-       */}
-        {/*
-     
-         */}
-     <View style={{ height: height * 0.5, padding: 10 }}>
           <Text style={GlobalStyle.welcomeText}>Salud mental </Text>
           <Text style={GlobalStyle.subtitle}>Tests psicológicos</Text>
-        <Text style={[GlobalStyle.text, { textAlign: 'justify' }]}>
-         A continuación, podrás realizar diferentes tests psicológicos para conocer mejor tu bienestar emocional y recibir orientación sobre tu estado de ánimo.
-        </Text>
-          
-                  {/* Imagen con altura ajustada */}
-        <Image
-          source={require('../../../assets/images/SlidesOnboarding/test.png')}
-          style={{
-            width: '100%',
-            height: height * 0.20, // Ajustar la altura de la imagen al 20% de la pantalla
-            resizeMode: 'contain', // Cambiar a 'contain' para evitar recortes
-            marginTop: 11
-          }}
-        />
-        
+          <Text style={[GlobalStyle.text, styles.heroText]}>
+            A continuación, podrás realizar diferentes tests psicológicos para
+            conocer mejor tu bienestar emocional y recibir orientación sobre tu
+            estado de ánimo.
+          </Text>
+
+          <Image
+            source={require('../../../assets/images/SlidesOnboarding/test.png')}
+            style={styles.heroImage}
+          />
         </View>
 
-        
-  
-        {
-         }
-       
-             {/*
-        {/*
-       * *********************
-       * ***** Section 2 *****
-       * *********************
-       */}
-      <View style={GlobalStyle.rowTwo}>
-        <View style={GlobalStyle.statsContainer}>
-          
-        </View>
-        <ScrollView>
-          <View style={{ marginTop: 10 }}>
+        <View style={styles.contentCard}>
+          <View style={styles.buttonsWrapper}>
             <SettingsButton
               text="Depresión"
               onPress={() => navigation.navigate('DepressionTestMain')}
-            /> 
+            />
             <SettingsButton
               text="Ansiedad"
               onPress={() => navigation.navigate('AnsiedadTestMain')}
             />
-            {/* <SettingsButton text="Notifications" onPress={() => navigation.navigate('Counselling')} /> */}
-           {/*  <SettingsButton
-              text="Privacy policy"
-               onPress={() => navigation.navigate('Notification')}
-            /> */}
-
           </View>
-        </ScrollView>
-      </View>
-      
-      </SafeAreaView>
-    );
-  }
-  
-  export default SaludMental;
-  
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+export default SaludMental;
+
+const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+  },
+  heroSection: {
+    minHeight: height * 0.38,
+    padding: 10,
+    paddingBottom: 14,
+  },
+  heroText: {
+    textAlign: 'left',
+    lineHeight: 24,
+  },
+  heroImage: {
+    width: '100%',
+    height: Math.min(height * 0.18, 180),
+    resizeMode: 'contain',
+    marginTop: 12,
+  },
+  contentCard: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingHorizontal: 30,
+    paddingTop: 14,
+    paddingBottom: 24,
+    flexGrow: 1,
+  },
+  buttonsWrapper: {
+    marginTop: 10,
+  },
+});

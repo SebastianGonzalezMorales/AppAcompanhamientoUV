@@ -22,19 +22,23 @@ const styles = StyleSheet.create({
     backgroundColor: '#d8eef7', // Mismo color de fondo
     borderRadius: 10,
     flexDirection: 'row',
-    height: 80,
-    justifyContent: 'center',
+    minHeight: 80,
+    justifyContent: 'space-between',
     marginTop: 10,
+    paddingVertical: 12,
   },
   text: {
     color: '#238bdf',
     flex: 1,
+    flexShrink: 1,
     fontFamily: 'DoppioOne', // Fuente igual a la que usas
     fontSize: 16,
     marginLeft: 20,
+    marginRight: 12,
   },
   icon: {
     marginRight: 15,
+    alignSelf: 'center',
   },
 });
 

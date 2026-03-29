@@ -4,10 +4,11 @@ import {
   SafeAreaView,
   Text,
   View,
-  FlatList,
   Modal,
   Dimensions,
   StyleSheet,
+  ScrollView,
+  Platform,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -369,11 +370,10 @@ const HomeMood = ({ navigation }) => {
         </View>
       </Modal>
 
-      {/*
-       * *********************
-       * ***** Section 1 *****
-       * *********************
-       */}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
       {/* Espacio hasta la frase del día */}
       <View style={{ marginBottom: 10 }}>
         {/* Saludo */}
@@ -382,39 +382,12 @@ const HomeMood = ({ navigation }) => {
         </Text>
 
         {/* Pregunta */}
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "flex-end",
-            marginBottom: 8,
-          }}
-        >
-          <Text
-            style={[
-              GlobalStyle.subtitle,
-              {
-                textAlign: "left",
-                fontFamily: "CustomFontForQuestion", // Estilo específico para el signo de pregunta
-              },
-            ]}
-          >
-            ¿
-          </Text>
-          <Text
-            style={[
-              GlobalStyle.subtitle, // Manteniendo el estilo original
-              {
-                textAlign: "left",
-                marginLeft: -60, // Ajuste fino para eliminar el espacio grande
-              },
-            ]}
-          >
-            Cómo te sientes ahora mismo?
-          </Text>
-        </View>
+        <Text style={[GlobalStyle.subtitle, styles.questionText]}>
+          ¿Cómo te sientes ahora mismo?
+        </Text>
 
         {/* Botones de estados de ánimo */}
-        <View style={GlobalStyle.moodsContainer}>
+        <View style={styles.moodsContainer}>
           <PickMoodButton
             onPress={() => startTracking("Mal", 1)}
             emoji="😞"
@@ -439,7 +412,7 @@ const HomeMood = ({ navigation }) => {
 
         {/* Frase del día */}
         {/* Frase del día */}
-        <View style={{ marginTop: -10, paddingHorizontal: 20 }}>
+        <View style={{ marginTop: 4, paddingHorizontal: 20 }}>
           <Text style={[GlobalStyle.subtitle, { marginBottom: 6 }]}>
             Frase del día:
           </Text>
@@ -469,7 +442,7 @@ const HomeMood = ({ navigation }) => {
        * *********************
        */}
 
-      <View style={GlobalStyle.rowTwo}>
+      <View style={styles.contentCard}>
         {/* Botón “Estadísticas del último mes” */}
         <View style={GlobalStyle.statsContainer}>
           <HistoryButton
@@ -528,11 +501,10 @@ const HomeMood = ({ navigation }) => {
               textRight="Ver todo"
             />
 
-            <FlatList
-              data={moods.slice(0, 5)}
-              numColumns={1}
-              renderItem={({ item }) => (
+            <View>
+              {moods.slice(0, 5).map((item) => (
                 <CustomButton
+                  key={item.id}
                   buttonStyle={{
                     backgroundColor:
                       item.mood === "Mal"
@@ -572,16 +544,41 @@ const HomeMood = ({ navigation }) => {
                     navigation.navigate("MoodDetails", { moodId: item.id });
                   }}
                 />
-              )}
-            />
+              ))}
+            </View>
           </>
         )}
       </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+  },
+  contentCard: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingLeft: 30,
+    paddingRight: 30,
+    paddingBottom: 24,
+    flexGrow: 1,
+  },
+  questionText: {
+    textAlign: "left",
+    marginBottom: 8,
+    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
+  },
+  moodsContainer: {
+    backgroundColor: "transparent",
+    flexDirection: "row",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    paddingHorizontal: 10,
+  },
   storiesContainer: {
     flexDirection: "row",
     justifyContent: "space-around",

@@ -1,11 +1,11 @@
 import {
-  FlatList,
   SafeAreaView,
   Text,
   View,
   Alert,
   TouchableOpacity,
-  StyleSheet, Linking
+  StyleSheet, Linking,
+  ScrollView
 } from 'react-native';
 import React, { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -115,6 +115,10 @@ function AnsiedadTestMain({ navigation }) {
   return (
     <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
       <BackButton onPress={() => navigation.goBack()} />
+      <ScrollView
+        contentContainerStyle={styles.screenContent}
+        showsVerticalScrollIndicator={false}
+      >
 
       {graveCount >= 20 && (
         <View style={styles.alertContainer}>
@@ -145,9 +149,9 @@ function AnsiedadTestMain({ navigation }) {
         </View>
       )}
 
-      <View style={{ height: 320 }}>
+      <View style={{ minHeight: 320, paddingBottom: 16 }}>
         <Text style={GlobalStyle.welcomeText}>Test GAD-7</Text>
-        <Text style={GlobalStyle.subtitle}>Test de Ansiedad Generalizada</Text>
+        <Text style={[GlobalStyle.subtitle, { textAlign: 'left', marginTop: 8 }]}>Test de Ansiedad Generalizada</Text>
         <Text style={[GlobalStyle.text, { textAlign: 'justify' }]}> El cuestionario GAD-7 es una herramienta que se utiliza para medir la
           gravedad de la ansiedad a través de siete preguntas. Ayuda a
           identificar a las personas que pueden requerir una evaluación o
@@ -211,40 +215,39 @@ function AnsiedadTestMain({ navigation }) {
       ) : results.length === 0 ? (
         <Text style={{ textAlign: 'center', color: '#888', marginTop: 20 }}>            Aún no has realizado ningún test. Completa un test para ver tus resultados.</Text>
       ) : (
-        <FlatList
-        data={results.slice(0, 10)}
-        keyExtractor={(item) => item.id}
-        numColumns={1}
-        renderItem={({ item }) => (
-          <CustomButton
-            buttonStyle={{
-              backgroundColor:
-                item.severity === 'Normal'
-                  ? '#fdf3e4'
-                  : item.severity === 'Leve'
-                  ? '#e4f7f1'
-                  : item.severity === 'Moderado'
-                  ? '#e4eff7'
-                  : item.severity === 'Moderadamente grave'
-                  ? '#f7e4eb'
-                  : '#f7d8e3',
-              paddingVertical: 15,
-              paddingHorizontal: 20,
-              marginBottom: 10,
-              borderRadius: 10,
-            }}
-            onPress={() => {
-              navigation.navigate('ResultView', { documentId: item.id });
-            }}
-            title={item.severity}
-            textOne={item.dateData}
-            textTwo={item.totalScore}
-            textStyle={{ color: '#af7b56' }}
-          />
-        )}
-      />
-    )}
+        <View>
+          {results.slice(0, 10).map((item) => (
+            <CustomButton
+              key={item.id}
+              buttonStyle={{
+                backgroundColor:
+                  item.severity === 'Normal'
+                    ? '#fdf3e4'
+                    : item.severity === 'Leve'
+                    ? '#e4f7f1'
+                    : item.severity === 'Moderado'
+                    ? '#e4eff7'
+                    : item.severity === 'Moderadamente grave'
+                    ? '#f7e4eb'
+                    : '#f7d8e3',
+                paddingVertical: 15,
+                paddingHorizontal: 20,
+                marginBottom: 10,
+                borderRadius: 10,
+              }}
+              onPress={() => {
+                navigation.navigate('ResultView', { documentId: item.id });
+              }}
+              title={item.severity}
+              textOne={item.dateData}
+              textTwo={item.totalScore}
+              textStyle={{ color: '#af7b56' }}
+            />
+          ))}
+        </View>
+      )}
     </View>
+    </ScrollView>
 
       {showTooltip && (
         <>
@@ -306,6 +309,9 @@ function AnsiedadTestMain({ navigation }) {
 }
 
 const styles = StyleSheet.create({ 
+  screenContent: {
+    paddingBottom: 110,
+  },
 
   floatingButtonContainer: {
     position: 'absolute',

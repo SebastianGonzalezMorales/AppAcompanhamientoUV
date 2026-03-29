@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Linking,
   Modal,
+  ScrollView,
 } from "react-native";
 import React, { useState } from "react";
 import api from "../../../../utils/api";
@@ -386,7 +387,7 @@ function DepressionTestMain({ navigation }) {
 
           {/* Botones en una sola fila */}
           <View
-            style={{ flexDirection: "row", justifyContent: "space-evenly" }}
+            style={{ flexDirection: "row", justifyContent: "space-evenly", flexWrap: "wrap" }}
           >
             <TouchableOpacity
               onPress={handleCallPress}
@@ -447,9 +448,13 @@ function DepressionTestMain({ navigation }) {
         </TouchableOpacity>
       )}
 
-      <View style={{ height: 320 }}>
+      <ScrollView
+        contentContainerStyle={styles.screenContent}
+        showsVerticalScrollIndicator={false}
+      >
+      <View style={{ minHeight: 320, paddingBottom: 16 }}>
         <Text style={GlobalStyle.welcomeText}>Test PHQ-9</Text>
-        <Text style={[GlobalStyle.subtitle, { marginTop: -10 }]}>
+        <Text style={[GlobalStyle.subtitle, { marginTop: 8, textAlign: "left" }]}>
           Test de depresión
         </Text>
 
@@ -513,7 +518,7 @@ function DepressionTestMain({ navigation }) {
         </Text>
       </View>
 
-      <View style={GlobalStyle.rowTwo}>
+      <View style={[GlobalStyle.rowTwo, styles.resultsCard]}>
         <View style={GlobalStyle.statsContainer}>
           <Text style={GlobalStyle.statsTitle}>Estadísticas</Text>
           <StatsButton
@@ -553,7 +558,10 @@ function DepressionTestMain({ navigation }) {
           // Finalmente, si no hay error y sí hay datos, mostramos la lista
           <FlatList
             data={results.slice(0, 10)}
-            numColumns={1}
+            keyExtractor={(item) => item.id}
+            nestedScrollEnabled={true}
+            showsVerticalScrollIndicator={false}
+            style={styles.previewList}
             renderItem={({ item }) => {
               const severityStyles = getSeverityStyles(item.severity);
 
@@ -577,6 +585,7 @@ function DepressionTestMain({ navigation }) {
           />
         )}
       </View>
+      </ScrollView>
 
       {showTooltip && (
         <>
@@ -820,21 +829,31 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   modalButtonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: "column",
+    justifyContent: "center",
     width: "100%",
   },
   modalButton: {
-    flex: 1,
     paddingVertical: 10,
-    marginHorizontal: 5,
+    marginTop: 8,
     borderRadius: 8,
     alignItems: "center",
+    width: "100%",
   },
   modalButtonText: {
     color: "#FFF",
     fontWeight: "600",
     fontSize: 14,
+  },
+  screenContent: {
+    flexGrow: 1,
+  },
+  resultsCard: {
+    flexGrow: 1,
+    paddingBottom: 110,
+  },
+  previewList: {
+    maxHeight: 170,
   },
   smallButton: {
     flexDirection: "row",
@@ -844,6 +863,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 8,
     marginHorizontal: 2, // Espacio entre botones
+    marginTop: 4,
     elevation: 3,
   },
 
@@ -876,8 +896,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: "#ffd699",
-    paddingVertical: 6,
+    paddingVertical: 8,
     paddingHorizontal: 10,
+    maxWidth: 170,
     zIndex: 20,
     elevation: 5,
   },
@@ -886,6 +907,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
     marginRight: 4,
+    flexShrink: 1,
   },
 });
 

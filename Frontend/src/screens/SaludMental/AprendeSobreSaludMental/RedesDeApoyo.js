@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { SafeAreaView, Text, ScrollView, View, StyleSheet, TouchableOpacity, Linking } from 'react-native';
+import { SafeAreaView, Text, ScrollView, View, StyleSheet, TouchableOpacity, Linking, Dimensions } from 'react-native';
 import GlobalStyle from '../../../assets/styles/GlobalStyle';
 import BackButton from '../../../components/buttons/BackButton';
 import SupportButton from '../../../components/buttons/SupportButton';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
+const { height } = Dimensions.get('window');
 
 function RedesDeApoyo({ navigation }) {
   const [expandedSections, setExpandedSections] = useState({
@@ -23,21 +25,19 @@ function RedesDeApoyo({ navigation }) {
 
   return (
     <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
-      <View style={{ height: 260, padding: 15 }}>
-        <BackButton onPress={() => navigation.goBack()} />
-        <Text style={GlobalStyle.welcomeText}>Aprende sobre salud mental</Text>
-        <Text style={[GlobalStyle.subtitleMenu, { color: '#FFFFFF' }]}>Redes de apoyo</Text>
-        {/*  <Text style={{ color: '#FFFFFF', marginVertical: 10, paddingHorizontal: 20, textAlign: 'justify' }}> */}
-        <Text style={[GlobalStyle.text, { textAlign: 'justify', color: '#FFFFFF' }]}>
-          Conecta con los recursos y contactos disponibles para apoyarte en momentos difíciles.
-        </Text>
-      </View>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.heroSection}>
+          <BackButton onPress={() => navigation.goBack()} />
+          <Text style={GlobalStyle.welcomeText}>Aprende sobre salud mental</Text>
+          <Text style={[GlobalStyle.subtitleMenu, { color: '#FFFFFF' }]}>Redes de apoyo</Text>
+          <Text style={[GlobalStyle.text, styles.heroText]}>
+            Conecta con los recursos y contactos disponibles para apoyarte en
+            momentos difíciles.
+          </Text>
+        </View>
 
-      <View style={GlobalStyle.rowTwo}>
-        <ScrollView>
+        <View style={styles.contentCard}>
           <View style={{ marginTop: 15 }}>
-
-            {/* Botón 1: Fono Prevención del Suicidio */}
             <SupportButton
               text="Fono prevención del suicidio - MINSAL"
               onPress={() => toggleSection('uno')}
@@ -47,8 +47,7 @@ function RedesDeApoyo({ navigation }) {
               <View style={styles.infoBox}>
                 <Text style={styles.infoText}>
                   Si estás enfrentando una situación de crisis o necesitas orientación inmediata para
-                  prevenir el suicidio, puedes comunicarte con un profesional capacitado. Este servicio es gratuito y está disponible las 24
-                  horas, todos los días.
+                  prevenir el suicidio, puedes comunicarte con un profesional capacitado. Este servicio es gratuito y está disponible las 24 horas, todos los días.
                 </Text>
                 <TouchableOpacity
                   style={styles.callButton}
@@ -60,7 +59,6 @@ function RedesDeApoyo({ navigation }) {
               </View>
             )}
 
-            {/* Botón 2: Salud Responde */}
             <SupportButton
               text="Salud responde - MINSAL"
               onPress={() => toggleSection('dos')}
@@ -86,7 +84,6 @@ function RedesDeApoyo({ navigation }) {
               </View>
             )}
 
-            {/* Botón 3: Hablemos de todo */}
             <SupportButton
               text="Hablemos de todo - INJUV"
               onPress={() => toggleSection('tres')}
@@ -100,7 +97,7 @@ function RedesDeApoyo({ navigation }) {
                 </Text>
                 <TouchableOpacity
                   style={styles.chatButton}
-                  onPress={() => Linking.openURL('https://hablemosdetodo.injuv.gob.cl/')} // URL del chat
+                  onPress={() => Linking.openURL('https://hablemosdetodo.injuv.gob.cl/')}
                 >
                   <MaterialCommunityIcons name="chat" size={18} color="#FFF" />
                   <Text style={styles.chatButtonText}>Ir al chat</Text>
@@ -108,8 +105,6 @@ function RedesDeApoyo({ navigation }) {
               </View>
             )}
 
-
-            {/* Botón 4: Fono Drogas y Alcohol */}
             <SupportButton
               text="Fono drogas y alcohol"
               onPress={() => toggleSection('cuatro')}
@@ -119,23 +114,18 @@ function RedesDeApoyo({ navigation }) {
               <View style={styles.infoBox}>
                 <Text style={styles.infoText}>
                   Servicio gratuito, anónimo y confidencial, disponible las 24 horas del día para personas
-                  afectadas por el consumo de alcohol y otras drogas, así como sus familiares, amigos o
-                  cercanos.
+                  afectadas por el consumo de alcohol y otras drogas, así como sus familiares, amigos o cercanos.
                 </Text>
                 <TouchableOpacity
                   style={styles.callButton}
-                  onPress={() => Linking.openURL('tel:1412')} // Formato limpio
+                  onPress={() => Linking.openURL('tel:1412')}
                 >
                   <MaterialCommunityIcons name="phone" size={18} color="#FFF" />
                   <Text style={styles.callButtonText}>Llamar al 1412</Text>
                 </TouchableOpacity>
-
               </View>
             )}
 
-
-
-            {/* Botón 5: Violencia contra las Mujeres */}
             <SupportButton
               text="Fono orientación y ayuda violencia contra las mujeres"
               onPress={() => toggleSection('cinco')}
@@ -150,26 +140,43 @@ function RedesDeApoyo({ navigation }) {
                 </Text>
                 <TouchableOpacity
                   style={styles.callButton}
-                  // Púrpura para este servicio
                   onPress={() => Linking.openURL('tel:1455')}
-                // Número limpio
                 >
                   <MaterialCommunityIcons name="phone" size={18} color="#FFF" />
                   <Text style={styles.callButtonText}>Llamar al 1455</Text>
-                  {/* Número visible */}
                 </TouchableOpacity>
-
               </View>
-
             )}
           </View>
-        </ScrollView>
-      </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+  },
+  heroSection: {
+    minHeight: Math.min(height * 0.28, 260),
+    padding: 15,
+    paddingBottom: 12,
+  },
+  heroText: {
+    textAlign: 'left',
+    color: '#FFFFFF',
+    lineHeight: 24,
+  },
+  contentCard: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingHorizontal: 30,
+    paddingTop: 14,
+    paddingBottom: 24,
+    flexGrow: 1,
+  },
   infoBox: {
     backgroundColor: '#E3F2FD',
     padding: 15,
@@ -181,41 +188,45 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
     lineHeight: 20,
-    textAlign: 'justify', // Justificado
+    textAlign: 'justify',
     marginBottom: 15,
   },
   callButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#4CAF50', // Fondo verde
-    borderRadius: 20, // Más pequeño
+    justifyContent: 'center',
+    backgroundColor: '#4CAF50',
+    borderRadius: 20,
     paddingVertical: 8,
     paddingHorizontal: 15,
+    minWidth: 180,
   },
   callButtonText: {
     color: '#FFF',
     fontSize: 14,
     fontWeight: 'bold',
     marginLeft: 8,
+    flexShrink: 1,
+    textAlign: 'center',
   },
-
   chatButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#9C27B0', // Fondo púrpura (para reflejar el color de la sección)
+    justifyContent: 'center',
+    backgroundColor: '#9C27B0',
     borderRadius: 20,
     paddingVertical: 8,
     paddingHorizontal: 15,
+    minWidth: 150,
   },
   chatButtonText: {
     color: '#FFF',
     fontSize: 14,
     fontWeight: 'bold',
     marginLeft: 8,
+    flexShrink: 1,
+    textAlign: 'center',
   },
-
 });
-
-
 
 export default RedesDeApoyo;

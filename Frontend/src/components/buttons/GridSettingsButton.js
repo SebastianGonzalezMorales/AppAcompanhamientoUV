@@ -12,7 +12,6 @@ export default function GridSettingsButton(props) {
       style={[styles.button, { backgroundColor: props.backgroundColor || '#d8eef7' }]}
     >
       <View style={styles.content}>
-        {/* Imagen debajo del texto, si se proporciona */}
         {props.imageSource && (
           <Image source={props.imageSource} style={styles.image} resizeMode="contain" />
         )}
@@ -38,34 +37,34 @@ const styles = StyleSheet.create({
     backgroundColor: '#d8eef7',
     borderRadius: 10,
     flexDirection: 'row',
-    height: 150,
+    minHeight: 150,
     justifyContent: 'space-between',
     paddingHorizontal: 15,
+    paddingVertical: 12,
     margin: 5,
     flex: 1,
   },
   content: {
     alignItems: 'center',
-    justifyContent: 'center',
     justifyContent: 'flex-start',
     padding: 5,
     flex: 1,
-    marginTop: -20,
   },
   text: {
     color: '#238bdf',
     fontFamily: 'DoppioOne',
     fontSize: 15,
-    marginTop: -10, // Espacio entre la imagen y el texto
+    marginTop: 4,
     textAlign: 'center',
-    paddingHorizontal: -50, // Ampliar el área del texto horizontalmente
+    flexShrink: 1,
   },
   image: {
-    width: 130, // Ajusta el tamaño según sea necesario
-    height: 130,
-    marginBottom: -10, // Espacio entre la imagen y el texto
+    width: 110,
+    height: 90,
+    marginBottom: 2,
   },
   icon: {
     marginRight: 1,
+    alignSelf: 'center',
   },
 });

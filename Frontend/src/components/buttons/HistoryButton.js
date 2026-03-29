@@ -17,19 +17,22 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     marginBottom: 10,
     marginTop: 30,
   },
   textLeft: {
     color: '#5c6169',
     flex: 1,
+    flexShrink: 1,
     fontFamily: 'DoppioOne',
     fontSize: 16,
+    marginRight: 12,
   },
   textRight: {
     color: '#5c6169',
     fontFamily: 'DoppioOne',
     fontSize: 12,
+    textAlign: 'right',
   },
 });

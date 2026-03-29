@@ -25,20 +25,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#000C7B', // Color predeterminado que puede ser sobrescrito
     borderRadius: 10,
-    height: 60,
+    minHeight: 60,
     justifyContent: 'center',
     marginTop: 30,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
     width: '100%',
   },
   buttonContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
   },
   text: {
     color: '#fff', // Color predeterminado del texto que puede ser sobrescrito
     fontFamily: 'DoppioOne',
     fontSize: 18,
+    flexShrink: 1,
     marginLeft: 20, // Espacio entre el ícono y el texto
+    textAlign: 'center',
   },
   icon: {
     marginRight: -10, // Espaciado entre el ícono y el texto

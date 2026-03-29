@@ -16,9 +16,10 @@ export default function PickMoodButton(props) {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    marginLeft: 10,
-    marginRight: 10,
+    width: 84,
+    marginHorizontal: 4,
     marginTop: 20,
+    flexShrink: 1,
   },
   subContainer: {
     alignItems: 'center',
@@ -34,7 +35,11 @@ const styles = StyleSheet.create({
   emojiText: {
     color: '#fff',
     fontFamily: 'DoppioOne',
-    fontSize: 12,
+    fontSize: 11,
     paddingTop: 5,
+    textAlign: 'center',
+    flexShrink: 1,
+    width: '100%',
+    lineHeight: 14,
   },
 });

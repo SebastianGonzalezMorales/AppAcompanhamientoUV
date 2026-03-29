@@ -21,7 +21,7 @@ const Activity = [
   },
   {
     id: 5,
-    activity: 'Preparándome para un examen',
+    activity: 'Preparandome para un examen',
     selected: false,
   },
   {
@@ -46,7 +46,7 @@ const Activity = [
   },
   {
     id: 10,
-    activity: 'Preocupándome por el futuro',
+    activity: 'Preocupandome por el futuro',
     selected: false,
   },
   {
@@ -61,7 +61,7 @@ const Activity = [
   },
   {
     id: 13,
-    activity: 'Sintiéndome motivado',
+    activity: 'Sintiendome motivado',
     selected: false,
   },
   {

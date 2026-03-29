@@ -6,7 +6,8 @@ import {
   ScrollView,
   View,
   Image,
-  Dimensions
+  Dimensions,
+  StyleSheet,
 } from 'react-native';
 
 // Custom styles
@@ -16,57 +17,38 @@ import GlobalStyle from '../../../assets/styles/GlobalStyle';
 import BackButton from '../../../components/buttons/BackButton';
 import SettingsButton from '../../../components/buttons/SettingsButton';
 
-const { width, height } = Dimensions.get('window'); // Obtener las dimensiones de la pantalla
+const { height } = Dimensions.get('window');
 
 function AprendeSobreSaludMental({ navigation }) {
   return (
     <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.heroSection}>
+          <BackButton onPress={() => navigation.goBack()} />
 
-      {/* Sección Azul del Encabezado */}
-      <View style={{ height: height * 0.48, padding: 15 }}>
-        {/* Altura ajustada al 50% del tamaño de la pantalla */}
-        <BackButton onPress={() => navigation.goBack()} />
-
-        {
-          <Text
-            style={[
-              GlobalStyle.welcomeText,
-              { color: '#FFFFFF', marginTop: -10 } // Ajusta el margen superior
-            ]}
-          >
+          <Text style={[GlobalStyle.welcomeText, styles.heroTitle]}>
             Salud mental
           </Text>
-        }
-        
-        <Text style={[GlobalStyle.subtitleMenu, { color: '#FFFFFF', marginTop: -15 }]}>
-          Aprende sobre salud mental
-        </Text>
+          <Text style={[GlobalStyle.subtitleMenu, styles.heroSubtitle]}>
+            Aprende sobre salud mental
+          </Text>
 
-        <Text style={[GlobalStyle.text, { textAlign: 'justify', color: '#FFFFFF', marginTop: -10 }]}>
-          Encuentra herramientas y recursos destinados a fortalecer tu salud mental y emocional como estudiante.
-        </Text>
+          <Text style={[GlobalStyle.text, styles.heroText]}>
+            Encuentra herramientas y recursos destinados a fortalecer tu salud
+            mental y emocional como estudiante.
+          </Text>
 
-        {/* Imagen con altura ajustada */}
-        <Image
-          source={require('./../../../assets/images/Menu/salud_Mental.png')}
-          style={{
-            width: '100%',
-            height: height * 0.10, // Ajustar la altura de la imagen al 20% de la pantalla
-            resizeMode: 'contain', // Cambiar a 'contain' para evitar recortes
-            marginTop: 3
-          }}
-        />
+          <Image
+            source={require('./../../../assets/images/Menu/salud_Mental.png')}
+            style={styles.heroImage}
+          />
+        </View>
 
-        {/* Texto adicional */}
-        {/*          <Text style={[GlobalStyle.welcomeText, { color: '#FFFFFF', fontSize: 16, textAlign: 'center', marginTop: 10 }]}>
-          ¡ NO HAY SALUD SIN SALUD MENTAL !
-        </Text>  */}
-      </View>
-
-      {/* Sección de Botones de Navegación */}
-      <View style={[GlobalStyle.rowTwo, { marginTop: -10 }]}>
-        <ScrollView contentContainerStyle>
-          <View style={{ marginTop: 2 }}>
+        <View style={styles.contentCard}>
+          <View style={styles.buttonsWrapper}>
             <SettingsButton
               text="Información"
               onPress={() => navigation.navigate('Informacion')}
@@ -82,26 +64,65 @@ function AprendeSobreSaludMental({ navigation }) {
             <SettingsButton
               text="Redes de apoyo"
               onPress={() => navigation.navigate('RedesDeApoyo')}
-              backgroundColor="#FFE0B2" // Naranja claro y cálido
-              textColor="#FF762C"       // Naranja oscuro para texto
-              iconColor="#E65100"       // Naranja oscuro para icono
+              backgroundColor="#FFE0B2"
+              textColor="#FF762C"
+              iconColor="#E65100"
             />
             <SettingsButton
               text="Contactarse con apoyo UV"
               onPress={() => navigation.navigate('ContactarseConApoyoUV')}
-              backgroundColor="#fbcdd1" // Un rojo más presente y vibrante en el fondo
-              textColor="#F20C0C"       // Un rojo más oscuro para el texto
-              iconColor="#c62828"       // El mismo rojo oscuro para el icono
+              backgroundColor="#fbcdd1"
+              textColor="#F20C0C"
+              iconColor="#c62828"
             />
-
-
-
           </View>
-        </ScrollView>
-      </View>
-
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 export default AprendeSobreSaludMental;
+
+const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+  },
+  heroSection: {
+    minHeight: height * 0.34,
+    padding: 15,
+    paddingBottom: 12,
+  },
+  heroTitle: {
+    color: '#FFFFFF',
+    marginTop: 0,
+  },
+  heroSubtitle: {
+    color: '#FFFFFF',
+    marginTop: 8,
+  },
+  heroText: {
+    textAlign: 'left',
+    color: '#FFFFFF',
+    marginTop: 8,
+    lineHeight: 24,
+  },
+  heroImage: {
+    width: '100%',
+    height: Math.min(height * 0.14, 130),
+    resizeMode: 'contain',
+    marginTop: 12,
+  },
+  contentCard: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingHorizontal: 30,
+    paddingTop: 14,
+    paddingBottom: 24,
+    flexGrow: 1,
+  },
+  buttonsWrapper: {
+    marginTop: 2,
+  },
+});

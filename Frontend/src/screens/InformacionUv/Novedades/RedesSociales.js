@@ -1,4 +1,13 @@
-import { SafeAreaView, Text, View, ScrollView, TouchableOpacity, Image, Linking } from 'react-native';
+import {
+  SafeAreaView,
+  Text,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  Linking,
+  StyleSheet,
+} from 'react-native';
 import React from 'react';
 import GlobalStyle from '../../../assets/styles/GlobalStyle';
 import BackButton from '../../../components/buttons/BackButton';
@@ -10,20 +19,24 @@ const openInstagram = (url) => {
 const RedesSociales = ({ navigation }) => {
   return (
     <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
-      {/* Sección superior azul con el botón, título y subtítulo */}
-      <View style={{ height: 220 }}>
-        <BackButton onPress={() => navigation.goBack()} />
-        <Text style={GlobalStyle.welcomeText}>Espacio UV </Text>
-        <Text style={[GlobalStyle.subtitle, { textAlign: 'left' }]}>Explora lo más reciente de la UV</Text>
-        <Text style={[GlobalStyle.text, { textAlign: 'justify' }]}>
-          Entérate de lo que pasa en la UV con un solo clic. Accede a las redes sociales oficiales y mantente al tanto de actividades y novedades.
-        </Text>
-      </View>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.heroSection}>
+          <BackButton onPress={() => navigation.goBack()} />
+          <Text style={GlobalStyle.welcomeText}>Espacio UV </Text>
+          <Text style={[GlobalStyle.subtitle, styles.heroSubtitle]}>
+            Explora lo más reciente de la UV
+          </Text>
+          <Text style={[GlobalStyle.text, styles.heroText]}>
+            Entérate de lo que pasa en la UV con un solo clic. Accede a las
+            redes sociales oficiales y mantente al tanto de actividades y
+            novedades.
+          </Text>
+        </View>
 
-      {/* Ajuste de ScrollView para fondo blanco */}
-      <View style={{ flex: 1, backgroundColor: 'white', borderTopLeftRadius: 20, borderTopRightRadius: 20, overflow: 'hidden' }}>
-        <ScrollView contentContainerStyle={{ padding: 20 }}>
-          {/* Sección Vida Estudiantil y Apoyo */}
+        <View style={styles.contentCard}>
           <Text style={GlobalStyle.titleWhite}>Vida estudiantil y apoyo</Text>
           <View style={GlobalStyle.storiesContainer}>
             <TouchableOpacity onPress={() => openInstagram('https://www.instagram.com/daeuvalpo/')}>
@@ -60,8 +73,6 @@ const RedesSociales = ({ navigation }) => {
             </TouchableOpacity>
           </View>
 
-          {/* Secciones adicionales */}
-          {/* Sección Institucional y Universitario */}
           <Text style={GlobalStyle.titleWhite}>Institucional y universitario</Text>
           <View style={GlobalStyle.storiesContainer}>
             <TouchableOpacity onPress={() => openInstagram('https://www.instagram.com/uvalpochile/')}>
@@ -82,7 +93,6 @@ const RedesSociales = ({ navigation }) => {
             </TouchableOpacity>
           </View>
 
-          {/* Sección Deporte y Recreación */}
           <Text style={GlobalStyle.titleWhite}>Deporte y recreación</Text>
           <View style={GlobalStyle.storiesContainer}>
             <TouchableOpacity onPress={() => openInstagram('https://www.instagram.com/deportesyrecreacionuv/?hl=es')}>
@@ -95,7 +105,6 @@ const RedesSociales = ({ navigation }) => {
             </TouchableOpacity>
           </View>
 
-          {/* Sección Ciencia y Conocimiento */}
           <Text style={GlobalStyle.titleWhite}>Ciencia y conocimiento</Text>
           <View style={GlobalStyle.storiesContainer}>
             <TouchableOpacity onPress={() => openInstagram('https://www.instagram.com/cienciaabiertauv/')}>
@@ -107,10 +116,37 @@ const RedesSociales = ({ navigation }) => {
               </View>
             </TouchableOpacity>
           </View>
-        </ScrollView>
-      </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
 export default RedesSociales;
+
+const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+  },
+  heroSection: {
+    minHeight: 200,
+    paddingBottom: 12,
+  },
+  heroSubtitle: {
+    textAlign: 'left',
+  },
+  heroText: {
+    textAlign: 'left',
+    lineHeight: 24,
+  },
+  contentCard: {
+    flexGrow: 1,
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    overflow: 'hidden',
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 24,
+  },
+});

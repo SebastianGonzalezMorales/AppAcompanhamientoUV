@@ -1,4 +1,3 @@
-// react imports
 import {
   FlatList,
   Keyboard,
@@ -11,87 +10,62 @@ import {
   View,
   Alert,
   ScrollView,
+  StyleSheet,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Activity from "../Activities";
 
 import api from "../../../utils/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-// Import the API URL from environment variables
 import Constants from "expo-constants";
 
-// Asigna API_URL desde la configuración
-const { API_URL } = Constants.expoConfig?.extra || {};
-
-// components
 import BackButton from "../../../components/buttons/BackButton";
 import FormButton from "../../../components/buttons/FormButton";
 import InputButton from "../../../components/buttons/InputButton";
 
-// customisation
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import FormStyle from "../../../assets/styles/FormStyle";
 import GlobalStyle from "../../../assets/styles/GlobalStyle";
 
-// route to manage navigation history
-const MoodTrack = ({ route, navigation }) => {
-  // Obtener mood y value desde la pantalla anterior
-  const { mood, value, tip } = route.params;
-  // references
+const { API_URL } = Constants.expoConfig?.extra || {};
 
-  // states
+const MoodTrack = ({ route, navigation }) => {
+  const { mood, value } = route.params;
+
   const [title, setTitle] = useState("");
   const [quickNote, setQuickNote] = useState("");
-  const [activities, setActivities] = useState(Activity); // select activity handler
+  const [activities, setActivities] = useState(Activity);
 
-  /*
-   * *******************
-   * **** Functions ****
-   * *******************
-   */
-
-  // delete document when back button has been pressed
   function deleteDocument() {
-    /*     obtainId.delete();
-        
-            console.log('Document', docId, 'has been deleted.');*/
     navigation.goBack();
   }
 
-  // select activity handler
   const selectHandler = (item) => {
-    // Crea un array que altere el estado de seleccionado
-    const selectedItem = activities.map((value) => {
-      if (value.id === item.id) {
-        return { ...value, selected: !value.selected }; // toggle the selected state
-      } else {
-        return value;
+    const selectedItem = activities.map((activityItem) => {
+      if (activityItem.id === item.id) {
+        return { ...activityItem, selected: !activityItem.selected };
       }
+      return activityItem;
     });
+
     setActivities(selectedItem);
-    console.log(selectedItem);
   };
 
-  // Guardar el estado de ánimo en MongoDB a través del backend
   const saveMoodTrack = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
 
       if (token) {
-        // Crear array con actividades seleccionadas
         const selectedActivities = activities
           .filter((activity) => activity.selected)
-          .map((activity) => activity.activity); // Solo los nombres de actividades
+          .map((activity) => activity.activity);
 
-        // Construir parámetros para la solicitud del consejo
         const params = {
-          moodState: mood, // Estado de ánimo
+          moodState: mood,
           activities:
-            selectedActivities.length > 0 ? selectedActivities.join(",") : null, // Solo si hay actividades seleccionadas
+            selectedActivities.length > 0 ? selectedActivities.join(",") : null,
         };
 
-        // Obtener el consejo del backend
         const response = await api.get(`${API_URL}/tips/get-tips`, {
           headers: { Authorization: `Bearer ${token}` },
           params,
@@ -99,7 +73,6 @@ const MoodTrack = ({ route, navigation }) => {
 
         const tip = response.data.tip;
 
-        // Guardar el estado de ánimo en la base de datos
         await api.post(
           `${API_URL}/moodState/post-moodState`,
           {
@@ -114,175 +87,138 @@ const MoodTrack = ({ route, navigation }) => {
           }
         );
 
-        // Mostrar el consejo al usuario con una alerta
         Alert.alert("Consejo para ti", tip, [
           { text: "OK", onPress: () => navigation.navigate("HomeMood") },
         ]);
       } else {
-        console.log("No se encontró el token. Por favor, inicia sesión.");
+        console.log("No se encontro el token. Por favor, inicia sesion.");
       }
     } catch (error) {
-      console.error("Error al guardar el estado de ánimo:", error);
+      console.error("Error al guardar el estado de animo:", error);
     }
   };
 
-  // keyboard offset
   const keyboardVerticalOffset = Platform.OS === "ios" ? 80 : 0;
 
-  /*
-   * ****************
-   * **** Screen ****
-   * ****************
-   */
+  const getIconName = (id) => {
+    switch (id) {
+      case 1:
+        return "thought-bubble";
+      case 2:
+        return "emoticon-confused";
+      case 3:
+        return "account-group";
+      case 4:
+        return "emoticon-sad";
+      case 5:
+        return "book-check";
+      case 6:
+        return "tea";
+      case 7:
+        return "school";
+      case 8:
+        return "run";
+      case 9:
+        return "briefcase-check";
+      case 10:
+        return "calendar-clock";
+      case 11:
+        return "lightbulb-on";
+      case 12:
+        return "home-heart";
+      case 13:
+        return "emoticon-happy";
+      case 14:
+        return "arm-flex";
+      case 15:
+        return "heart";
+      case 16:
+        return "dots-horizontal";
+      default:
+        return "circle";
+    }
+  };
 
   return (
     <SafeAreaView style={[FormStyle.container, GlobalStyle.androidSafeArea]}>
-      {/* header */}
       <View style={FormStyle.flexContainer}>
         <BackButton onPress={deleteDocument} />
-
         <Text style={FormStyle.title}>{mood}</Text>
       </View>
+
       <KeyboardAvoidingView
         behavior="padding"
         keyboardVerticalOffset={keyboardVerticalOffset}
         style={{ flex: 1 }}
       >
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 24 }}>
           <View style={FormStyle.formContainer}>
-            {/* activities */}
-            <View style={{ alignItems: "center", justifyContent: "center" }}>
-              <Text
-                style={[
-                  GlobalStyle.subtitle,
-                  { textAlign: "center", fontSize: 18 },
-                ]}
-              >
-                <Text style={{ fontFamily: "Arial", fontSize: 18 }}>¿</Text>
-                Cómo te sientes ahora mismo?
+            <View style={styles.questionWrapper}>
+              <Text style={[GlobalStyle.subtitle, styles.questionText]}>
+                ¿Como te sientes ahora mismo?
               </Text>
             </View>
 
-            <View style={FormStyle.flatListContainer}>
+            <View style={styles.activitiesListContainer}>
               <FlatList
                 data={activities}
                 scrollEnabled={false}
-                numColumns={4}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => {
-                  let iconName = "";
-
-                  // set icons based on activity id
-                  switch (item.id) {
-                    case 1:
-                      iconName = "thought-bubble";
-                      break;
-                    case 2:
-                      iconName = "emoticon-confused";
-                      break;
-                    case 3:
-                      iconName = "account-group";
-                      break;
-                    case 4:
-                      iconName = "emoticon-sad";
-                      break;
-                    case 5:
-                      iconName = "book-check";
-                      break;
-                    case 6:
-                      iconName = "tea";
-                      break;
-                    case 7:
-                      iconName = "school";
-                      break;
-                    case 8:
-                      iconName = "run";
-                      break;
-                    case 9:
-                      iconName = "briefcase-check";
-                      break;
-                    case 10:
-                      iconName = "calendar-clock";
-                      break;
-                    case 11:
-                      iconName = "lightbulb-on";
-                      break;
-                    case 12:
-                      iconName = "home-heart";
-                      break;
-                    case 13:
-                      iconName = "emoticon-happy";
-                      break;
-                    case 14:
-                      iconName = "arm-flex";
-                      break;
-                    case 15:
-                      iconName = "heart";
-                      break;
-                    case 16:
-                      iconName = "dots-horizontal";
-                      break;
-                  }
-
-                  return (
-                    <View style={FormStyle.activitiesContainer}>
-                      <TouchableOpacity onPress={() => selectHandler(item)}>
-                        <View
+                numColumns={2}
+                keyExtractor={(item) => item.id.toString()}
+                columnWrapperStyle={styles.activitiesRow}
+                renderItem={({ item }) => (
+                  <View style={styles.activityItemWrapper}>
+                    <TouchableOpacity onPress={() => selectHandler(item)}>
+                      <View
+                        style={[
+                          styles.activityCard,
+                          {
+                            backgroundColor: item.selected
+                              ? "white"
+                              : "transparent",
+                          },
+                        ]}
+                      >
+                        <MaterialCommunityIcons
+                          name={getIconName(item.id)}
+                          size={24}
+                          color={item.selected ? "#5da5a9" : "#f2f2f2"}
+                          style={styles.activityIcon}
+                        />
+                        <Text
+                          numberOfLines={3}
                           style={[
-                            FormStyle.activityContainer,
+                            styles.activityText,
                             {
-                              backgroundColor: item.selected
-                                ? "white"
-                                : "transparent",
+                              color: item.selected ? "#5da5a9" : "#f2f2f2",
                             },
                           ]}
                         >
-                          <MaterialCommunityIcons
-                            name={iconName}
-                            size={24}
-                            color="#f2f2f2"
-                            style={[
-                              FormStyle.activityIcon,
-                              {
-                                color: item.selected ? "#5da5a9" : "#f2f2f2",
-                              },
-                            ]}
-                          />
-                          <Text
-                            style={[
-                              FormStyle.activityText,
-                              {
-                                color: item.selected ? "#5da5a9" : "#f2f2f2",
-                              },
-                            ]}
-                          >
-                            {item.activity}
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
-                    </View>
-                  );
-                }}
+                          {item.activity}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                )}
               />
             </View>
-            {/*    <Text style={FormStyle.seeMoreText}>Desliza para ver más</Text> */}
-            {/* inputs */}
+
             <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
               <View style={FormStyle.inputContainer}>
-                <Text style={FormStyle.text}>Mi día hasta ahora</Text>
+                <Text style={FormStyle.text}>Mi dia hasta ahora</Text>
                 <InputButton
-                  placeholder="Describe cómo ha sido tu día hasta este momento... (Opcional)."
-                  onChangeText={(title) => {
-                    setTitle(title);
+                  placeholder="Describe como ha sido tu dia hasta este momento... (Opcional)."
+                  onChangeText={(textValue) => {
+                    setTitle(textValue);
                   }}
                   autoCorrect={false}
                 />
 
                 <Text style={FormStyle.text}>Detalles importantes</Text>
                 <InputButton
-                  placeholder="Agrega información adicional o reflexiones sobre tu día... (Opcional)."
-                  onChangeText={(text) => {
-                    setQuickNote(text);
+                  placeholder="Agrega informacion adicional o reflexiones sobre tu dia... (Opcional)."
+                  onChangeText={(textValue) => {
+                    setQuickNote(textValue);
                   }}
                   autoCorrect={false}
                 />
@@ -290,7 +226,6 @@ const MoodTrack = ({ route, navigation }) => {
             </TouchableWithoutFeedback>
           </View>
 
-          {/* button */}
           <View style={[FormStyle.buttonContainer, { marginTop: 20 }]}>
             <FormButton
               onPress={saveMoodTrack}
@@ -308,3 +243,45 @@ const MoodTrack = ({ route, navigation }) => {
 };
 
 export default MoodTrack;
+
+const styles = StyleSheet.create({
+  questionWrapper: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  questionText: {
+    textAlign: "center",
+    fontSize: 18,
+    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
+  },
+  activitiesListContainer: {
+    width: "100%",
+    paddingHorizontal: 16,
+    marginTop: 8,
+  },
+  activitiesRow: {
+    justifyContent: "space-between",
+  },
+  activityItemWrapper: {
+    width: "48%",
+    marginBottom: 12,
+  },
+  activityCard: {
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 10,
+    minHeight: 112,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+  },
+  activityIcon: {
+    marginBottom: 10,
+  },
+  activityText: {
+    color: "#f2f2f2",
+    fontFamily: "DoppioOne",
+    fontSize: 14,
+    textAlign: "center",
+    lineHeight: 18,
+  },
+});

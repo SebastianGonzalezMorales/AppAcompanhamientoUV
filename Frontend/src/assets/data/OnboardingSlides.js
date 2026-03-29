@@ -11,7 +11,7 @@ export default [
       id: '2',
       title: 'Test de bienestar emocional',
       description:
-        'Completa diferentes test para identificar síntomas de depresión, ansiedad y otros aspectos de tu salud mental."',
+        'Completa diferentes test para identificar síntomas de depresión, ansiedad y otros aspectos de tu salud mental.',
         image: require('../../assets/images/SlidesOnboarding/test.png'),
     },
     {

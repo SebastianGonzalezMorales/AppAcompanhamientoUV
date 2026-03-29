@@ -1,8 +1,15 @@
-import { SafeAreaView, Text, View, Alert } from "react-native";
+import {
+  SafeAreaView,
+  Text,
+  View,
+  Alert,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 import React, { useState, useContext, useCallback } from "react";
-import { useFocusEffect } from "@react-navigation/native"; // Importar useFocusEffect
+import { useFocusEffect } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { ProgressBar } from "react-native-paper"; // Asegúrate de instalar react-native-paper
+import { ProgressBar } from "react-native-paper";
 import api from "../../utils/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -10,7 +17,6 @@ import { AuthContext } from "../../context/AuthContext";
 
 import Constants from "expo-constants";
 
-// Asigna API_URL desde la configuración
 const { API_URL } = Constants.expoConfig?.extra || {};
 
 import AuthButton from "../../components/buttons/AuthButton";
@@ -20,15 +26,14 @@ import GlobalStyle from "../../assets/styles/GlobalStyle";
 function UserProfile({ navigation }) {
   const { logout } = useContext(AuthContext);
 
-  // states
   const [name, setName] = useState("");
   const [rut, setRut] = useState("");
   const [email, setEmail] = useState("");
   const [birthdate, setBirthdate] = useState("");
   const [career, setCarrera] = useState("");
   const [phone, setPhone] = useState("");
-  const [progress, setProgress] = useState(0); // Progreso inicial en días consecutivos
-  const [message, setMessage] = useState("Cargando tu progreso semanal..."); // Mensaje motivacional
+  const [progress, setProgress] = useState(0);
+  const [message, setMessage] = useState("Cargando tu progreso semanal...");
 
   const fetchUserData = async () => {
     try {
@@ -41,7 +46,6 @@ function UserProfile({ navigation }) {
         );
         const userData = userResponse.data.data;
 
-        // Actualizar estados con datos del usuario
         setName(userData.name);
         setRut(userData.rut);
         setEmail(userData.email);
@@ -49,7 +53,6 @@ function UserProfile({ navigation }) {
         setCarrera(userData.career);
         setPhone(userData.phoneNumber);
 
-        // Obtener progreso semanal desde el backend
         const progressResponse = await api.get(
           `${API_URL}/moodState/calculateStreak`,
           { headers: { Authorization: `Bearer ${token}` } }
@@ -74,7 +77,6 @@ function UserProfile({ navigation }) {
     }
   };
 
-  // Se ejecuta cada vez que la pantalla gana foco
   useFocusEffect(
     useCallback(() => {
       fetchUserData();
@@ -85,7 +87,6 @@ function UserProfile({ navigation }) {
     try {
       await logout();
       navigation.replace("Login");
-      // Mostrar alerta de éxito
       Alert.alert(
         "Cierre de sesión exitoso",
         "¡Has cerrado sesión correctamente!",
@@ -104,91 +105,126 @@ function UserProfile({ navigation }) {
 
   return (
     <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
-      {/* Header Section */}
-      <View style={{ height: 310, alignItems: "center" }}>
-        <Text style={[GlobalStyle.welcomeText, { marginRight: 30 }]}>
-          Mi perfil
-        </Text>
-        <Icon
-          name="user-circle"
-          size={100}
-          color="#000"
-          style={{ marginTop: 20 }}
-        />
-
-        {/* Mensaje motivacional */}
-        <Text
-          style={[
-            GlobalStyle.text,
-            {
-              textAlign: "center",
-              color: "#FFFFFF",
-              fontSize: 16,
-              marginTop: 0,
-            },
-          ]}
-        >
-          {message}
-        </Text>
-
-        {/* Barra de progreso */}
-        <View style={{ width: "80%", marginTop: 15 }}>
-          <ProgressBar
-            progress={progress / 7} // Progreso basado en un objetivo de 7 días
-            color="#4CAF50"
-            style={{ height: 10, borderRadius: 5 }}
-          />
-          <Text style={{ textAlign: "center", marginTop: 5, color: "#FFFFFF" }}>
-            {progress}/7 días esta semana
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.headerSection}>
+          <Text style={[GlobalStyle.welcomeText, styles.headerTitle]}>
+            Mi perfil
           </Text>
-        </View>
-      </View>
+          <Icon
+            name="user-circle"
+            size={100}
+            color="#000"
+            style={styles.profileIcon}
+          />
 
-      {/* User Info Section */}
-      <View style={GlobalStyle.rowTwo}>
-        <View style={GlobalStyle.statsContainer}>
-          <Text style={[GlobalStyle.statsTitle, { marginVertical: -5 }]}>
-            <Text style={{ fontWeight: "bold", fontSize: 17 }}>Nombre: </Text>{" "}
+          <Text style={[GlobalStyle.text, styles.messageText]}>{message}</Text>
+
+          <View style={styles.progressWrapper}>
+            <ProgressBar
+              progress={progress / 7}
+              color="#4CAF50"
+              style={{ height: 10, borderRadius: 5 }}
+            />
+            <Text style={styles.progressText}>{progress}/7 días esta semana</Text>
+          </View>
+        </View>
+
+        <View style={styles.infoCard}>
+          <Text style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Nombre: </Text>
             {name}
           </Text>
-          <Text style={[GlobalStyle.statsTitle, { marginVertical: -5 }]}>
-            <Text style={{ fontWeight: "bold", fontSize: 17 }}>Rut: </Text>{" "}
+          <Text style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Rut: </Text>
             {rut}
           </Text>
-          <Text style={[GlobalStyle.statsTitle, { marginVertical: -5 }]}>
-            <Text style={{ fontWeight: "bold", fontSize: 17 }}>Email: </Text>{" "}
+          <Text style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Email: </Text>
             {email}
           </Text>
-          <Text style={[GlobalStyle.statsTitle, { marginVertical: -5 }]}>
-            <Text style={{ fontWeight: "bold", fontSize: 17 }}>Teléfono: </Text>{" "}
+          <Text style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Teléfono: </Text>
             {phone}
           </Text>
-          <Text style={[GlobalStyle.statsTitle, { marginVertical: -5 }]}>
-            <Text style={{ fontWeight: "bold", fontSize: 17 }}>Carrera: </Text>{" "}
+          <Text style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Carrera: </Text>
             {career}
           </Text>
-          <Text style={[GlobalStyle.statsTitle, { marginVertical: -5 }]}>
-            <Text style={{ fontWeight: "bold", fontSize: 17 }}>
-              Fecha de nacimiento:{" "}
-            </Text>{" "}
+          <Text style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Fecha de nacimiento: </Text>
             {birthdate}
           </Text>
-        </View>
 
-        {/* Logout Button */}
-        <View style={{ marginTop: -7, paddingBottom: 50 }}>
-          <AuthButton
-            onPress={handleSignOut}
-            text="Cerrar sesión"
-            iconName="log-out-outline"
-            iconColor="#388E3C"
-            buttonStyle={{ backgroundColor: "#A5D6A7" }}
-            textStyle={{ color: "#388E3C" }}
-          />
+          <View style={styles.logoutWrapper}>
+            <AuthButton
+              onPress={handleSignOut}
+              text="Cerrar sesión"
+              iconName="log-out-outline"
+              iconColor="#388E3C"
+              buttonStyle={{ backgroundColor: "#A5D6A7", marginTop: 0 }}
+              textStyle={{ color: "#388E3C" }}
+            />
+          </View>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 export default UserProfile;
+
+const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+  },
+  headerSection: {
+    alignItems: "center",
+    paddingBottom: 20,
+  },
+  headerTitle: {
+    marginRight: 30,
+  },
+  profileIcon: {
+    marginTop: 20,
+  },
+  messageText: {
+    textAlign: "center",
+    color: "#FFFFFF",
+    fontSize: 16,
+    marginTop: 0,
+    lineHeight: 24,
+  },
+  progressWrapper: {
+    width: "80%",
+    marginTop: 15,
+  },
+  progressText: {
+    textAlign: "center",
+    marginTop: 5,
+    color: "#FFFFFF",
+  },
+  infoCard: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingHorizontal: 30,
+    paddingTop: 20,
+    paddingBottom: 50,
+    flexGrow: 1,
+  },
+  infoRow: {
+    ...GlobalStyle.statsTitle,
+    marginVertical: 2,
+    lineHeight: 24,
+  },
+  infoLabel: {
+    fontWeight: "bold",
+    fontSize: 17,
+  },
+  logoutWrapper: {
+    marginTop: 14,
+  },
+});
