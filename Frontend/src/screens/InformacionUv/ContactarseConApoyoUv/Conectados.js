@@ -163,7 +163,7 @@ function Conectados({ navigation }) {
     const subject = "[Apoyo emocional - AppAcompañamientoUv]";
     const body = `Hola,
     
-  Mi nombre es ${userName}, estudiante de la carrera ${userCareer}, y escribo este correo ya que quiero solicitar apoyo emocional. Me siento en una situación díficil que me gustaría compartir con ustedes para recibir orientación.
+  Mi nombre es ${userName}, estudiante de la carrera ${userCareer}, y escribo este correo ya que quiero solicitar apoyo emocional. Me siento en una situación difícil que me gustaría compartir con ustedes para recibir orientación.
 
 Muchas gracias.
 

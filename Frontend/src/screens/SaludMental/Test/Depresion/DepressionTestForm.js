@@ -1,6 +1,5 @@
-
 // react imports
-import { Alert, FlatList, Text, View } from "react-native";
+import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import api from "../../../../utils/api";
@@ -36,6 +35,8 @@ const DepressionTestForm = ({ navigation }) => {
   const [showResults, setShowResults] = useState(false);
   const [date, setDate] = useState("");
   const [severity, setSeverity] = useState("");
+  const [pendingQuestionNumber, setPendingQuestionNumber] = useState(null);
+  const [validationModalVisible, setValidationModalVisible] = useState(false);
 
   // get all questions from the API
   useEffect(() => {
@@ -72,6 +73,16 @@ const DepressionTestForm = ({ navigation }) => {
 
   // submit for results and set data to database
   const handleSubmit = async () => {
+    const firstUnansweredIndex = questions.findIndex(
+      (_, index) => selectedOptions[index] === undefined
+    );
+
+    if (firstUnansweredIndex !== -1) {
+      setPendingQuestionNumber(firstUnansweredIndex + 1);
+      setValidationModalVisible(true);
+      return;
+    }
+
     let totalScore = 0;
     questions.forEach((question, index) => {
       if (selectedOptions[index] === question.selectedoption1) {
@@ -122,10 +133,8 @@ const DepressionTestForm = ({ navigation }) => {
       }
     } catch (error) {
       console.error("Error al enviar datos:", error);
-      Alert.alert(
-        "Error",
-        "No se pudo enviar los resultados. Por favor, inténtalo de nuevo."
-      );
+      setPendingQuestionNumber(null);
+      setValidationModalVisible(true);
     }
   };
 
@@ -203,6 +212,41 @@ const DepressionTestForm = ({ navigation }) => {
 
   return (
     <SafeAreaView style={[FormStyle.container, GlobalStyle.androidSafeArea]}>
+      <Modal
+        transparent
+        animationType="fade"
+        visible={validationModalVisible}
+        onRequestClose={() => setValidationModalVisible(false)}
+      >
+        <View style={localStyles.modalOverlay}>
+          <View style={localStyles.modalCard}>
+            <Text style={localStyles.modalTitle}>
+              {pendingQuestionNumber ? "Pregunta pendiente" : "Error"}
+            </Text>
+            <Text style={localStyles.modalText}>
+              {pendingQuestionNumber
+                ? (
+                  <>
+                    Debes responder la pregunta{" "}
+                    <Text style={localStyles.modalTextNumber}>
+                      {pendingQuestionNumber}
+                    </Text>{" "}
+                    antes de continuar.
+                  </>
+                )
+                : "No se pudo enviar los resultados. Por favor, inténtalo de nuevo."}
+            </Text>
+
+            <TouchableOpacity
+              style={localStyles.modalButton}
+              onPress={() => setValidationModalVisible(false)}
+            >
+              <Text style={localStyles.modalButtonText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <View style={FormStyle.flexContainer}>
         <BackButton onPress={() => navigation.goBack()} />
 
@@ -290,3 +334,55 @@ const DepressionTestForm = ({ navigation }) => {
 };
 
 export default DepressionTestForm;
+
+const localStyles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.28)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 28,
+  },
+  modalCard: {
+    width: "100%",
+    maxWidth: 320,
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+  },
+  modalTitle: {
+    color: "#5c6169",
+    fontFamily: "DoppioOne",
+    fontSize: 19,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  modalText: {
+    color: "#5c6169",
+    fontFamily: "Actor",
+    fontSize: 18,
+    lineHeight: 24,
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  modalTextNumber: {
+    fontFamily: "Actor",
+    fontSize: 18,
+    color: "#5c6169",
+  },
+  modalButton: {
+    alignSelf: "center",
+    minWidth: 96,
+    borderRadius: 12,
+    backgroundColor: "#f2f2f2",
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+  },
+  modalButtonText: {
+    color: "#5da5a9",
+    fontFamily: "DoppioOne",
+    fontSize: 17,
+    textAlign: "center",
+  },
+});

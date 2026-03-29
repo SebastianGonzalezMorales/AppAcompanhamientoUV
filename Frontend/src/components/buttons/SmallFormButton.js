@@ -6,6 +6,7 @@ export default function SmallFormButton(props) {
   return (
     <TouchableOpacity
       onPress={props.onPress}
+      disabled={props.disabled}
       style={[styles.button, props.buttonStyle]}
     >
       <Text style={[styles.text, props.textStyle]}>{props.text}</Text>
