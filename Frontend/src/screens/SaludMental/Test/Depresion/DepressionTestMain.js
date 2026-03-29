@@ -30,6 +30,23 @@ import GlobalStyle from "../../../../assets/styles/GlobalStyle";
 import Icon from "react-native-vector-icons/MaterialIcons"; // Íconos de llamada y correo
 import FontAwesome from "react-native-vector-icons/FontAwesome"; // Ícono de WhatsApp
 
+const getSeverityStyles = (severity) => {
+  switch (severity) {
+    case "Normal":
+      return { backgroundColor: "#d8f7ea", textColor: "#109f5c" };
+    case "Leve":
+      return { backgroundColor: "#d8eef7", textColor: "#238bdf" };
+    case "Moderado":
+      return { backgroundColor: "#fff1a8", textColor: "#d4a000" };
+    case "Moderadamente grave":
+      return { backgroundColor: "#ffd7b0", textColor: "#f08c00" };
+    case "Grave":
+      return { backgroundColor: "#ffc9d2", textColor: "#b00020" };
+    default:
+      return { backgroundColor: "#ffffff", textColor: "#000000" };
+  }
+};
+
 function DepressionTestMain({ navigation }) {
   const [showTooltip, setShowTooltip] = useState(false);
   const [results, setResults] = useState([]);
@@ -537,33 +554,28 @@ function DepressionTestMain({ navigation }) {
           <FlatList
             data={results.slice(0, 10)}
             numColumns={1}
-            renderItem={({ item }) => (
-              <CustomButton
-                buttonStyle={{
-                  backgroundColor:
-                    item.severity === "Normal"
-                      ? "#fdf3e4"
-                      : item.severity === "Leve"
-                      ? "#e4f7f1"
-                      : item.severity === "Moderado"
-                      ? "#e4eff7"
-                      : item.severity === "Moderadamente grave"
-                      ? "#f7e4eb"
-                      : "#f7d8e3",
-                  paddingVertical: 15,
-                  paddingHorizontal: 20,
-                  marginBottom: 10,
-                  borderRadius: 10,
-                }}
-                onPress={() => {
-                  navigation.navigate("ResultView", { documentId: item.id });
-                }}
-                title={item.severity}
-                textOne={item.dateData}
-                textTwo={item.totalScore}
-                textStyle={{ color: "#af7b56" }}
-              />
-            )}
+            renderItem={({ item }) => {
+              const severityStyles = getSeverityStyles(item.severity);
+
+              return (
+                <CustomButton
+                  buttonStyle={{
+                    backgroundColor: severityStyles.backgroundColor,
+                    paddingVertical: 15,
+                    paddingHorizontal: 20,
+                    marginBottom: 10,
+                    borderRadius: 10,
+                  }}
+                  onPress={() => {
+                    navigation.navigate("ResultView", { documentId: item.id });
+                  }}
+                  title={item.severity}
+                  textOne={item.dateData}
+                  textTwo={item.totalScore}
+                  textStyle={{ color: severityStyles.textColor }}
+                />
+              );
+            }}
           />
         )}
       </View>

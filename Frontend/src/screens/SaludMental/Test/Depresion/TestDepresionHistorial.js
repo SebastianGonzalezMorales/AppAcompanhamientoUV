@@ -24,6 +24,23 @@ const getCurrentMonthValue = () => {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 };
 
+const getSeverityStyles = (severity) => {
+  switch (severity) {
+    case "Normal":
+      return { backgroundColor: "#d8f7ea", textColor: "#109f5c" };
+    case "Leve":
+      return { backgroundColor: "#d8eef7", textColor: "#238bdf" };
+    case "Moderado":
+      return { backgroundColor: "#fff1a8", textColor: "#d4a000" };
+    case "Moderadamente grave":
+      return { backgroundColor: "#ffd7b0", textColor: "#f08c00" };
+    case "Grave":
+      return { backgroundColor: "#ffc9d2", textColor: "#b00020" };
+    default:
+      return { backgroundColor: "#ffffff", textColor: "#000000" };
+  }
+};
+
 const QuestionnaireHistory = ({ navigation }) => {
   const [results, setResults] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState("");
@@ -195,44 +212,26 @@ const QuestionnaireHistory = ({ navigation }) => {
             data={results}
             numColumns={1}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <CustomButton
-                buttonStyle={{
-                  backgroundColor:
-                    item.severity === "Normal"
-                      ? "#f7e7d8"
-                      : item.severity === "Leve"
-                      ? "#d8f7ea"
-                      : item.severity === "Moderado"
-                      ? "#d8eef7"
-                      : item.severity === "Moderadamente grave"
-                      ? "#f7d8e3"
-                      : item.severity === "Grave"
-                      ? "#f7d8e3"
-                      : "#ffffff",
-                }}
-                textStyle={{
-                  color:
-                    item.severity === "Normal"
-                      ? "#af7b56"
-                      : item.severity === "Leve"
-                      ? "#109f5c"
-                      : item.severity === "Moderado"
-                      ? "#238bdf"
-                      : item.severity === "Moderadamente grave"
-                      ? "#d85a77"
-                      : item.severity === "Grave"
-                      ? "#d85a77"
-                      : "#000000",
-                }}
-                title={item.severity}
-                textOne={item.date}
-                textTwo={item.totalScore}
-                onPress={() =>
-                  navigation.navigate("ResultView", { documentId: item.id })
-                }
-              />
-            )}
+            renderItem={({ item }) => {
+              const severityStyles = getSeverityStyles(item.severity);
+
+              return (
+                <CustomButton
+                  buttonStyle={{
+                    backgroundColor: severityStyles.backgroundColor,
+                  }}
+                  textStyle={{
+                    color: severityStyles.textColor,
+                  }}
+                  title={item.severity}
+                  textOne={item.date}
+                  textTwo={item.totalScore}
+                  onPress={() =>
+                    navigation.navigate("ResultView", { documentId: item.id })
+                  }
+                />
+              );
+            }}
           />
         )}
       </View>
