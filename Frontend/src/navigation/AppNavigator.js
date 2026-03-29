@@ -66,6 +66,8 @@ const Stack = createNativeStackNavigator();
 const AppNavigator = () => {
   const { userToken, isLoading } = useContext(AuthContext);
   const [viewedOnboarding, setViewedOnboarding] = useState(false);
+  const [resumePasswordRecovery, setResumePasswordRecovery] = useState(false);
+  const [isRecoveryStateLoading, setIsRecoveryStateLoading] = useState(true);
 
   // Pre-loading fonts
   const [fontsLoaded] = useFonts({
@@ -86,7 +88,58 @@ const AppNavigator = () => {
     }
   }, [fontsLoaded]);
 
-  if (!fontsLoaded || isLoading) {
+  useEffect(() => {
+    const loadRecoveryState = async () => {
+      try {
+        const recoveryState = await AsyncStorage.multiGet([
+          'resetPasswordEmail',
+          'resetPasswordAutoResume',
+          'resetPasswordRequestedAt',
+        ]);
+        const storedEmail = recoveryState[0]?.[1];
+        const autoResume = recoveryState[1]?.[1];
+        const requestedAtRaw = recoveryState[2]?.[1];
+        const requestedAt = Number(requestedAtRaw || 0);
+
+        if (storedEmail && !requestedAtRaw) {
+          await AsyncStorage.setItem(
+            'resetPasswordRequestedAt',
+            Date.now().toString()
+          );
+        }
+
+        const isRecoveryValid =
+          !!storedEmail &&
+          ((requestedAt > 0 &&
+            Date.now() - requestedAt < 60 * 60 * 1000) ||
+            !requestedAtRaw);
+        const shouldResume = isRecoveryValid && autoResume === 'true';
+
+        setResumePasswordRecovery(shouldResume);
+
+        if (!isRecoveryValid && (storedEmail || requestedAt)) {
+          await AsyncStorage.multiRemove([
+            'resetPasswordEmail',
+            'resetPasswordAutoResume',
+            'resetPasswordRequestedAt',
+          ]);
+        }
+
+        if (shouldResume) {
+          await AsyncStorage.setItem('resetPasswordAutoResume', 'false');
+        }
+      } catch (error) {
+        console.error('Error al recuperar el estado de cambio de contraseña:', error);
+        setResumePasswordRecovery(false);
+      } finally {
+        setIsRecoveryStateLoading(false);
+      }
+    };
+
+    loadRecoveryState();
+  }, [userToken]);
+
+  if (!fontsLoaded || isLoading || isRecoveryStateLoading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
 
@@ -95,12 +148,25 @@ const AppNavigator = () => {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!userToken ? (
           <>
-            <Stack.Screen name="Onboarding" component={Onboarding} />
-            <Stack.Screen name="Policy" component={Policy} />
-            <Stack.Screen name="Login" component={Login} />
-            <Stack.Screen name="Register" component={Register} />
-            <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
-            <Stack.Screen name="ChangePassword" component={ChangePassword} />
+            {resumePasswordRecovery ? (
+              <>
+                <Stack.Screen name="ChangePassword" component={ChangePassword} />
+                <Stack.Screen name="Onboarding" component={Onboarding} />
+                <Stack.Screen name="Policy" component={Policy} />
+                <Stack.Screen name="Login" component={Login} />
+                <Stack.Screen name="Register" component={Register} />
+                <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+              </>
+            ) : (
+              <>
+                <Stack.Screen name="Onboarding" component={Onboarding} />
+                <Stack.Screen name="Policy" component={Policy} />
+                <Stack.Screen name="Login" component={Login} />
+                <Stack.Screen name="Register" component={Register} />
+                <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+                <Stack.Screen name="ChangePassword" component={ChangePassword} />
+              </>
+            )}
           </>
         ) : (
           <>

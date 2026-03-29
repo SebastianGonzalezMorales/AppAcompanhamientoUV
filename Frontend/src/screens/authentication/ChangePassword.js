@@ -8,6 +8,7 @@ import api from '../../utils/api';
 
 // Import the API URL from environment variables
 import Constants from 'expo-constants';
+import { useFocusEffect } from '@react-navigation/native';
 
 // Asigna API_URL desde la configuración
 const { API_URL } = Constants.expoConfig?.extra || {};
@@ -27,6 +28,43 @@ const ChangePassword = ({ navigation }) => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const markRecoveryAsResumable = async () => {
+        try {
+          const recoveryState = await AsyncStorage.multiGet([
+            'resetPasswordEmail',
+            'resetPasswordRequestedAt',
+          ]);
+          const storedEmail = recoveryState[0]?.[1];
+          const requestedAtRaw = recoveryState[1]?.[1];
+          const requestedAt = Number(requestedAtRaw || 0);
+
+          if (storedEmail && !requestedAtRaw) {
+            await AsyncStorage.setItem(
+              'resetPasswordRequestedAt',
+              Date.now().toString()
+            );
+          }
+
+          const isRecoveryValid =
+            !!storedEmail &&
+            ((requestedAt > 0 &&
+              Date.now() - requestedAt < 60 * 60 * 1000) ||
+              !requestedAtRaw);
+
+          if (isRecoveryValid) {
+            await AsyncStorage.setItem('resetPasswordAutoResume', 'true');
+          }
+        } catch (error) {
+          console.error('Error al guardar el estado de recuperación:', error);
+        }
+      };
+
+      markRecoveryAsResumable();
+    }, [])
+  );
 
   /*
    * *******************
@@ -83,6 +121,12 @@ const ChangePassword = ({ navigation }) => {
         confirmPassword: confirmPassword,
       }
     );
+
+    await AsyncStorage.multiRemove([
+      'resetPasswordEmail',
+      'resetPasswordAutoResume',
+      'resetPasswordRequestedAt',
+    ]);
 
     Alert.alert("¡Listo!", "Contraseña cambiada exitosamente.");
     navigation.replace('Login');
@@ -189,7 +233,10 @@ return (
           </Text>
           <SmallAuthButton
             text="Iniciar sesión"
-            onPress={() => navigation.replace('Login')}
+            onPress={async () => {
+              await AsyncStorage.setItem('resetPasswordAutoResume', 'false');
+              navigation.replace('Login');
+            }}
           />
         </View>
 

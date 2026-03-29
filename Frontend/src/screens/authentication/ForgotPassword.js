@@ -67,6 +67,8 @@ const ForgotPassword = ({ navigation }) => {
       // Guardar el correo electrónico en AsyncStorage
       try {
         await AsyncStorage.setItem('resetPasswordEmail', lowercaseEmail);
+        await AsyncStorage.setItem('resetPasswordAutoResume', 'true');
+        await AsyncStorage.setItem('resetPasswordRequestedAt', Date.now().toString());
         console.log('Correo electrónico guardado exitosamente en AsyncStorage');
 
       } catch (error) {

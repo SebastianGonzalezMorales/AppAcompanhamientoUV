@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'flex-end',
     paddingHorizontal: 24,
-    paddingTop: 18,
+    paddingTop: 34,
   },
   skipButton: {
     minWidth: 72,

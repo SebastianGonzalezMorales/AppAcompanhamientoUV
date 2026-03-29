@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import api from '../../utils/api';
 
 import { AuthContext } from '../../context/AuthContext';
+import { useFocusEffect } from '@react-navigation/native';
 
 // Import the API URL from environment variables
 import Constants from 'expo-constants';
@@ -32,6 +33,7 @@ const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [hasPasswordRecoveryToResume, setHasPasswordRecoveryToResume] = useState(false);
 
   /*
  * *******************
@@ -47,6 +49,50 @@ const Login = ({ navigation }) => {
       console.log('Error @clearOnboarding', error);
     }
   };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadRecoveryState = async () => {
+        try {
+          const recoveryState = await AsyncStorage.multiGet([
+            'resetPasswordEmail',
+            'resetPasswordRequestedAt',
+          ]);
+          const storedEmail = recoveryState[0]?.[1];
+          const requestedAtRaw = recoveryState[1]?.[1];
+          const requestedAt = Number(requestedAtRaw || 0);
+
+          if (storedEmail && !requestedAtRaw) {
+            await AsyncStorage.setItem(
+              'resetPasswordRequestedAt',
+              Date.now().toString()
+            );
+          }
+
+          const isRecoveryValid =
+            !!storedEmail &&
+            ((requestedAt > 0 &&
+              Date.now() - requestedAt < 60 * 60 * 1000) ||
+              !requestedAtRaw);
+
+          if (!isRecoveryValid && (storedEmail || requestedAt)) {
+            await AsyncStorage.multiRemove([
+              'resetPasswordEmail',
+              'resetPasswordAutoResume',
+              'resetPasswordRequestedAt',
+            ]);
+          }
+
+          setHasPasswordRecoveryToResume(isRecoveryValid);
+        } catch (error) {
+          console.log('Error @loadRecoveryState', error);
+          setHasPasswordRecoveryToResume(false);
+        }
+      };
+
+      loadRecoveryState();
+    }, [])
+  );
 
   // Login function
   const handleLogin = async (email, password) => {
@@ -238,10 +284,19 @@ const Login = ({ navigation }) => {
 
           <View style={AuthStyle.changeScreenContainer}>
             <Text style={AuthStyle.changeScreenText}>
+              {hasPasswordRecoveryToResume ? '¿Quieres retomar tu recuperación?' : ''}
             </Text>
             <SmallAuthButton
-              text="Olvidaste tu contraseña"
-              onPress={() => navigation.replace('ForgotPassword')}
+              text={hasPasswordRecoveryToResume ? 'Continuar cambio' : 'Olvidaste tu contraseña'}
+              onPress={async () => {
+                if (hasPasswordRecoveryToResume) {
+                  await AsyncStorage.setItem('resetPasswordAutoResume', 'true');
+                  navigation.replace('ChangePassword');
+                  return;
+                }
+
+                navigation.replace('ForgotPassword');
+              }}
             />
           </View>
 
