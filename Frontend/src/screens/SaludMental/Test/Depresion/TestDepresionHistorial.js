@@ -7,13 +7,22 @@ import {
   ActivityIndicator,
 } from "react-native";
 import React, { useState, useEffect } from "react";
-import { fetchWithToken } from "../../../../utils/apiHelpers";
+import api from "../../../../utils/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
 import { Dropdown } from "react-native-element-dropdown";
 import { getMonth, getMonths } from "../../../../utils/getMonths";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import ModalStyle from "../../../../assets/styles/ModalStyle";
 import CustomButton from "../../../../components/buttons/CustomButton";
 import GlobalStyles from "../../../../assets/styles/GlobalStyle";
+
+const { API_URL } = Constants.expoConfig?.extra || {};
+
+const getCurrentMonthValue = () => {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+};
 
 const QuestionnaireHistory = ({ navigation }) => {
   const [results, setResults] = useState([]);
@@ -22,33 +31,52 @@ const QuestionnaireHistory = ({ navigation }) => {
   const [noData, setNoData] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const months = getMonths();       // [{ label, value }, …]
-  const currentMonth = getMonth();  // p. ej. "2025-06"
+  const months = getMonths();
+  const currentMonth = getMonth();
+  const initialMonthValue = getCurrentMonthValue();
 
-  /* ----- Función para traer datos ----- */
-  const fetchData = async (monthFilter = null) => {
+  const fetchData = async (monthFilter = initialMonthValue) => {
     setIsLoading(true);
     setErrorMessage("");
     setNoData(false);
 
     try {
-      const monthString = monthFilter
-        ? monthFilter
-        : `${new Date().getFullYear()}-${String(
-            new Date().getMonth() + 1
-          ).padStart(2, "0")}`;
+      const token = await AsyncStorage.getItem("token");
+      if (!token) throw new Error("Sin token de autenticación");
 
-      const response = await fetchWithToken(
-        `/resultsTests/getResultsTestByMonth?month=${monthString}`
+      const { data: userResponse } = await api.post(
+        `${API_URL}/tokens/userid`,
+        { token },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      const data = response?.results || [];
 
-      const mapped = data.map((item) => ({
-        id: item._id,
-        severity: item.severity, // “Normal”, “Leve”, etc.
-        date: new Date(item.created).toLocaleDateString(),
-        totalScore: `${item.totalScore}/27`,
-      }));
+      const userId = userResponse.userId;
+      if (!userId) throw new Error("No se encontró userId");
+
+      const { data: resultsResponse } = await api.post(
+        `${API_URL}/resultsTests/get-resultsTestUser/${userId}`,
+        { token },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const monthString = monthFilter;
+      const data = resultsResponse.results || [];
+
+      const mapped = data
+        .filter((item) => {
+          const createdDate = new Date(item.created);
+          const itemMonth = `${createdDate.getFullYear()}-${String(
+            createdDate.getMonth() + 1
+          ).padStart(2, "0")}`;
+          return itemMonth === monthString;
+        })
+        .sort((a, b) => new Date(b.created) - new Date(a.created))
+        .map((item) => ({
+          id: item._id,
+          severity: item.severity,
+          date: new Date(item.created).toLocaleDateString(),
+          totalScore: `${item.totalScore}/27`,
+        }));
 
       if (mapped.length === 0) {
         setNoData(true);
@@ -66,18 +94,16 @@ const QuestionnaireHistory = ({ navigation }) => {
     }
   };
 
-  /* ----- Efecto inicial ----- */
   useEffect(() => {
-    fetchData();
+    setSelectedMonth(initialMonthValue);
+    fetchData(initialMonthValue);
   }, []);
 
-  /* ----- Cambio de mes ----- */
   const handleMonthSelected = async (month) => {
     setSelectedMonth(month.value);
     await fetchData(month.value);
   };
 
-  /* ----- Render ----- */
   return (
     <SafeAreaView
       style={[
@@ -85,7 +111,6 @@ const QuestionnaireHistory = ({ navigation }) => {
         { backgroundColor: "#fff", flex: 1 },
       ]}
     >
-      {/* Header */}
       <View style={ModalStyle.headerWrapper}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <MaterialCommunityIcons name="arrow-left" color="#666a72" size={30} />
@@ -95,7 +120,6 @@ const QuestionnaireHistory = ({ navigation }) => {
         </Text>
       </View>
 
-      {/* Dropdown de mes */}
       <View style={{ paddingHorizontal: 30, marginVertical: 10 }}>
         <Dropdown
           placeholderStyle={{
@@ -118,7 +142,6 @@ const QuestionnaireHistory = ({ navigation }) => {
         />
       </View>
 
-      {/* Lista, mensaje de error o sin datos */}
       <View style={[{ flex: 1 }, ModalStyle.flatlistWrapper]}>
         {isLoading ? (
           <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>

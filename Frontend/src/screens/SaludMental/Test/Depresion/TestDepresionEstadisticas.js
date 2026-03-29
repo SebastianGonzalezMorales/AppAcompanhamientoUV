@@ -26,6 +26,11 @@ import FormStyle from "../../../../assets/styles/FormStyle";
 
 const { API_URL } = Constants.expoConfig?.extra || {};
 
+const getCurrentMonthValue = () => {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+};
+
 const QuestionnaireStats = ({ navigation }) => {
   /* ----- Estados ----- */
   const [x, setX] = useState([]);          // etiquetas eje X (días)
@@ -38,18 +43,14 @@ const QuestionnaireStats = ({ navigation }) => {
 
   const currentMonth = getMonth();
   const months = getMonths();
+  const initialMonthValue = getCurrentMonthValue();
 
   const chartwidth = Dimensions.get("window").width * 0.99;
 
   /* ----- Traer datos al montar ----- */
   useEffect(() => {
-    const currentYear = new Date().getFullYear();
-    const currentMonthIndex = new Date().getMonth() + 1;
-    const initialMonth = `${currentYear}-${String(currentMonthIndex).padStart(
-      2,
-      "0"
-    )}`;
-    fetchData(initialMonth);
+    setSelectedMonth(initialMonthValue);
+    fetchData(initialMonthValue);
   }, []);
 
   /* ----- Fetch datos ----- */
@@ -61,12 +62,19 @@ const QuestionnaireStats = ({ navigation }) => {
       const token = await AsyncStorage.getItem("token");
       if (!token) throw new Error("Sin token de autenticación");
 
-      const response = await api.get(
-        `${API_URL}/resultsTests/getResultsTestByMonth`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { month },
-        }
+      const { data: userResponse } = await api.post(
+        `${API_URL}/tokens/userid`,
+        { token },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const userId = userResponse.userId;
+
+      if (!userId) throw new Error("No se encontró userId");
+
+      const response = await api.post(
+        `${API_URL}/resultsTests/get-resultsTestUser/${userId}`,
+        { token },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       const data = response.data.results || [];
@@ -77,11 +85,13 @@ const QuestionnaireStats = ({ navigation }) => {
         const newY = [];
 
         data.forEach(({ totalScore, created }) => {
-          const itemMonth = `${new Date(created).getFullYear()}-${String(
-            new Date(created).getMonth() + 1
+          const createdDate = new Date(created);
+          const itemMonth = `${createdDate.getFullYear()}-${String(
+            createdDate.getMonth() + 1
           ).padStart(2, "0")}`;
-          const day = new Date(created).getDate();
+
           if (itemMonth === month) {
+            const day = createdDate.getDate();
             newX.push(String(day));
             newY.push(totalScore);
           }
