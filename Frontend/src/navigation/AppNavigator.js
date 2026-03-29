@@ -26,6 +26,7 @@ import DepressionTestForm from '../screens/SaludMental/Test/Depresion/Depression
 import AnsiedadTestMain from '../screens/SaludMental/Test/Ansiedad/AnsiedadTestMain';
 import DepressionTestMain from '../screens/SaludMental/Test/Depresion/DepressionTestMain';
 import TestDepresionHistorial from '../screens/SaludMental/Test/Depresion/TestDepresionHistorial';
+import TestAnsiedadHistorial from '../screens/SaludMental/Test/Ansiedad/TestAnsiedadHistorial';
 import TestAnsiedadEstadisticas from '../screens/SaludMental/Test/Ansiedad/TestAnsiedadEstadisticas';
 import TestDepresionEstadisticas from '../screens/SaludMental/Test/Depresion/TestDepresionEstadisticas';
 import ResultView from '../screens/SaludMental/Test/Depresion/ResultView';
@@ -109,6 +110,7 @@ const AppNavigator = () => {
             <Stack.Screen name="AnsiedadTestMain" component={AnsiedadTestMain} />
             <Stack.Screen name="DepressionTestMain" component={DepressionTestMain} />
             <Stack.Screen name="TestDepresionHistorial" component={TestDepresionHistorial} />
+            <Stack.Screen name="TestAnsiedadHistorial" component={TestAnsiedadHistorial} />
             <Stack.Screen name="TestAnsiedadEstadisticas" component={TestAnsiedadEstadisticas} />
             <Stack.Screen name="TestDepresionEstadisticas" component={TestDepresionEstadisticas} />
             <Stack.Screen name="ResultView" component={ResultView} />

@@ -195,10 +195,16 @@ function AnsiedadTestMain({ navigation }) {
             <View style={GlobalStyle.rowTwo}>
         <View style={GlobalStyle.statsContainer}>
           <Text style={GlobalStyle.statsTitle}>Estadísticas</Text>
-          <StatsButton />
+          <StatsButton
+            onPress={() => navigation.navigate('TestAnsiedadHistorial')}
+          />
         </View>
 
-        <HistoryButton textLeft="Resultados" textRight="Ver todos" />
+        <HistoryButton
+          onPress={() => navigation.navigate('TestAnsiedadEstadisticas')}
+          textLeft="Resultados"
+          textRight="Ver todos"
+        />
 
       {isLoading ? (
         <Text style={{ textAlign: 'center', color: '#888', marginTop: 20 }}>Cargando resultados...</Text>

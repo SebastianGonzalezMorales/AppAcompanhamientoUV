@@ -1,95 +1,48 @@
 import {
-  FlatList,
+  ActivityIndicator,
   SafeAreaView,
   Text,
   View,
   TouchableOpacity,
 } from "react-native";
-import React, { useState, useEffect } from "react";
-import { fetchWithToken } from "../../../../utils/apiHelpers";
+import React, { useEffect, useMemo, useState } from "react";
 import { Dropdown } from "react-native-element-dropdown";
 import { getMonth, getMonths } from "../../../../utils/getMonths";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import ModalStyle from "../../../../assets/styles/ModalStyle";
-import CustomButton from "../../../../components/buttons/CustomButton";
 import GlobalStyles from "../../../../assets/styles/GlobalStyle";
 
 const TestAnsiedadEstadisticas = ({ navigation }) => {
-  const [results, setResults] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [noData, setNoData] = useState(false);
 
-  const months = getMonths();
+  const months = useMemo(() => getMonths(), []);
   const currentMonth = getMonth();
 
-  // Hook para obtener los datos al montar el componente
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const currentMonthString = `${new Date().getFullYear()}-${String(
-          new Date().getMonth() + 1
-        ).padStart(2, "0")}`;
+    const simulateLoading = async () => {
+      setIsLoading(true);
+      setNoData(false);
 
-        console.log("currentMonthString:", currentMonthString);
+      await new Promise((resolve) => setTimeout(resolve, 700));
 
-        const response = await fetchWithToken(
-          `/resultsTests/getResultsTestByMonth?month=${currentMonthString}`
-        );
-        console.log("Response:", response);
-
-        const data = response?.results || [];
-        console.log("Data:", data);
-
-        const results = data.map((item) => {
-          const severity = item.severity; // Suponiendo que la severidad ya está en español
-          const date = new Date(item.created).toLocaleDateString();
-          const totalScore = `${item.totalScore}/27`;
-
-          return {
-            id: item._id,
-            severity,
-            date,
-            totalScore,
-          };
-        });
-        console.log("Results:", results);
-
-        setResults(results);
-      } catch (error) {
-        console.error("Error al obtener los resultados:", error);
-      }
+      setNoData(true);
+      setIsLoading(false);
     };
 
-    fetchData();
+    simulateLoading();
   }, []);
 
-  // Manejar la selección del mes
-  const handleMonthSelected = async (item) => {
+  const handleMonthSelected = (item) => {
     setSelectedMonth(item.value);
-    try {
-      const response = await fetchWithToken(
-        `/resultsTests/getResultsTestByMonth?month=${item.value}`
-      );
-      console.log("Response:", response);
+    setIsLoading(true);
+    setNoData(false);
 
-      const data = response?.results || [];
-      console.log("Data:", data);
-
-      const results = data.map((item) => {
-        const severity = item.severity;
-        const date = new Date(item.created).toLocaleDateString();
-        const totalScore = `${item.totalScore}/27`;
-
-        return {
-          id: item._id,
-          severity,
-          date,
-          totalScore,
-        };
-      });
-      setResults(results);
-    } catch (error) {
-      console.error("Error al obtener los resultados:", error);
-    }
+    setTimeout(() => {
+      setNoData(true);
+      setIsLoading(false);
+    }, 600);
   };
 
   return (
@@ -108,7 +61,6 @@ const TestAnsiedadEstadisticas = ({ navigation }) => {
         </Text>
       </View>
 
-      {/* Dropdown */}
       <View style={{ paddingHorizontal: 30, marginVertical: 10 }}>
         <Dropdown
           placeholderStyle={{
@@ -127,57 +79,39 @@ const TestAnsiedadEstadisticas = ({ navigation }) => {
           placeholder={currentMonth}
           data={months}
           value={selectedMonth}
-          onChange={(month) => handleMonthSelected(month)}
+          onChange={(item) => handleMonthSelected(item)}
           labelField="label"
           valueField="value"
         />
       </View>
 
-      <View style={ModalStyle.flatlistWrapper}>
-        <FlatList
-          data={results}
-          numColumns={1}
-          renderItem={({ item }) => (
-            <CustomButton
-              buttonStyle={{
-                backgroundColor:
-                  item.severity === "Normal"
-                    ? "#f7e7d8"
-                    : item.severity === "Leve"
-                    ? "#d8f7ea"
-                    : item.severity === "Moderado"
-                    ? "#d8eef7"
-                    : item.severity === "Moderadamente grave"
-                    ? "#f7d8e3"
-                    : item.severity === "Grave"
-                    ? "#f7d8e3"
-                    : "#ffffff", // Color por defecto
-              }}
-              textStyle={{
-                color:
-                  item.severity === "Normal"
-                    ? "#af7b56"
-                    : item.severity === "Leve"
-                    ? "#109f5c"
-                    : item.severity === "Moderado"
-                    ? "#238bdf"
-                    : item.severity === "Moderadamente grave"
-                    ? "#d85a77"
-                    : item.severity === "Grave"
-                    ? "#d85a77"
-                    : "#000000", // Color por defecto
-              }}
-              title={item.severity}
-              textOne={item.date}
-              textTwo={item.totalScore}
-              onPress={() => {
-                navigation.navigate("ResultView", {
-                  documentId: item.id,
-                });
-              }}
-            />
-          )}
-        />
+      <View
+        style={[
+          ModalStyle.flatlistWrapper,
+          {
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            paddingHorizontal: 20,
+          },
+        ]}
+      >
+        {isLoading ? (
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+            <ActivityIndicator size="large" color="#5da5a9" />
+          </View>
+        ) : noData ? (
+          <Text
+            style={{
+              color: "#666a72",
+              fontFamily: "DoppioOne",
+              fontSize: 16,
+              textAlign: "center",
+            }}
+          >
+            No se encontraron registros de tests para este mes 🫤.
+          </Text>
+        ) : null}
       </View>
     </SafeAreaView>
   );
