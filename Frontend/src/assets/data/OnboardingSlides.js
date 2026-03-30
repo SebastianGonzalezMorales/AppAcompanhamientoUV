@@ -3,7 +3,7 @@ export default [
       id: '1',
       title: '¡ Bienvenido !',
       description:
-        'Está es la aplicación de acompañamiento de Salud Mental de estudiantes de primer año de la Universidad de Valparaiso.',
+        'Esta es la aplicación de acompañamiento de Salud Mental para estudiantes de primer año de la Universidad de Valparaíso.',
       image: require('../../assets/images/SlidesOnboarding/Icon_Application.png'),
      
     },

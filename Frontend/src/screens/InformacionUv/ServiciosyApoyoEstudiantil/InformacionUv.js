@@ -48,14 +48,17 @@ function InformacionUv({ navigation }) {
         <FlatList
           data={servicios}
           keyExtractor={(item) => item.text}
-          numColumns={1}
+          numColumns={2}
           contentContainerStyle={styles.listContent}
+          columnWrapperStyle={styles.columnWrapper}
           renderItem={({ item }) => (
-            <GridSettingsButton
-              text={item.text}
-              imageSource={item.imageSource}
-              onPress={() => navigation.navigate(item.screen)}
-            />
+            <View style={styles.gridItem}>
+              <GridSettingsButton
+                text={item.text}
+                imageSource={item.imageSource}
+                onPress={() => navigation.navigate(item.screen)}
+              />
+            </View>
           )}
         />
       </View>
@@ -88,11 +91,15 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   listContent: {
-    padding: 10,
+    paddingHorizontal: 10,
+    paddingTop: 10,
     paddingBottom: 24,
   },
   columnWrapper: {
     justifyContent: 'space-between',
-    marginBottom: 10,
+    marginBottom: 8,
+  },
+  gridItem: {
+    width: '48%',
   },
 });

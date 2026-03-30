@@ -248,7 +248,10 @@ const HomeMood = ({ navigation }) => {
         console.log(`Mensaje: ${message}`);
         console.log(`Autor: ${author}`);
 
-        setMotivationalQuote(`${message} - ${author}`);
+        const normalizedAuthor = author?.trim();
+        setMotivationalQuote(
+          normalizedAuthor ? `${message} - ${normalizedAuthor}` : message
+        );
       } else {
         console.log("No se encontró el token. Por favor, inicia sesión.");
       }
@@ -412,23 +415,14 @@ const HomeMood = ({ navigation }) => {
 
         {/* Frase del día */}
         {/* Frase del día */}
-        <View style={{ marginTop: 4, paddingHorizontal: 20 }}>
-          <Text style={[GlobalStyle.subtitle, { marginBottom: 6 }]}>
+        <View style={styles.quoteSection}>
+          <Text style={[GlobalStyle.subtitle, styles.quoteTitle]}>
             Frase del día:
           </Text>
 
           {motivationalQuote !== "" && (
             <Text
-              style={[
-                GlobalStyle.quoteText || {
-                  fontSize: 14,
-                  color: "#FFFFFF",
-                  lineHeight: 20,
-                  textAlign: "justify",
-                },
-              ]}
-              numberOfLines={3}
-              ellipsizeMode="tail"
+              style={[GlobalStyle.quoteText, styles.quoteText]}
             >
               {motivationalQuote}
             </Text>
@@ -501,7 +495,11 @@ const HomeMood = ({ navigation }) => {
               textRight="Ver todo"
             />
 
-            <View>
+            <ScrollView
+              nestedScrollEnabled={true}
+              showsVerticalScrollIndicator={false}
+              style={styles.recentList}
+            >
               {moods.slice(0, 5).map((item) => (
                 <CustomButton
                   key={item.id}
@@ -545,7 +543,7 @@ const HomeMood = ({ navigation }) => {
                   }}
                 />
               ))}
-            </View>
+            </ScrollView>
           </>
         )}
       </View>
@@ -577,12 +575,30 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     flexWrap: "wrap",
-    paddingHorizontal: 10,
+    paddingHorizontal: 0,
   },
   storiesContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
     padding: 10,
+  },
+  recentList: {
+    maxHeight: 170,
+  },
+  quoteSection: {
+    marginTop: 4,
+    paddingHorizontal: 20,
+    paddingBottom: 12,
+  },
+  quoteTitle: {
+    marginBottom: 6,
+    paddingTop: 24,
+  },
+  quoteText: {
+    width: "100%",
+    textAlign: "left",
+    lineHeight: 24,
+    flexShrink: 1,
   },
   storyImage: {
     width: 100,

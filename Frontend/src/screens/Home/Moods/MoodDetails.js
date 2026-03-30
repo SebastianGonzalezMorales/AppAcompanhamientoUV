@@ -3,6 +3,7 @@ import {
   FlatList,
   Keyboard,
   KeyboardAvoidingView,
+  PixelRatio,
   Platform,
   SafeAreaView,
   Text,
@@ -44,6 +45,8 @@ const MoodDetails = ({ route, navigation }) => {
   const [activities, setActivities] = useState(Activity);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const fontScale = PixelRatio.getFontScale();
+  const activityColumns = fontScale > 1.15 ? 3 : 4;
 
   // Cargar los datos desde el backend
   useEffect(() => {
@@ -166,7 +169,8 @@ const MoodDetails = ({ route, navigation }) => {
               <FlatList
                 data={activities}
                 scrollEnabled={false}
-                numColumns={4}
+                numColumns={activityColumns}
+                key={activityColumns}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => {
                   let iconName = "";

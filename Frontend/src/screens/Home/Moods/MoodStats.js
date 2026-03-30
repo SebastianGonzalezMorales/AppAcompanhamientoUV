@@ -312,11 +312,11 @@ const MoodStats = ({ navigation }) => {
           </Text>
         </View>
 
-        <View style={ChartStyle.legendContainer}>
-          <Text style={ChartStyle.legendtext}>1 - Mal</Text>
-          <Text style={ChartStyle.legendtext}>2 - Regular</Text>
-          <Text style={ChartStyle.legendtext}>3 - Bien</Text>
-          <Text style={ChartStyle.legendtext}>4 - Excelente</Text>
+        <View style={styles.monthLegendContainer}>
+          <Text style={styles.monthLegendText}>1 - Mal</Text>
+          <Text style={styles.monthLegendText}>2 - Regular</Text>
+          <Text style={styles.monthLegendText}>3 - Bien</Text>
+          <Text style={styles.monthLegendText}>4 - Excelente</Text>
         </View>
 
         <View style={ChartStyle.pieChartContainer}>
@@ -374,6 +374,26 @@ const MoodStats = ({ navigation }) => {
       {renderContent()}
     </SafeAreaView>
   );
+};
+
+const styles = {
+  monthLegendContainer: {
+    alignSelf: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginTop: 10,
+    marginBottom: 30,
+    width: "85%",
+  },
+  monthLegendText: {
+    color: "#f2f2f2",
+    fontFamily: "DoppioOne",
+    marginHorizontal: 0,
+    marginBottom: 8,
+    textAlign: "center",
+    width: "48%",
+  },
 };
 
 export default MoodStats;

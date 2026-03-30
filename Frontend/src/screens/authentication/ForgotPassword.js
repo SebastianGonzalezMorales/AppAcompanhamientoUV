@@ -12,7 +12,6 @@ import Constants from 'expo-constants';
 // Asigna API_URL desde la configuración
 const { API_URL } = Constants.expoConfig?.extra || {};
 
-
 // components
 import AuthButton from '../../components/buttons/AuthButton';
 import SmallAuthButton from '../../components/buttons/SmallAuthButton';
@@ -21,7 +20,6 @@ import SmallAuthButton from '../../components/buttons/SmallAuthButton';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AuthStyle from '../../assets/styles/AuthStyle';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const ForgotPassword = ({ navigation }) => {
   // states
@@ -33,65 +31,74 @@ const ForgotPassword = ({ navigation }) => {
    * *******************
    */
 
-  const validateEmail = (email) => {
-  const emailRegex = /^[a-zA-Z]+\.[a-zA-Z]+@estudiantes\.uv\.cl$/;
+  const validateEmail = (emailValue) => {
+    const emailRegex = /^[a-zA-Z]+\.[a-zA-Z]+@estudiantes\.uv\.cl$/;
 
-    return emailRegex.test(email);
+    return emailRegex.test(emailValue);
   };
-  
-  
+
+  const sanitizeEmail = (value) => value.replace(/\s+/g, '');
+
   // Función de recuperación de contraseña
   const handlePasswordRecovery = async () => {
     try {
+      const sanitizedEmail = sanitizeEmail(email).trim().toLowerCase();
 
-      if (!email.trim()) {
+      if (!sanitizedEmail) {
         return Alert.alert('Error', 'Por favor, ingresa tu correo institucional.');
       }
 
-      // Usar antes de enviar la solicitud
-      if (!validateEmail(email)) {
+      if (!validateEmail(sanitizedEmail)) {
         return Alert.alert('Error', 'Por favor, ingresa un correo institucional válido.');
       }
-      
-      // Convertir el correo electrónico a minúsculas
-      const lowercaseEmail = email.toLowerCase();
-      
-    // Enviar la solicitud al backend
-    const response = await api.post(`${API_URL}/password/forgot-password`, { email: lowercaseEmail });
-    console.log(response)
-    // Manejar la respuesta del backend
-    if (response.data.success) {
-      // Mostrar mensaje de éxito
-      Alert.alert('¡Correo enviado!', response.data.message);
 
-      // Guardar el correo electrónico en AsyncStorage
-      try {
-        await AsyncStorage.setItem('resetPasswordEmail', lowercaseEmail);
-        await AsyncStorage.setItem('resetPasswordAutoResume', 'true');
-        await AsyncStorage.setItem('resetPasswordRequestedAt', Date.now().toString());
-        console.log('Correo electrónico guardado exitosamente en AsyncStorage');
+      setEmail(sanitizedEmail);
 
-      } catch (error) {
-        console.error('Error al guardar en AsyncStorage:', error);
+      const response = await api.post(`${API_URL}/password/forgot-password`, {
+        email: sanitizedEmail,
+      });
+
+      console.log(response);
+
+      if (response.data.success) {
+        Alert.alert('Correo enviado', response.data.message);
+
+        try {
+          await AsyncStorage.setItem('resetPasswordEmail', sanitizedEmail);
+          await AsyncStorage.setItem('resetPasswordAutoResume', 'true');
+          await AsyncStorage.setItem(
+            'resetPasswordRequestedAt',
+            Date.now().toString()
+          );
+          console.log('Correo electrónico guardado exitosamente en AsyncStorage');
+        } catch (error) {
+          console.error('Error al guardar en AsyncStorage:', error);
+        }
+
+        navigation.replace('ChangePassword');
+      } else {
+        Alert.alert(
+          'Error',
+          response.data.message || 'Error al enviar el enlace de recuperación.'
+        );
+      }
+    } catch (error) {
+      if (error.response) {
+        Alert.alert(
+          'Error',
+          error.response.data.message || 'Algo salió mal. Intenta nuevamente.'
+        );
+      } else {
+        Alert.alert(
+          'Error',
+          'No se pudo conectar con el servidor. Por favor, revisa tu conexión.'
+        );
       }
 
-      // Navegar a la pantalla de cambio de contraseña
-      navigation.replace('ChangePassword');
-    } else {
-      alert(response.data.message || 'Error al enviar el enlace de recuperación.'); // Mensaje de error del backend
+      console.log('Error @handlePasswordRecovery:', error.response || error.message);
     }
-  } catch (error) {
- // Manejo de errores del backend
- if (error.response) {
-  // Mostrar mensaje basado en el error del backend
-  Alert.alert('Error', error.response.data.message || 'Algo salió mal. Intenta nuevamente.');
-} else {
-  // Error general en la solicitud
-  Alert.alert('Error', 'No se pudo conectar con el servidor. Por favor, revisa tu conexión.');
-}
-console.log('Error @handlePasswordRecovery:', error.response || error.message);
-  }
-};
+  };
+
   /*
    * ****************
    * **** Screen ****
@@ -131,28 +138,23 @@ console.log('Error @handlePasswordRecovery:', error.response || error.message);
             <TextInput
               autoCapitalize="none"
               keyboardType="email-address"
-              onChangeText={(text) => setEmail(text)}
+              onChangeText={(text) => setEmail(sanitizeEmail(text))}
               placeholder="Correo institucional"
               placeholderTextColor="#92959f"
               selectionColor="#5da5a9"
               style={AuthStyle.input}
+              value={email}
             />
           </View>
 
-          {/* Recover Password Button */}
           <AuthButton
             onPress={handlePasswordRecovery}
             text="Recuperar contraseña"
             iconName="lock-open"
-            
-           
-           
           />
 
           <View style={AuthStyle.changeScreenContainer}>
-            <Text style={AuthStyle.changeScreenText}>
-              ¿Recordaste tu contraseña?
-            </Text>
+            <Text style={AuthStyle.changeScreenText}>¿Recordaste tu contraseña?</Text>
             <SmallAuthButton
               text="Iniciar sesión"
               onPress={() => navigation.replace('Login')}

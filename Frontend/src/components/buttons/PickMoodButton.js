@@ -16,10 +16,10 @@ export default function PickMoodButton(props) {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    width: 84,
-    marginHorizontal: 4,
+    width: '23%',
+    marginHorizontal: 0,
     marginTop: 20,
-    flexShrink: 1,
+    marginBottom: 4,
   },
   subContainer: {
     alignItems: 'center',
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     paddingTop: 5,
     textAlign: 'center',
     flexShrink: 1,
-    width: '100%',
+    width: '90%',
     lineHeight: 14,
   },
 });

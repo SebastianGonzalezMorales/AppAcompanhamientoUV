@@ -1,5 +1,4 @@
 import {
-  FlatList,
   SafeAreaView,
   Text,
   View,
@@ -556,17 +555,17 @@ function DepressionTestMain({ navigation }) {
           </Text>
         ) : (
           // Finalmente, si no hay error y sí hay datos, mostramos la lista
-          <FlatList
-            data={results.slice(0, 10)}
-            keyExtractor={(item) => item.id}
+          <ScrollView
             nestedScrollEnabled={true}
             showsVerticalScrollIndicator={false}
             style={styles.previewList}
-            renderItem={({ item }) => {
+          >
+            {results.slice(0, 10).map((item) => {
               const severityStyles = getSeverityStyles(item.severity);
 
               return (
                 <DepressionResultButton
+                  key={item.id}
                   buttonStyle={{
                     backgroundColor: severityStyles.backgroundColor,
                     marginBottom: 10,
@@ -581,8 +580,8 @@ function DepressionTestMain({ navigation }) {
                   textStyle={{ color: severityStyles.textColor }}
                 />
               );
-            }}
-          />
+            })}
+          </ScrollView>
         )}
       </View>
       </ScrollView>
@@ -850,7 +849,7 @@ const styles = StyleSheet.create({
   },
   resultsCard: {
     flexGrow: 1,
-    paddingBottom: 110,
+    paddingBottom: 32,
   },
   previewList: {
     maxHeight: 170,

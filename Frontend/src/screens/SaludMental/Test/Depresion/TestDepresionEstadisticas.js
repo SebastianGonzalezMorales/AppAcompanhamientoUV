@@ -140,7 +140,7 @@ const QuestionnaireStats = ({ navigation }) => {
       >
         <View style={FormStyle.flexContainer}>
           <BackButton onPress={() => navigation.goBack()} />
-          <Text style={[FormStyle.title, { left: 40 }]}>Estadisticas por mes</Text>
+          <Text style={[FormStyle.title, { left: 40 }]}>Estadísticas por mes</Text>
         </View>
 
         <View style={styles.dropdownContainer}>
@@ -218,7 +218,7 @@ const QuestionnaireStats = ({ navigation }) => {
               />
 
               <Text style={styles.yAxisLabel}>Puntaje PHQ-9</Text>
-              <Text style={styles.xAxisLabel}>Dia del mes</Text>
+              <Text style={styles.xAxisLabel}>Día del mes</Text>
             </View>
           )}
         </View>

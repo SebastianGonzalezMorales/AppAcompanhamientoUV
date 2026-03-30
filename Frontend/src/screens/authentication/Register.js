@@ -1,5 +1,5 @@
 // react imports
-import { Image, Text, TextInput, View, TouchableOpacity } from "react-native";
+import { Image, Text, TextInput, View, TouchableOpacity, StyleSheet } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import React, { useState } from "react";
 import Svg, { Circle } from "react-native-svg";
@@ -533,24 +533,43 @@ const Register = ({ navigation }) => {
           </View>
 
           {/* Dropdown para Facultad */}
-          <View style={[AuthStyle.inputContainer, { position: "relative" }]}>
+          <View
+            style={[
+              AuthStyle.inputContainer,
+              styles.dateInputContainer,
+              styles.pickerFieldContainer,
+            ]}
+          >
             <MaterialCommunityIcons
               name="domain"
               size={24}
               color="#5da5a9"
               style={AuthStyle.icon}
             />
+            <Text
+              allowFontScaling
+              numberOfLines={2}
+              pointerEvents="none"
+              style={[
+                AuthStyle.input,
+                styles.dateFieldText,
+                !faculty && styles.datePlaceholderText,
+              ]}
+            >
+              {faculty || "Selecciona una facultad"}
+            </Text>
+            <MaterialCommunityIcons
+              name="chevron-down"
+              size={24}
+              color="#92959f"
+              pointerEvents="none"
+              style={styles.pickerChevron}
+            />
             <Picker
               selectedValue={faculty}
               onValueChange={(itemValue) => handleFacultadChange(itemValue)}
-              style={[
-                AuthStyle.input,
-                {
-                  backgroundColor: "transparent",
-                  width: "87%", // Asegura que el Picker ocupe todo el espacio disponible
-                  right: 16, // Ajusta este valor
-                },
-              ]}
+              style={[styles.hiddenPickerOverlay, styles.adaptivePickerInput]}
+              itemStyle={styles.adaptivePickerItem}
               enabled={Object.keys(facultiesData).length > 0}
               dropdownIconColor="#92959f"
             >
@@ -562,25 +581,54 @@ const Register = ({ navigation }) => {
           </View>
 
           {/* Dropdown para Carrera */}
-          <View style={[AuthStyle.inputContainer, { position: "relative" }]}>
+          <View
+            style={[
+              AuthStyle.inputContainer,
+              styles.dateInputContainer,
+              styles.pickerFieldContainer,
+            ]}
+          >
             <MaterialCommunityIcons
               name="school-outline" // Ícono para Carrera
               size={24}
               color="#5da5a9" // Color celeste igual al resto
               style={AuthStyle.icon} // Usa el mismo estilo que los otros íconos
             />
-            <Picker
-              selectedValue={career}
-              onValueChange={(itemValue) => setCareer(itemValue)}
+            <Text
+              allowFontScaling
+              numberOfLines={2}
+              pointerEvents="none"
               style={[
                 AuthStyle.input,
-                {
-                  backgroundColor: "transparent",
-                  width: "87%", // Asegura que el Picker ocupe todo el espacio disponible
-                  right: 16, // Ajusta este valor
-                },
+                styles.dateFieldText,
+                !career && styles.datePlaceholderText,
               ]}
-              enabled={careersAvailable.length > 0} // Solo habilitado si hay carreras disponibles
+            >
+              {career || "Selecciona una carrera"}
+            </Text>
+            <MaterialCommunityIcons
+              name="chevron-down"
+              size={24}
+              color="#92959f"
+              pointerEvents="none"
+              style={styles.pickerChevron}
+            />
+            <Picker
+              selectedValue={career}
+              onValueChange={(itemValue) => {
+                if (!faculty) {
+                  Alert.alert("Atención", "Primero selecciona una facultad.");
+                  return;
+                }
+
+                setCareer(itemValue);
+              }}
+              style={[
+                styles.hiddenPickerOverlay,
+                styles.adaptivePickerInput,
+              ]}
+              itemStyle={styles.adaptivePickerItem}
+              enabled={true}
               dropdownIconColor="#92959f" // Color de la flecha predeterminada
             >
               <Picker.Item label="Selecciona una carrera" value="" />
@@ -592,12 +640,13 @@ const Register = ({ navigation }) => {
 
           <TouchableOpacity
             onPress={() => setShowDatePicker(true)}
-            style={AuthStyle.inputContainer} // Aplica los mismos estilos
+            style={[AuthStyle.inputContainer, styles.dateInputContainer]} // Aplica los mismos estilos
           >
             <View
               style={{
                 flexDirection: "row",
                 alignItems: "center",
+                minWidth: 0,
                 width: "100%",
               }}
             >
@@ -606,13 +655,22 @@ const Register = ({ navigation }) => {
                 size={24}
                 style={AuthStyle.icon}
               />
-              <TextInput
-                value={birthdate}
-                placeholder="Selecciona tu fecha de nacimiento"
-                placeholderTextColor="#92959f"
-                style={[AuthStyle.input, { flex: 1 }]} // Asegura que ocupe el ancho restante
-                editable={false}
-                pointerEvents="none"
+              <Text
+                allowFontScaling
+                numberOfLines={2}
+                style={[
+                  AuthStyle.input,
+                  styles.dateFieldText,
+                  !birthdate && styles.datePlaceholderText,
+                ]}
+              >
+                {birthdate || "Selecciona tu fecha de nacimiento"}
+              </Text>
+              <MaterialCommunityIcons
+                name="chevron-down"
+                size={24}
+                color="#92959f"
+                style={styles.pickerChevron}
               />
             </View>
           </TouchableOpacity>
@@ -732,5 +790,54 @@ const Register = ({ navigation }) => {
     </KeyboardAwareScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  adaptivePickerInput: {
+    backgroundColor: "transparent",
+    flex: 1,
+    marginLeft: 4,
+    minWidth: 0,
+    paddingRight: 36,
+    right: 0,
+    width: "100%",
+  },
+  adaptivePickerItem: {
+    fontSize: 15,
+  },
+  dateInputContainer: {
+    height: "auto",
+    minHeight: 60,
+  },
+  dateFieldText: {
+    flex: 1,
+    flexShrink: 1,
+    lineHeight: 20,
+    marginLeft: 10,
+    minWidth: 0,
+    paddingRight: 8,
+    width: "auto",
+  },
+  datePlaceholderText: {
+    color: "#92959f",
+  },
+  pickerFieldContainer: {
+    position: "relative",
+  },
+  pickerChevron: {
+    marginRight: 16,
+  },
+  hiddenPickerOverlay: {
+    bottom: 0,
+    color: "transparent",
+    height: "100%",
+    left: 0,
+    opacity: 0,
+    position: "absolute",
+    right: 0,
+    top: 0,
+    width: "100%",
+    zIndex: 2,
+  },
+});
 
 export default Register;

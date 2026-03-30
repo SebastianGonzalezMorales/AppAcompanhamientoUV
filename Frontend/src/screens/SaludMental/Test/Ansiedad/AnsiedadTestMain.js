@@ -196,7 +196,7 @@ function AnsiedadTestMain({ navigation }) {
       </View>
 
             {/* Sección de estadísticas y resultados */}
-            <View style={GlobalStyle.rowTwo}>
+            <View style={[GlobalStyle.rowTwo, styles.resultsCard]}>
         <View style={GlobalStyle.statsContainer}>
           <Text style={GlobalStyle.statsTitle}>Estadísticas</Text>
           <StatsButton
@@ -310,7 +310,10 @@ function AnsiedadTestMain({ navigation }) {
 
 const styles = StyleSheet.create({ 
   screenContent: {
-    paddingBottom: 110,
+    paddingBottom: 0,
+  },
+  resultsCard: {
+    paddingBottom: 32,
   },
 
   floatingButtonContainer: {

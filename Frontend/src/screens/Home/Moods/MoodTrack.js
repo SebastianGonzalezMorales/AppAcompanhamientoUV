@@ -31,6 +31,7 @@ const { API_URL } = Constants.expoConfig?.extra || {};
 
 const MoodTrack = ({ route, navigation }) => {
   const { mood, value } = route.params;
+  const activityColumns = 3;
 
   const [title, setTitle] = useState("");
   const [quickNote, setQuickNote] = useState("");
@@ -163,11 +164,19 @@ const MoodTrack = ({ route, navigation }) => {
               <FlatList
                 data={activities}
                 scrollEnabled={false}
-                numColumns={2}
+                numColumns={activityColumns}
+                key={activityColumns}
                 keyExtractor={(item) => item.id.toString()}
                 columnWrapperStyle={styles.activitiesRow}
                 renderItem={({ item }) => (
-                  <View style={styles.activityItemWrapper}>
+                  <View
+                    style={[
+                      styles.activityItemWrapper,
+                      activityColumns === 4
+                        ? styles.activityItemWrapperFourColumns
+                        : styles.activityItemWrapperThreeColumns,
+                    ]}
+                  >
                     <TouchableOpacity onPress={() => selectHandler(item)}>
                       <View
                         style={[
@@ -263,16 +272,21 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   activityItemWrapper: {
-    width: "48%",
     marginBottom: 12,
+  },
+  activityItemWrapperFourColumns: {
+    width: "23%",
+  },
+  activityItemWrapperThreeColumns: {
+    width: "31%",
   },
   activityCard: {
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 10,
-    minHeight: 112,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
+    minHeight: 104,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
   },
   activityIcon: {
     marginBottom: 10,
@@ -280,8 +294,8 @@ const styles = StyleSheet.create({
   activityText: {
     color: "#f2f2f2",
     fontFamily: "DoppioOne",
-    fontSize: 14,
+    fontSize: 13,
     textAlign: "center",
-    lineHeight: 18,
+    lineHeight: 16,
   },
 });
