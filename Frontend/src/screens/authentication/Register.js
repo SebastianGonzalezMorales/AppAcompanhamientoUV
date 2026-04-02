@@ -48,6 +48,9 @@ const Register = ({ navigation }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("+569 "); // Inicializa con el prefijo
 
+  const sanitizeEmail = (value) => value.replace(/\s+/g, "");
+  const sanitizePasswordEdges = (value) => value.replace(/^\s+|\s+$/g, "");
+
   /*
    * *******************
    * **** Functions ****
@@ -266,16 +269,24 @@ const Register = ({ navigation }) => {
     confirmPassword
   ) => {
     try {
+      const sanitizedEmail = sanitizeEmail(email).trim().toLowerCase();
+      const sanitizedPassword = sanitizePasswordEdges(password).trim();
+      const sanitizedConfirmPassword = sanitizePasswordEdges(confirmPassword).trim();
+
+      setEmail(sanitizedEmail);
+      setPassword(sanitizedPassword);
+      setConfirmPassword(sanitizedConfirmPassword);
+
       console.log(" ");
       console.log(fullName);
       console.log(rut);
-      console.log(email);
+      console.log(sanitizedEmail);
       console.log(faculty);
       console.log(career);
       console.log(birthdate);
       console.log(phoneNumber);
-      console.log(password);
-      console.log(confirmPassword);
+      console.log(sanitizedPassword);
+      console.log(sanitizedConfirmPassword);
       console.log(" ");
 
       // Validación de nombre y apellido
@@ -341,14 +352,14 @@ const Register = ({ navigation }) => {
         return;
       }
 
-      if (!email.trim()) {
+      if (!sanitizedEmail) {
         Alert.alert("Error", "Por favor, ingresa tu correo electrónico.", [
           { text: "OK" },
         ]);
         return;
       }
 
-      if (!validateEmail(email)) {
+      if (!validateEmail(sanitizedEmail)) {
         Alert.alert(
           "Error",
           "Correo electrónico inválido. Por favor, utiliza el formato nombre.apellido@estudiantes.uv.cl.",
@@ -357,8 +368,7 @@ const Register = ({ navigation }) => {
         return;
       }
 
-      const trimmedPassword = password.trim();
-      if (!isStrongPassword(trimmedPassword)) {
+      if (!isStrongPassword(sanitizedPassword)) {
         Alert.alert(
           "Error",
           "La contraseña debe tener al menos 8 caracteres, incluyendo una letra mayúscula, una letra minúscula, un número y un símbolo.",
@@ -367,7 +377,7 @@ const Register = ({ navigation }) => {
         return;
       }
 
-      if (password !== confirmPassword) {
+      if (sanitizedPassword !== sanitizedConfirmPassword) {
         Alert.alert(
           "Error",
           "Las contraseñas no coinciden. Por favor, verifica que ambas sean iguales.",
@@ -380,9 +390,9 @@ const Register = ({ navigation }) => {
       const userData = {
         name: fullName,
         rut: rut,
-        email: email,
-        password: password,
-        confirmPassword: confirmPassword,
+        email: sanitizedEmail,
+        password: sanitizedPassword,
+        confirmPassword: sanitizedConfirmPassword,
         birthdate: birthdate,
         career: career,
         faculty: faculty,
@@ -524,11 +534,12 @@ const Register = ({ navigation }) => {
             <TextInput
               autoCapitalize="none"
               keyboardType="Email address"
-              onChangeText={(text) => setEmail(text)} // every time the text changes, we can set the email to that text (callback function)
+              onChangeText={(text) => setEmail(sanitizeEmail(text))}
               placeholder="Correo institucional"
               placeholderTextColor="#92959f"
               selectionColor="#5da5a9"
               style={AuthStyle.input}
+              value={email}
             />
           </View>
 
@@ -710,12 +721,15 @@ const Register = ({ navigation }) => {
               style={AuthStyle.icon}
             />
             <TextInput
-              onChangeText={(text) => setPassword(text)}
+              onChangeText={(text) =>
+                setPassword(sanitizePasswordEdges(text))
+              }
               placeholder="Contraseña"
               placeholderTextColor="#92959f"
               secureTextEntry={!showPassword}
               selectionColor="#5da5a9"
               style={AuthStyle.input}
+              value={password}
             />
             <TouchableOpacity
               onPress={() => setShowPassword(!showPassword)}
@@ -739,12 +753,15 @@ const Register = ({ navigation }) => {
               style={AuthStyle.icon}
             />
             <TextInput
-              onChangeText={(text) => setConfirmPassword(text)}
+              onChangeText={(text) =>
+                setConfirmPassword(sanitizePasswordEdges(text))
+              }
               placeholder="Confirmar contraseña"
               placeholderTextColor="#92959f"
               secureTextEntry={!showPassword}
               selectionColor="#5da5a9"
               style={AuthStyle.input}
+              value={confirmPassword}
             />
             {/*  Botón para mostrar/ocultar contraseña  */}
             <TouchableOpacity

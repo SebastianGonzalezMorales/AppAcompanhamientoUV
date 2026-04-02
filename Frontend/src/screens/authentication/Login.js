@@ -103,10 +103,11 @@ const Login = ({ navigation }) => {
   const handleLogin = async (emailValue, passwordValue) => {
     try {
       // Convertir el correo electrónico a minúsculas
-      const lowercaseEmail = emailValue.toLowerCase();
+      const sanitizedEmail = emailValue.trim().toLowerCase();
+      const sanitizedPassword = passwordValue.trim();
       const response = await api.post(`${API_URL}/auth/login`, {
-        email: lowercaseEmail,
-        password: passwordValue,
+        email: sanitizedEmail,
+        password: sanitizedPassword,
       });
 
       const { token } = response.data;
@@ -234,11 +235,12 @@ const Login = ({ navigation }) => {
             <TextInput
               autoCapitalize="none"
               keyboardType="email-address"
-              onChangeText={(text) => setEmail(text)}
+              onChangeText={(text) => setEmail(text.replace(/\s+/g, ''))}
               placeholder="Correo institucional"
               placeholderTextColor="#92959f"
               selectionColor="#5da5a9"
               style={AuthStyle.input}
+              value={email}
             />
           </View>
           <View style={AuthStyle.inputContainer}>
@@ -248,12 +250,15 @@ const Login = ({ navigation }) => {
               style={AuthStyle.icon}
             />
             <TextInput
-              onChangeText={(text) => setPassword(text)}
+              onChangeText={(text) =>
+                setPassword(text.replace(/^\s+|\s+$/g, ''))
+              }
               placeholder="Contraseña"
               placeholderTextColor="#92959f"
               secureTextEntry={!showPassword}
               selectionColor="#5da5a9"
               style={AuthStyle.input}
+              value={password}
             />
             <TouchableOpacity
               onPress={() => setShowPassword(!showPassword)}
@@ -270,15 +275,21 @@ const Login = ({ navigation }) => {
           {/* buttons */}
           <AuthButton
             onPress={() => {
-              if (!email) {
+              const sanitizedEmail = email.trim();
+              const sanitizedPassword = password.trim();
+
+              setEmail(sanitizedEmail);
+              setPassword(sanitizedPassword);
+
+              if (!sanitizedEmail) {
                 Alert.alert('Error', 'Por favor, ingresa tu correo electrónico.');
                 return;
               }
-              if (!password) {
+              if (!sanitizedPassword) {
                 Alert.alert('Error', 'Por favor, ingresa tu contraseña.');
                 return;
               }
-              handleLogin(email, password);
+              handleLogin(sanitizedEmail, sanitizedPassword);
             }}
             text="Ingresar"
             iconName="log-in"
