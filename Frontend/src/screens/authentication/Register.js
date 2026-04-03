@@ -50,6 +50,9 @@ const Register = ({ navigation }) => {
 
   const sanitizeEmail = (value) => value.replace(/\s+/g, "");
   const sanitizePasswordEdges = (value) => value.replace(/^\s+|\s+$/g, "");
+  const handlePasswordChange = (value) => setPassword(sanitizePasswordEdges(value));
+  const handleConfirmPasswordChange = (value) =>
+    setConfirmPassword(sanitizePasswordEdges(value));
 
   /*
    * *******************
@@ -721,9 +724,7 @@ const Register = ({ navigation }) => {
               style={AuthStyle.icon}
             />
             <TextInput
-              onChangeText={(text) =>
-                setPassword(sanitizePasswordEdges(text))
-              }
+              onChangeText={handlePasswordChange}
               placeholder="Contraseña"
               placeholderTextColor="#92959f"
               secureTextEntry={!showPassword}
@@ -753,9 +754,7 @@ const Register = ({ navigation }) => {
               style={AuthStyle.icon}
             />
             <TextInput
-              onChangeText={(text) =>
-                setConfirmPassword(sanitizePasswordEdges(text))
-              }
+              onChangeText={handleConfirmPasswordChange}
               placeholder="Confirmar contraseña"
               placeholderTextColor="#92959f"
               secureTextEntry={!showPassword}

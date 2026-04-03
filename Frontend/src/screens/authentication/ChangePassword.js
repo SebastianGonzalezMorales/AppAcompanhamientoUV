@@ -28,6 +28,10 @@ const ChangePassword = ({ navigation }) => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const sanitizePasswordEdges = (value) => value.replace(/^\s+|\s+$/g, '');
+  const handleNewPasswordChange = (value) => setNewPassword(sanitizePasswordEdges(value));
+  const handleConfirmPasswordChange = (value) =>
+    setConfirmPassword(sanitizePasswordEdges(value));
 
   useFocusEffect(
     React.useCallback(() => {
@@ -73,19 +77,25 @@ const ChangePassword = ({ navigation }) => {
    */
 
   const handleChangePassword = async () => {
+    const sanitizedNewPassword = sanitizePasswordEdges(newPassword).trim();
+    const sanitizedConfirmPassword = sanitizePasswordEdges(confirmPassword).trim();
+
+    setNewPassword(sanitizedNewPassword);
+    setConfirmPassword(sanitizedConfirmPassword);
+
     // Validar si los campos están vacíos
-    if (!newPassword) {
+    if (!sanitizedNewPassword) {
       Alert.alert("Error", "Por favor, ingresa la nueva contraseña.");
       return;
     }
 
-    if (!confirmPassword) {
+    if (!sanitizedConfirmPassword) {
       Alert.alert("Error", "Por favor, confirma tu contraseña.");
       return;
     }
 
     // Validar si las contraseñas coinciden
-    if (newPassword !== confirmPassword) {
+    if (sanitizedNewPassword !== sanitizedConfirmPassword) {
       Alert.alert("Error", "Las contraseñas ingresadas no coinciden. Por favor, verifica y vuelve a intentarlo.");
       return;
     }
@@ -117,8 +127,8 @@ const ChangePassword = ({ navigation }) => {
       `${API_URL}/password/change-password`,
       {
         token: token,
-        newPassword: newPassword,
-        confirmPassword: confirmPassword,
+        newPassword: sanitizedNewPassword,
+        confirmPassword: sanitizedConfirmPassword,
       }
     );
 
@@ -180,7 +190,8 @@ return (
             secureTextEntry={!showPassword}
             selectionColor="#5da5a9"
             style={AuthStyle.input}
-            onChangeText={(text) => setNewPassword(text)}
+            onChangeText={handleNewPasswordChange}
+            value={newPassword}
           />
           <TouchableOpacity
             onPress={() => setShowPassword(!showPassword)}
@@ -207,7 +218,8 @@ return (
             secureTextEntry={!showPassword}
             selectionColor="#5da5a9"
             style={AuthStyle.input}
-            onChangeText={(text) => setConfirmPassword(text)}
+            onChangeText={handleConfirmPasswordChange}
+            value={confirmPassword}
           />
           <TouchableOpacity
             onPress={() => setShowPassword(!showPassword)}

@@ -39,6 +39,8 @@ const Login = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [hasPasswordRecoveryToResume, setHasPasswordRecoveryToResume] = useState(false);
+  const sanitizePasswordEdges = (value) => value.replace(/^\s+|\s+$/g, '');
+  const handlePasswordChange = (value) => setPassword(sanitizePasswordEdges(value));
 
   /*
    * *******************
@@ -250,9 +252,7 @@ const Login = ({ navigation }) => {
               style={AuthStyle.icon}
             />
             <TextInput
-              onChangeText={(text) =>
-                setPassword(text.replace(/^\s+|\s+$/g, ''))
-              }
+              onChangeText={handlePasswordChange}
               placeholder="Contraseña"
               placeholderTextColor="#92959f"
               secureTextEntry={!showPassword}
@@ -276,7 +276,7 @@ const Login = ({ navigation }) => {
           <AuthButton
             onPress={() => {
               const sanitizedEmail = email.trim();
-              const sanitizedPassword = password.trim();
+              const sanitizedPassword = sanitizePasswordEdges(password).trim();
 
               setEmail(sanitizedEmail);
               setPassword(sanitizedPassword);
