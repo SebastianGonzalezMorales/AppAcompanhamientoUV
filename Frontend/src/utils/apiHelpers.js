@@ -21,6 +21,7 @@ export const fetchWithToken = async (
     const config = {
       method,
       url: `${API_URL}${endpoint}`,
+      timeout: 6000,
       headers: {
         Authorization: `Bearer ${token}`,
       },
