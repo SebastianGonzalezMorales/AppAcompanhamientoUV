@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   heroText: {
-    textAlign: 'left',
+    textAlign: 'justify',
     color: '#FFFFFF',
     lineHeight: 24,
   },

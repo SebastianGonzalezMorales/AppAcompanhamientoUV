@@ -159,17 +159,17 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   heroTitle: {
-    textAlign: "left",
+    textAlign: "justify",
     color: "#FFFFFF",
     paddingTop: 10,
   },
   heroText: {
-    textAlign: "left",
+    textAlign: "justify",
     color: "#FFFFFF",
     lineHeight: 24,
   },
   highlightText: {
-    textAlign: "left",
+    textAlign: "justify",
     fontWeight: "bold",
     color: "#FFD700",
     lineHeight: 24,

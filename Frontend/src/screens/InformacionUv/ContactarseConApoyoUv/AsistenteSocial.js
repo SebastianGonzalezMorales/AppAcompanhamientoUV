@@ -219,12 +219,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#000C7B",
   },
   heroSmallTitle: {
-    textAlign: "left",
+    textAlign: "justify",
     color: "#FFFFFF",
     paddingTop: 10,
   },
   heroText: {
-    textAlign: "left",
+    textAlign: "justify",
     color: "#FFFFFF",
     lineHeight: 24,
   },

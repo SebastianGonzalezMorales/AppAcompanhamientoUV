@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     paddingBottom: 14,
   },
   heroText: {
-    textAlign: 'left',
+    textAlign: 'justify',
     lineHeight: 24,
   },
   heroImage: {

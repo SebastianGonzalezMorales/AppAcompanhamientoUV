@@ -566,7 +566,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   questionText: {
-    textAlign: "left",
+    textAlign: "justify",
     marginBottom: 8,
     fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
   },
@@ -596,7 +596,7 @@ const styles = StyleSheet.create({
   },
   quoteText: {
     width: "100%",
-    textAlign: "left",
+    textAlign: "justify",
     lineHeight: 24,
     flexShrink: 1,
   },

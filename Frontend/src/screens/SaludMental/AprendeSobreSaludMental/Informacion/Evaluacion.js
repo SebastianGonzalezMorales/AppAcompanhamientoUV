@@ -103,7 +103,7 @@ function Evaluacion({ navigation }) {
 const styles = StyleSheet.create({
   description: {
     fontSize: 14,
-    textAlign: 'left',
+    textAlign: 'justify',
     marginTop: 10,
     marginHorizontal: 15,
   },

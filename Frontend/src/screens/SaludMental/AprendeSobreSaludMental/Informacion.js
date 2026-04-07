@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   heroText: {
-    textAlign: 'left',
+    textAlign: 'justify',
     lineHeight: 24,
   },
   contentCard: {

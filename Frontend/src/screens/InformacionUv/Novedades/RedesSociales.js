@@ -133,10 +133,10 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   heroSubtitle: {
-    textAlign: 'left',
+    textAlign: 'justify',
   },
   heroText: {
-    textAlign: 'left',
+    textAlign: 'justify',
     lineHeight: 24,
   },
   contentCard: {

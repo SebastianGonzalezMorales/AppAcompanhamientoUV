@@ -145,7 +145,7 @@ const MoodDetails = ({ route, navigation }) => {
                 style={[
                   GlobalStyle.subtitle,
                   {
-                    textAlign: "left",
+                    textAlign: "justify",
                     fontFamily: "CustomFontForQuestion", // Estilo específico para el signo de pregunta
                   },
                 ]}
@@ -156,7 +156,7 @@ const MoodDetails = ({ route, navigation }) => {
                 style={[
                   GlobalStyle.subtitle, // Manteniendo el estilo original
                   {
-                    textAlign: "left",
+                    textAlign: "justify",
                     marginLeft: -60, // Ajuste fino para eliminar el espacio grande
                   },
                 ]}

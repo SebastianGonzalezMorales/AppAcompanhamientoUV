@@ -138,9 +138,10 @@ const QuestionnaireStats = ({ navigation }) => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={FormStyle.flexContainer}>
+        <View style={styles.headerContainer}>
           <BackButton onPress={() => navigation.goBack()} />
-          <Text style={[FormStyle.title, { left: 40 }]}>Estadísticas por mes</Text>
+          <Text style={styles.headerTitle}>Estadísticas por mes</Text>
+          <View style={styles.headerSpacer} />
         </View>
 
         <View style={styles.dropdownContainer}>
@@ -271,6 +272,23 @@ const QuestionnaireStats = ({ navigation }) => {
 export default QuestionnaireStats;
 
 const styles = StyleSheet.create({
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  headerTitle: {
+    flex: 1,
+    flexShrink: 1,
+    color: "#f2f2f2",
+    fontFamily: "DoppioOne",
+    fontSize: 20,
+    textAlign: "center",
+    marginTop: 20,
+    paddingHorizontal: 12,
+  },
+  headerSpacer: {
+    width: 70,
+  },
   scrollContent: {
     paddingBottom: 40,
   },

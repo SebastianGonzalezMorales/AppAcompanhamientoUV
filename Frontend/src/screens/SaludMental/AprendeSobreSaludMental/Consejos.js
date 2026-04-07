@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   heroText: {
-    textAlign: 'left',
+    textAlign: 'justify',
     lineHeight: 24,
   },
   centeredContainer: {

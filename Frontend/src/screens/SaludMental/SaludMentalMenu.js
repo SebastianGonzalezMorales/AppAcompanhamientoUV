@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   heroText: {
-    textAlign: 'left',
+    textAlign: 'justify',
     color: '#FFFFFF',
     flexShrink: 1,
     lineHeight: 24,

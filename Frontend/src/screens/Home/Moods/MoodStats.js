@@ -341,11 +341,12 @@ const MoodStats = ({ navigation }) => {
 
   return (
     <SafeAreaView style={[FormStyle.container, GlobalStyle.androidSafeArea]}>
-      <View style={FormStyle.flexContainer}>
+      <View style={styles.headerContainer}>
         <BackButton onPress={() => navigation.goBack()} />
-        <Text style={[FormStyle.title, { left: 30 }]}>
+        <Text style={styles.headerTitle}>
           Estadísticas por mes
         </Text>
+        <View style={styles.headerSpacer} />
       </View>
 
       <View style={{ paddingHorizontal: 30, marginVertical: 20 }}>
@@ -377,6 +378,23 @@ const MoodStats = ({ navigation }) => {
 };
 
 const styles = {
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  headerTitle: {
+    flex: 1,
+    flexShrink: 1,
+    color: "#f2f2f2",
+    fontFamily: "DoppioOne",
+    fontSize: 20,
+    textAlign: "center",
+    marginTop: 20,
+    paddingHorizontal: 12,
+  },
+  headerSpacer: {
+    width: 70,
+  },
   monthLegendContainer: {
     alignSelf: "center",
     flexDirection: "row",

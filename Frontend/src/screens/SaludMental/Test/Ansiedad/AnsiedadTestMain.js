@@ -151,7 +151,7 @@ function AnsiedadTestMain({ navigation }) {
 
       <View style={{ minHeight: 320, paddingBottom: 16 }}>
         <Text style={GlobalStyle.welcomeText}>Test GAD-7</Text>
-        <Text style={[GlobalStyle.subtitle, { textAlign: 'left', marginTop: 8 }]}>Test de Ansiedad Generalizada</Text>
+        <Text style={[GlobalStyle.subtitle, { textAlign: 'justify', marginTop: 8 }]}>Test de Ansiedad Generalizada</Text>
         <Text style={[GlobalStyle.text, { textAlign: 'justify' }]}> El cuestionario GAD-7 es una herramienta que se utiliza para medir la
           gravedad de la ansiedad a través de siete preguntas. Ayuda a
           identificar a las personas que pueden requerir una evaluación o
@@ -192,7 +192,7 @@ function AnsiedadTestMain({ navigation }) {
 
 
         <View style={GlobalStyle.line} />
-        <Text style={[GlobalStyle.text, { textAlign: 'left' }]}>Última prueba realizada: {isLoading ? 'Cargando...' : lastTest}</Text>
+        <Text style={[GlobalStyle.text, { textAlign: 'justify' }]}>Última prueba realizada: {isLoading ? 'Cargando...' : lastTest}</Text>
       </View>
 
             {/* Sección de estadísticas y resultados */}

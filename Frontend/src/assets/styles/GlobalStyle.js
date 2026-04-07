@@ -1,27 +1,14 @@
 import { StatusBar, StyleSheet, Platform } from 'react-native';
 
 export default StyleSheet.create({
-  // android
   androidSafeArea: {
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
 
-  // containers
   container: {
     backgroundColor: '#000C7B',
     flex: 1,
-
   },
-/*   rowTwo: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    flex: 1,
-    paddingLeft: 30,
-    paddingRight: 30,
-    marginBottom: 20,  // Espacio entre secciones
-  },
- */
 
   rowTwo: {
     backgroundColor: '#fff',
@@ -32,14 +19,13 @@ export default StyleSheet.create({
     paddingRight: 30,
   },
 
-
   titleWhite: {
     color: '#000C7B',
     fontFamily: 'DoppioOne',
     fontSize: 20,
     paddingTop: 20,
-    paddingBottom: 10,  // Espacio entre el título y la siguiente sección
-    textAlign: 'left',  // Alineación a la izquierda
+    paddingBottom: 10,
+    textAlign: 'justify',
   },
 
   titleWhitee: {
@@ -47,8 +33,8 @@ export default StyleSheet.create({
     fontFamily: 'DoppioOne',
     fontSize: 20,
     paddingTop: 20,
-    paddingBottom: 10,  // Espacio entre el título y la siguiente sección
-    textAlign: 'left',  // Alineación a la izquierda
+    paddingBottom: 10,
+    textAlign: 'justify',
   },
 
   subtitleBlack: {
@@ -56,10 +42,9 @@ export default StyleSheet.create({
     fontFamily: 'DoppioOne',
     fontSize: 16,
     paddingTop: 5,
-    textAlign: 'left',
+    textAlign: 'justify',
   },
 
-  // Contenedor exterior para el borde negro
   outerContainer: {
     width: 95,
     height: 95,
@@ -68,38 +53,37 @@ export default StyleSheet.create({
     borderColor: '#000C7B',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',  // Agregar sombra
-    shadowOffset: { width: 0, height: 4 },  // Desplazamiento de la sombra
-    shadowOpacity: 0.3,  // Opacidad de la sombra
-    shadowRadius: 4,  // Difusión de la sombra
-    elevation: 5,  // Para que funcione en Android
-    backgroundColor: '#fff',  // Fondo blanco para resaltar el botón
-    marginHorizontal: 10,   // Añadir espacio horizontal entre los botones
-    marginBottom: 20,  // Aumentar el espacio debajo del contenedor
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+    backgroundColor: '#fff',
+    marginHorizontal: 10,
+    marginBottom: 20,
   },
 
-  // La imagen en sí
   storyImage: {
-    width: '100%',  // La imagen ocupa todo el ancho del contenedor
-    height: '100%',  // La imagen ocupa todo el alto del contenedor
-    borderRadius: 50,  // Mantener la imagen redondeada dentro del contenedor blanco
-    resizeMode: 'cover',  // Ajustar la imagen sin distorsionar
+    width: '100%',
+    height: '100%',
+    borderRadius: 50,
+    resizeMode: 'cover',
   },
-  // Contenedor de las historias
+
   storiesContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    flexWrap: 'wrap',  // Permite que las filas se ajusten
+    flexWrap: 'wrap',
     padding: 10,
     marginBottom: 20,
   },
+
   row: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
-    marginBottom: 80, //Aumentar el espacio entre filas
+    marginBottom: 80,
   },
 
-  // row one
   welcomeText: {
     color: '#f2f2fc',
     fontFamily: 'DoppioOne',
@@ -107,6 +91,7 @@ export default StyleSheet.create({
     paddingLeft: 30,
     paddingTop: 20,
   },
+
   subtitle: {
     color: '#f2f2fc',
     fontFamily: 'DoppioOne',
@@ -115,7 +100,6 @@ export default StyleSheet.create({
     paddingRight: 30,
     paddingTop: 30,
     textAlign: 'justify',
-    
   },
 
   subtitleMenu: {
@@ -126,8 +110,8 @@ export default StyleSheet.create({
     paddingRight: 30,
     paddingTop: 30,
     textAlign: 'justify',
-    
   },
+
   text: {
     color: '#f2f2fc',
     fontFamily: 'DoppioOne',
@@ -135,17 +119,15 @@ export default StyleSheet.create({
     paddingLeft: 30,
     paddingRight: 30,
     paddingTop: 20,
-    textAlign: 'center',
+    textAlign: 'justify',
   },
 
-  // mood
   moodsContainer: {
     backgroundColor: 'transparent',
     flexDirection: 'row',
     justifyContent: 'center',
   },
 
-  // statistics
   statsTitle: {
     color: '#5c6169',
     fontFamily: 'DoppioOne',
@@ -153,14 +135,12 @@ export default StyleSheet.create({
     paddingTop: 26,
   },
 
-  // settings button container
   buttonContainer: {
     marginTop: 30,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  // circular button (questionnaire & medication)
   circularButtonContainer: {
     position: 'absolute',
     bottom: 0,
@@ -169,7 +149,6 @@ export default StyleSheet.create({
     marginBottom: 30,
   },
 
-  // line (questionnaire)
   line: {
     marginTop: 20,
     borderBottomColor: '#f2f2f2',
@@ -178,12 +157,12 @@ export default StyleSheet.create({
     marginRight: 215,
   },
 
-  // calendar (medication)
   calendarContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 20,
   },
+
   selectDate: {
     width: 30,
     height: 30,
@@ -191,23 +170,25 @@ export default StyleSheet.create({
     alignItems: 'center',
     marginHorizontal: 8,
   },
+
   daysContainer: {
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 5,
   },
+
   daysText: {
     color: '#f2f2f2',
     fontFamily: 'DoppioOne',
     fontSize: 14,
   },
 
-  // line (counselling)
   counsellingLine: {
     marginTop: 20,
     borderBottomColor: '#f2f2f2',
     borderBottomWidth: 1,
   },
+
   quoteText: {
     fontSize: 16,
     fontStyle: 'italic',
@@ -215,26 +196,25 @@ export default StyleSheet.create({
   },
 
   responseBox: {
-    backgroundColor: '#F0F4F8', // Fondo claro para destacar el recuadro
+    backgroundColor: '#F0F4F8',
     borderRadius: 8,
     padding: 15,
     marginVertical: 5,
     borderWidth: 1,
-    borderColor: '#B0BEC5', // Color de borde para definir el recuadro
+    borderColor: '#B0BEC5',
   },
+
   buttonIcon: {
     fontSize: 18,
-    color: '#00796B', // Color de la flecha para que sea visible
+    color: '#00796B',
   },
+
   sectionContent: {
-    textAlign: 'justify', // Para justificar el texto
-    color: '#424242', // Color del texto
-    fontSize: 14, // Tamaño de la fuente
-    lineHeight: 20, // Espaciado entre líneas para mejor legibilidad
-    paddingHorizontal: 1, // Espaciado horizontal dentro del recuadro
-    paddingVertical: 5, // Espaciado vertical dentro del recuadro
+    textAlign: 'justify',
+    color: '#424242',
+    fontSize: 14,
+    lineHeight: 20,
+    paddingHorizontal: 1,
+    paddingVertical: 5,
   },
-  
-
-
 });

@@ -453,7 +453,7 @@ function DepressionTestMain({ navigation }) {
       >
       <View style={{ minHeight: 320, paddingBottom: 16 }}>
         <Text style={GlobalStyle.welcomeText}>Test PHQ-9</Text>
-        <Text style={[GlobalStyle.subtitle, { marginTop: 8, textAlign: "left" }]}>
+        <Text style={[GlobalStyle.subtitle, { marginTop: 8, textAlign: "justify" }]}>
           Test de depresión
         </Text>
 
@@ -502,7 +502,7 @@ function DepressionTestMain({ navigation }) {
 
         <View style={GlobalStyle.line} />
 
-        <Text style={[GlobalStyle.text, { textAlign: "left" }]}>
+        <Text style={[GlobalStyle.text, { textAlign: "justify" }]}>
           Última prueba realizada:{" "}
           {isLoading
             ? "Cargando..."
