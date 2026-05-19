@@ -3,12 +3,12 @@ function errorHandler(err, req, res, next) {
         //Jwt authentication error
         //Esto aparece ya que el usuario tiene que
         // enviar el token para poder realizar las peticiones
-        res.status(401).json({message: "The user is not authorized"})
+        return res.status(401).json({message: "The user is not authorized"})
     }
     
     if (err.name === 'ValidationError') {
         // Validation error
-        res.status(500).json({message: err})
+        return res.status(500).json({message: err})
     } 
 
     // Default to 500 server error

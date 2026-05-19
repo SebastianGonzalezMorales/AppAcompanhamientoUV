@@ -61,7 +61,6 @@ app.use(favicon(path.join(__dirname, 'public', 'Icon_Application_Blue.png')));
 app.use(bodyParser.json());
 app.use(morgan('tiny'));
 app.use(authJwt);
-app.use(errorHandler);
 
 // Rutas públicas
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -96,6 +95,8 @@ app.get('/', (req, res) => {
   res.send('<h1> Funcionando ! </h1>');
 });
 
+app.use(errorHandler);
+
 mongoose.set('strictQuery', false);
 
 if (!process.env.CONNECTION_STRING) {
@@ -104,7 +105,7 @@ if (!process.env.CONNECTION_STRING) {
 
 mongoose
   .connect(process.env.CONNECTION_STRING, {
-    dbName: 'my-app',
+    dbName: 'AppAcomp-AWS',
   })
   .then(() => {
     console.log();

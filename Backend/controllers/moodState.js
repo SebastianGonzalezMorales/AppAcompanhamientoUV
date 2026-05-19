@@ -1,4 +1,8 @@
 const { MoodState } = require("../models/moodState");
+const { analyzeFaceEmotions } = require("../helpers/rekognitionHelper");
+const {
+  compareMoodWithEmotion,
+} = require("../helpers/moodImageComparisonHelper");
 
 //const { authJwt }
 
@@ -38,6 +42,139 @@ const postMoodState = async (req, res) => {
       success: false,
       message: "Error en el servidor al guardar el estado de ánimo",
       error: err.message, // Detalles adicionales del error
+    });
+  }
+};
+
+const normalizeActivities = (activities) => {
+  if (activities === undefined || activities === null || activities === "") {
+    return activities;
+  }
+
+  if (Array.isArray(activities)) {
+    return activities;
+  }
+
+  if (typeof activities === "string") {
+    const trimmedActivities = activities.trim();
+
+    if (!trimmedActivities) {
+      return [];
+    }
+
+    try {
+      const parsedActivities = JSON.parse(trimmedActivities);
+
+      if (Array.isArray(parsedActivities)) {
+        return parsedActivities;
+      }
+    } catch (error) {
+      // Si no es JSON válido, se procesa como texto simple.
+    }
+
+    if (trimmedActivities.includes(",")) {
+      return trimmedActivities
+        .split(",")
+        .map((activity) => activity.trim())
+        .filter(Boolean);
+    }
+
+    return [trimmedActivities];
+  }
+
+  return activities;
+};
+
+const buildImageAnalysisWithoutImage = () => ({
+  hasImage: false,
+  faceDetected: null,
+  dominantEmotion: null,
+  confidence: null,
+  emotions: [],
+  comparisonResult: "sin_imagen",
+  supportMessage:
+    "Tu estado de ánimo fue registrado correctamente sin análisis de imagen complementario.",
+  analyzedAt: null,
+});
+
+const buildImageAnalysisFromUploadError = () => ({
+  hasImage: true,
+  faceDetected: null,
+  dominantEmotion: null,
+  confidence: null,
+  emotions: [],
+  comparisonResult: "sin_analisis",
+  supportMessage:
+    "Tu estado de ánimo fue registrado correctamente. No fue posible completar el análisis referencial de la imagen, por lo que tu registro manual sigue siendo el dato principal.",
+  analyzedAt: new Date(),
+});
+
+const buildImageAnalysisFromRekognition = (mood, analysis) => {
+  const comparison = compareMoodWithEmotion(mood, analysis.dominantEmotion);
+
+  return {
+    hasImage: true,
+    faceDetected: analysis.faceDetected,
+    dominantEmotion: analysis.dominantEmotion,
+    confidence: analysis.confidence,
+    emotions: analysis.emotions || [],
+    comparisonResult: comparison.comparisonResult,
+    supportMessage: comparison.supportMessage,
+    analyzedAt: new Date(),
+  };
+};
+
+const postMoodStateWithImage = async (req, res) => {
+  let imageAnalysis = buildImageAnalysisWithoutImage();
+
+  try {
+    const normalizedActivities = normalizeActivities(req.body.activities);
+
+    if (req.moodImageUploadError) {
+      imageAnalysis = buildImageAnalysisFromUploadError();
+    } else if (req.file) {
+      try {
+        const analysis = await analyzeFaceEmotions(req.file.buffer);
+        imageAnalysis = buildImageAnalysisFromRekognition(
+          req.body.moodState,
+          analysis
+        );
+      } catch (analysisError) {
+        console.error(
+          "Error al analizar la imagen del estado de ánimo con Rekognition:",
+          analysisError
+        );
+        imageAnalysis = buildImageAnalysisFromUploadError();
+      }
+    }
+
+    const moodState = new MoodState({
+      userId: req.auth.userId,
+      moodState: req.body.moodState,
+      intensity: req.body.intensity,
+      activities: normalizedActivities,
+      title: req.body.title,
+      comments: req.body.comments,
+      imageAnalysis,
+    });
+
+    const createdMoodState = await moodState.save();
+
+    res.status(201).json({
+      success: true,
+      documentId: createdMoodState._id,
+      data: createdMoodState,
+      imageAnalysis: createdMoodState.imageAnalysis,
+    });
+  } catch (err) {
+    console.error(
+      "Error en el servidor al guardar el estado de ánimo con imagen:",
+      err
+    );
+    res.status(500).json({
+      success: false,
+      message: "Error en el servidor al guardar el estado de ánimo",
+      error: err.message,
     });
   }
 };
@@ -175,6 +312,7 @@ function getWeekStart(date) {
 module.exports = {
   getMoodStates,
   postMoodState,
+  postMoodStateWithImage,
   getMoodStatesByUserId,
   getMoodStateById,
   calculateWeeklyStreak,

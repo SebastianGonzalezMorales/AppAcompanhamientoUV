@@ -15,9 +15,13 @@ const authRoutes = require("./auth");
 const passwordRoutes = require("./password");
 const tokenRoutes = require("./token");
 const userRoutes = require("./user");
+const rekognitionRoutes = require("./Aws/rekognitionRoutes");
 
 module.exports = (app) => {
   const api = process.env.API_URL;
+
+  //Aws
+  app.use(`${api}/rekognition`, rekognitionRoutes);
 
   // Registrar las rutas con sus respectivos prefijos
   app.use(`${api}/assistants`, assistantRoutes);
