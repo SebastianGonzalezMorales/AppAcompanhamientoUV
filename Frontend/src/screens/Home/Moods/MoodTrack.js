@@ -11,6 +11,7 @@ import {
   Alert,
   ScrollView,
   StyleSheet,
+  Image,
 } from "react-native";
 import React, { useState } from "react";
 import Activity from "../Activities";
@@ -28,6 +29,7 @@ import FormStyle from "../../../assets/styles/FormStyle";
 import GlobalStyle from "../../../assets/styles/GlobalStyle";
 
 const { API_URL } = Constants.expoConfig?.extra || {};
+let imagePickerModule = null;
 
 const MoodTrack = ({ route, navigation }) => {
   const { mood, value } = route.params;
@@ -36,10 +38,66 @@ const MoodTrack = ({ route, navigation }) => {
   const [title, setTitle] = useState("");
   const [quickNote, setQuickNote] = useState("");
   const [activities, setActivities] = useState(Activity);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   function deleteDocument() {
     navigation.goBack();
   }
+
+  const getImagePickerModule = () => {
+    if (imagePickerModule) {
+      return imagePickerModule;
+    }
+
+    try {
+      imagePickerModule = require("expo-image-picker");
+      return imagePickerModule;
+    } catch (error) {
+      console.error("expo-image-picker no esta disponible en este build:", error);
+      return null;
+    }
+  };
+
+  const takeMoodPhoto = async () => {
+    const ImagePicker = getImagePickerModule();
+
+    if (!ImagePicker) {
+      Alert.alert(
+        "Actualizacion requerida",
+        "Esta version de la aplicacion aun no incluye el modulo de camara. Necesitas reinstalar el build mas reciente para usar esta funcion."
+      );
+      return;
+    }
+
+    try {
+      const permissionResult =
+        await ImagePicker.requestCameraPermissionsAsync();
+
+      if (!permissionResult.granted) {
+        Alert.alert(
+          "Permiso requerido",
+          "Necesitas permitir el acceso a la camara para tomar una foto."
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 0.7,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setSelectedImage(result.assets[0]);
+      }
+    } catch (error) {
+      console.error("Error al abrir la camara:", error);
+      Alert.alert(
+        "Error",
+        "No se pudo abrir la camara. Intentalo nuevamente."
+      );
+    }
+  };
 
   const selectHandler = (item) => {
     const selectedItem = activities.map((activityItem) => {
@@ -56,46 +114,115 @@ const MoodTrack = ({ route, navigation }) => {
     try {
       const token = await AsyncStorage.getItem("token");
 
-      if (token) {
-        const selectedActivities = activities
-          .filter((activity) => activity.selected)
-          .map((activity) => activity.activity);
+      if (!token) {
+        console.log("No se encontro el token. Por favor, inicia sesion.");
+        Alert.alert(
+          "Sesion requerida",
+          "Necesitas iniciar sesion nuevamente para guardar tu estado de animo."
+        );
+        return;
+      }
 
-        const params = {
-          moodState: mood,
-          activities:
-            selectedActivities.length > 0 ? selectedActivities.join(",") : null,
-        };
+      const selectedActivities = activities
+        .filter((activity) => activity.selected)
+        .map((activity) => activity.activity);
 
+      const params = {
+        moodState: mood,
+        activities:
+          selectedActivities.length > 0 ? selectedActivities.join(",") : null,
+      };
+      const formData = new FormData();
+
+      formData.append("moodState", mood);
+      formData.append("intensity", value.toString());
+      formData.append("comments", quickNote);
+      formData.append("title", title);
+
+      selectedActivities.forEach((activity) => {
+        formData.append("activities", activity);
+      });
+
+      if (selectedImage) {
+        const imageUri = selectedImage.uri;
+        const fileName = imageUri.split("/").pop() || "mood-image.jpg";
+        const fileExtension = fileName.split(".").pop()?.toLowerCase();
+        const mimeType =
+          fileExtension === "jpg"
+            ? "image/jpeg"
+            : fileExtension
+            ? `image/${fileExtension}`
+            : "image/jpeg";
+
+        formData.append("image", {
+          uri: imageUri,
+          name: fileName,
+          type: mimeType,
+        });
+      }
+
+      const moodResponse = await api.post(
+        `${API_URL}/moodState/post-moodState-with-image`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      const supportMessage = moodResponse.data?.imageAnalysis?.supportMessage;
+      let tip =
+        "Tu estado de ánimo fue registrado correctamente.";
+
+      try {
         const response = await api.get(`${API_URL}/tips/get-tips`, {
           headers: { Authorization: `Bearer ${token}` },
           params,
         });
 
-        const tip = response.data.tip;
-
-        await api.post(
-          `${API_URL}/moodState/post-moodState`,
-          {
-            moodState: mood,
-            intensity: value,
-            comments: quickNote,
-            activities: selectedActivities,
-            title: title,
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        Alert.alert("Consejo para ti", tip, [
-          { text: "OK", onPress: () => navigation.navigate("HomeMood") },
-        ]);
-      } else {
-        console.log("No se encontro el token. Por favor, inicia sesion.");
+        if (response.data?.tip) {
+          tip = response.data.tip;
+        }
+      } catch (tipError) {
+        console.warn("No se pudo obtener el consejo:", {
+          url: tipError.config?.url,
+          status: tipError.response?.status,
+          data: tipError.response?.data,
+        });
       }
+
+      const finalMessage = supportMessage
+        ? `${tip}\n\nAnalisis complementario:\n${supportMessage}`
+        : tip;
+
+      Alert.alert("Consejo para ti", finalMessage, [
+        { text: "OK", onPress: () => navigation.navigate("HomeMood") },
+      ]);
     } catch (error) {
-      console.error("Error al guardar el estado de animo:", error);
+      console.error("Error al guardar el estado de animo:", {
+        message: error.message,
+        url: error.config?.url,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+
+      let errorMessage =
+        "No pudimos guardar tu estado de animo en este momento. Intentalo nuevamente en unos minutos.";
+
+      if (error.response?.status === 401) {
+        errorMessage =
+          "Tu sesion vencio. Vuelve a iniciar sesion para guardar tu estado de animo.";
+      } else if (error.response?.status === 400) {
+        errorMessage =
+          "No pudimos procesar la informacion enviada. Revisa la foto o los datos del registro e intentalo nuevamente.";
+      } else if (error.response?.status === 413) {
+        errorMessage =
+          "La imagen seleccionada es demasiado grande. Prueba con una foto mas liviana.";
+      }
+
+      Alert.alert("No se pudo guardar", errorMessage);
     }
   };
 
@@ -156,7 +283,7 @@ const MoodTrack = ({ route, navigation }) => {
           <View style={FormStyle.formContainer}>
             <View style={styles.questionWrapper}>
               <Text style={[GlobalStyle.subtitle, styles.questionText]}>
-                ¿Como te sientes ahora mismo?
+                Como te sientes ahora mismo?
               </Text>
             </View>
 
@@ -235,6 +362,36 @@ const MoodTrack = ({ route, navigation }) => {
             </TouchableWithoutFeedback>
           </View>
 
+          <View style={styles.photoContainer}>
+            <TouchableOpacity style={styles.photoButton} onPress={takeMoodPhoto}>
+              <MaterialCommunityIcons
+                name="camera"
+                size={24}
+                color="#5da5a9"
+                style={{ marginRight: 8 }}
+              />
+              <Text style={styles.photoButtonText}>
+                {selectedImage ? "Cambiar foto opcional" : "Tomar foto opcional"}
+              </Text>
+            </TouchableOpacity>
+
+            {selectedImage && (
+              <View style={styles.previewContainer}>
+                <Image
+                  source={{ uri: selectedImage.uri }}
+                  style={styles.previewImage}
+                />
+
+                <TouchableOpacity
+                  style={styles.removePhotoButton}
+                  onPress={() => setSelectedImage(null)}
+                >
+                  <Text style={styles.removePhotoText}>Eliminar foto</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+
           <View style={[FormStyle.buttonContainer, { marginTop: 20 }]}>
             <FormButton
               onPress={saveMoodTrack}
@@ -297,5 +454,43 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: "center",
     lineHeight: 16,
+  },
+  photoContainer: {
+    alignItems: "center",
+    marginTop: 16,
+    paddingHorizontal: 16,
+  },
+  photoButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f2f2f2",
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  photoButtonText: {
+    color: "#5da5a9",
+    fontFamily: "DoppioOne",
+    fontSize: 15,
+    textAlign: "center",
+  },
+  previewContainer: {
+    alignItems: "center",
+    marginTop: 12,
+  },
+  previewImage: {
+    width: 130,
+    height: 130,
+    borderRadius: 12,
+  },
+  removePhotoButton: {
+    marginTop: 8,
+  },
+  removePhotoText: {
+    color: "#f2f2f2",
+    fontFamily: "DoppioOne",
+    fontSize: 14,
+    textDecorationLine: "underline",
   },
 });

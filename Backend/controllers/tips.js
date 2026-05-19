@@ -2,6 +2,13 @@
 
 const Tips = require("../models/tips");
 
+const buildFallbackTipResponse = (message) => ({
+  tip:
+    message ||
+    "Tu estado de animo fue registrado correctamente. Aun no tenemos un consejo disponible por ahora, pero puedes revisar los recursos de apoyo de la aplicacion.",
+  isFallback: true,
+});
+
 // Controlador para obtener un tip aleatorio según el estado de ánimo y las actividades
 const getTips = async (req, res) => {
   try {
@@ -31,9 +38,11 @@ const getTips = async (req, res) => {
 
     // Si no se encuentra el estado, devolver un error
     if (!tip) {
-      return res.status(404).json({
-        mensaje: "No se encontraron consejos para el estado proporcionado.",
-      });
+      return res.status(200).json(
+        buildFallbackTipResponse(
+          "Tu estado de animo fue registrado correctamente. Aun no encontramos consejos cargados para este estado."
+        )
+      );
     }
 
     let consejoElegido;
@@ -55,19 +64,22 @@ const getTips = async (req, res) => {
         consejoElegido =
           tip.generalTips[Math.floor(Math.random() * tip.generalTips.length)];
       } else {
-        return res.status(404).json({
-          mensaje:
-            "No se encontraron consejos para las actividades proporcionadas.",
-        });
+        return res.status(200).json(
+          buildFallbackTipResponse(
+            "Tu estado de animo fue registrado correctamente. Aun no encontramos un consejo asociado a las actividades seleccionadas."
+          )
+        );
       }
     } else if (tip.generalTips.length > 0) {
       // Si no se proporcionaron actividades, elegir un tip general
       consejoElegido =
         tip.generalTips[Math.floor(Math.random() * tip.generalTips.length)];
     } else {
-      return res.status(404).json({
-        mensaje: "No se encontraron consejos generales para este estado.",
-      });
+      return res.status(200).json(
+        buildFallbackTipResponse(
+          "Tu estado de animo fue registrado correctamente. Aun no tenemos un consejo general disponible para este estado."
+        )
+      );
     }
 
     // Devolver el tip elegido
