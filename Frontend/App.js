@@ -1,7 +1,10 @@
 import React, { useEffect } from 'react';
+import { LogBox } from 'react-native';
 import { AuthProvider } from './src/context/AuthContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import Constants from 'expo-constants';
+
+LogBox.ignoreLogs(['ExpoFaceDetector has been deprecated']);
 
 export default function App() {
 
