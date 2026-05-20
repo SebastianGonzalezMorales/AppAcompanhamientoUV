@@ -1,9 +1,30 @@
+const emotionLabels = {
+  HAPPY: "alegría",
+  CALM: "tranquilidad",
+  SAD: "tristeza",
+  ANGRY: "enojo o tensión",
+  FEAR: "preocupación o temor",
+  CONFUSED: "confusión",
+  DISGUSTED: "incomodidad",
+  SURPRISED: "sorpresa",
+  UNKNOWN: "una expresión no identificada con claridad",
+};
+
+const getEmotionLabel = (dominantEmotion) => {
+  return (
+    emotionLabels[dominantEmotion] ||
+    "una expresión no identificada con claridad"
+  );
+};
+
 const compareMoodWithEmotion = (mood, dominantEmotion) => {
   const positiveMoods = ["Bien", "Excelente"];
   const supportMoods = ["Mal", "Regular"];
 
   const positiveEmotions = ["HAPPY", "CALM"];
   const supportEmotions = ["SAD", "ANGRY", "FEAR", "CONFUSED", "DISGUSTED"];
+  const neutralEmotions = ["SURPRISED", "UNKNOWN"];
+  const emotionLabel = getEmotionLabel(dominantEmotion);
 
   if (!dominantEmotion) {
     return {
@@ -19,8 +40,7 @@ const compareMoodWithEmotion = (mood, dominantEmotion) => {
   ) {
     return {
       comparisonResult: "coincidencia_positiva",
-      supportMessage:
-        "Tu registro coincide con una expresión positiva detectada de forma referencial.",
+      supportMessage: `La imagen mostró una expresión asociada a ${emotionLabel}. Esto coincide con tu registro. Sigue así; reconocer estos momentos también ayuda a cuidar tu bienestar.`,
     };
   }
 
@@ -30,8 +50,7 @@ const compareMoodWithEmotion = (mood, dominantEmotion) => {
   ) {
     return {
       comparisonResult: "coincidencia_de_apoyo",
-      supportMessage:
-        "Tu registro y el análisis referencial sugieren que podrías necesitar un momento de apoyo. Recuerda que puedes revisar los recursos disponibles en la aplicación.",
+      supportMessage: `La imagen mostró una expresión asociada a ${emotionLabel}. Esto coincide con tu registro. Si sientes que necesitas apoyo, puedes revisar las opciones de contacto disponibles en la aplicación.`,
     };
   }
 
@@ -41,8 +60,7 @@ const compareMoodWithEmotion = (mood, dominantEmotion) => {
   ) {
     return {
       comparisonResult: "posible_diferencia",
-      supportMessage:
-        "Tu registro fue positivo, aunque el análisis referencial detectó una expresión distinta. Este resultado no representa un diagnóstico.",
+      supportMessage: `Registraste un estado positivo, aunque la imagen mostró una expresión asociada a ${emotionLabel}. Puede ser útil tomarlo como una señal para reflexionar, no como una conclusión.`,
     };
   }
 
@@ -52,8 +70,14 @@ const compareMoodWithEmotion = (mood, dominantEmotion) => {
   ) {
     return {
       comparisonResult: "diferencia_referencial",
-      supportMessage:
-        "Tu registro fue guardado correctamente. La imagen mostró una expresión distinta de forma referencial, pero tu registro manual sigue siendo el dato principal.",
+      supportMessage: `Registraste un estado de ánimo bajo, aunque la imagen mostró una expresión asociada a ${emotionLabel}. Tu registro manual sigue siendo el dato principal.`,
+    };
+  }
+
+  if (neutralEmotions.includes(dominantEmotion)) {
+    return {
+      comparisonResult: "resultado_referencial",
+      supportMessage: `La imagen mostró una expresión asociada a ${emotionLabel}. Este dato queda como información complementaria para tu registro.`,
     };
   }
 

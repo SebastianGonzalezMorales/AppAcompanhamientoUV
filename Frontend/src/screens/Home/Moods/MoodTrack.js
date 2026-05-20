@@ -6,6 +6,8 @@ import {
   FlatList,
   Keyboard,
   KeyboardAvoidingView,
+  Linking,
+  Modal,
   Platform,
   SafeAreaView,
   ScrollView,
@@ -93,8 +95,72 @@ const getRequestCameraPermissionsAsync = () => {
 
 const buildTipMessage = (tip) => `Consejo para ti:\n\n${tip}`;
 
-const buildAnalysisMessage = (supportMessage) =>
-  `Análisis complementario:\n\n${supportMessage}\n\nImportante:\n\nEste resultado es referencial y no representa un diagnóstico. Tu registro manual sigue siendo el dato principal.`;
+const analysisPreviewTip =
+  "Tómate un momento para respirar y reconocer cómo te sientes. Registrar tu estado de ánimo ya es un paso importante.";
+
+const showAnalysisPreviewInsteadOfCamera = false;
+const supportPhoneNumber = "+56968301655";
+const supportWhatsAppNumber = "56968301655";
+const supportEmail = "dae@uv.cl";
+
+const analysisPreviewScenarios = [
+  {
+    key: "happy-match",
+    label: "Alegría",
+    comparisonResult: "coincidencia_positiva",
+    supportMessage:
+      "La imagen mostró una expresión asociada a alegría. Esto coincide con tu registro. Sigue así; reconocer estos momentos también ayuda a cuidar tu bienestar.",
+  },
+  {
+    key: "calm-match",
+    label: "Calma",
+    comparisonResult: "coincidencia_positiva",
+    supportMessage:
+      "La imagen mostró una expresión tranquila. Esto puede acompañar tu registro como una señal complementaria de calma.",
+  },
+  {
+    key: "sad-support",
+    label: "Tristeza",
+    comparisonResult: "coincidencia_de_apoyo",
+    supportMessage:
+      "La imagen mostró una expresión asociada a tristeza. Esto coincide con tu registro. Si sientes que necesitas apoyo, puedes revisar las opciones de contacto disponibles en la aplicación.",
+  },
+  {
+    key: "support-needed",
+    label: "Apoyo",
+    comparisonResult: "coincidencia_de_apoyo",
+    supportMessage:
+      "La imagen mostró una expresión de malestar. Si esto coincide con cómo te sientes, podrías darte un momento de pausa o revisar los recursos de apoyo disponibles en la aplicación.",
+  },
+  {
+    key: "positive-difference",
+    label: "Diferencia positiva",
+    comparisonResult: "posible_diferencia",
+    supportMessage:
+      "Registraste un estado positivo, aunque la imagen mostró una expresión distinta. Puede ser útil tomarlo como una señal para reflexionar, no como una conclusión.",
+  },
+  {
+    key: "support-difference",
+    label: "Diferencia baja",
+    comparisonResult: "diferencia_referencial",
+    supportMessage:
+      "Registraste un estado de ánimo bajo, aunque la imagen mostró una expresión más tranquila o positiva. Tu registro manual sigue siendo el dato principal.",
+  },
+  {
+    key: "no-face",
+    label: "Sin rostro",
+    comparisonResult: "sin_analisis",
+    supportMessage:
+      "No se detectó un rostro con suficiente claridad. Tu estado de ánimo fue registrado correctamente sin análisis complementario de imagen.",
+  },
+  {
+    key: "no-analysis",
+    label: "Sin análisis",
+    comparisonResult: "sin_analisis",
+    supportMessage:
+      "No fue posible obtener un análisis complementario de la imagen. Tu registro manual fue guardado correctamente.",
+  },
+];
 
 const faceDetectionSettings = {
   mode: FaceDetector.FaceDetectorMode.fast,
@@ -108,9 +174,13 @@ const MoodTrack = ({ route, navigation }) => {
   const { mood, value } = route.params;
   const activityColumns = 3;
   const cameraRef = useRef(null);
+  const scrollViewRef = useRef(null);
   const scanAnimation = useRef(new Animated.Value(0)).current;
   const overlayOpacity = useRef(new Animated.Value(0.18)).current;
   const readyPulse = useRef(new Animated.Value(0)).current;
+  const lastScrollOffsetRef = useRef(0);
+  const shouldScrollToSelfieRef = useRef(false);
+  const wasCameraOpenRef = useRef(false);
 
   const [title, setTitle] = useState("");
   const [quickNote, setQuickNote] = useState("");
@@ -122,6 +192,17 @@ const MoodTrack = ({ route, navigation }) => {
   const [isOpeningCamera, setIsOpeningCamera] = useState(false);
   const [isCapturingSelfie, setIsCapturingSelfie] = useState(false);
   const [isSavingMood, setIsSavingMood] = useState(false);
+  const [showMoodSupportAlert, setShowMoodSupportAlert] = useState(false);
+  const [isMoodSupportAlertMinimized, setIsMoodSupportAlertMinimized] =
+    useState(false);
+  const [showMoodSupportConfirmModal, setShowMoodSupportConfirmModal] =
+    useState(false);
+  const [analysisDialog, setAnalysisDialog] = useState({
+    visible: false,
+    supportMessage: "",
+    comparisonResult: null,
+    onAccept: null,
+  });
 
   const LegacyCameraComponent = getLegacyCameraComponent();
   const cameraFacing = "front";
@@ -230,6 +311,31 @@ const MoodTrack = ({ route, navigation }) => {
     };
   }, [isSelfieCaptured, readyPulse]);
 
+  useEffect(() => {
+    if (wasCameraOpenRef.current && !isCameraOpen) {
+      requestAnimationFrame(() => {
+        const scrollTarget = scrollViewRef.current;
+
+        if (!scrollTarget) {
+          return;
+        }
+
+        if (shouldScrollToSelfieRef.current && isSelfieReady) {
+          scrollTarget.scrollToEnd({ animated: true });
+          shouldScrollToSelfieRef.current = false;
+          return;
+        }
+
+        scrollTarget.scrollTo({
+          y: lastScrollOffsetRef.current,
+          animated: false,
+        });
+      });
+    }
+
+    wasCameraOpenRef.current = isCameraOpen;
+  }, [isCameraOpen, isSelfieReady]);
+
   function deleteDocument() {
     if (isSavingMood || isCameraOpen) {
       return;
@@ -238,21 +344,118 @@ const MoodTrack = ({ route, navigation }) => {
     navigation.goBack();
   }
 
-  const showAnalysisAlert = (supportMessage) => {
-    Alert.alert(
-      "Análisis complementario",
-      buildAnalysisMessage(supportMessage),
-      [{ text: "Aceptar", onPress: () => navigation.navigate("HomeMood") }]
-    );
+  const showAnalysisAlert = (
+    supportMessage,
+    onAccept = () => navigation.navigate("HomeMood"),
+    comparisonResult = null
+  ) => {
+    setAnalysisDialog({
+      visible: true,
+      supportMessage,
+      comparisonResult,
+      onAccept,
+    });
   };
 
-  const showResultAlert = (tip, supportMessage, hasSelfie) => {
+  const closeAnalysisDialog = () => {
+    const nextAction = analysisDialog.onAccept;
+    const shouldShowSupportAlert =
+      analysisDialog.comparisonResult === "coincidencia_de_apoyo";
+
+    setAnalysisDialog({
+      visible: false,
+      supportMessage: "",
+      comparisonResult: null,
+      onAccept: null,
+    });
+
+    if (shouldShowSupportAlert) {
+      setIsMoodSupportAlertMinimized(false);
+      setShowMoodSupportAlert(true);
+      return;
+    }
+
+    if (nextAction) {
+      nextAction();
+    }
+  };
+
+  const minimizeMoodSupportAlert = () => {
+    setShowMoodSupportConfirmModal(false);
+    setIsMoodSupportAlertMinimized(true);
+  };
+
+  const expandMoodSupportAlert = () => {
+    setIsMoodSupportAlertMinimized(false);
+    setShowMoodSupportAlert(true);
+  };
+
+  const closeMoodSupportAlert = () => {
+    setShowMoodSupportConfirmModal(false);
+    setShowMoodSupportAlert(false);
+    setIsMoodSupportAlertMinimized(false);
+    navigation.navigate("HomeMood");
+  };
+
+  const callMoodSupport = () => {
+    Linking.openURL(`tel:${supportPhoneNumber}`).catch(() => {
+      Alert.alert("No se pudo llamar", "No se pudo abrir la aplicación de teléfono.");
+    });
+  };
+
+  const sendMoodSupportEmail = () => {
+    const subject = "[Apoyo emocional - AppAcompañamientoUV]";
+    const body =
+      "Hola,\n\nEstoy usando la app de acompañamiento UV y me gustaría solicitar orientación o apoyo emocional.\n\nMuchas gracias.";
+    const url = `mailto:${supportEmail}?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+
+    Linking.openURL(url).catch(() => {
+      Alert.alert("No se pudo abrir el correo", "No se pudo abrir el cliente de correo.");
+    });
+  };
+
+  const sendMoodSupportWhatsApp = () => {
+    const message =
+      "Hola, estoy usando la app de acompañamiento UV y me gustaría solicitar orientación o apoyo emocional. Muchas gracias.";
+    const url = `https://wa.me/${supportWhatsAppNumber}?text=${encodeURIComponent(
+      message
+    )}`;
+
+    Linking.openURL(url).catch(() => {
+      Alert.alert(
+        "No se pudo abrir WhatsApp",
+        "Asegúrate de tener WhatsApp instalado en tu dispositivo."
+      );
+    });
+  };
+
+  const showAnalysisPreviewScenario = (scenario) => {
+    Alert.alert("Registro completado", buildTipMessage(analysisPreviewTip), [
+      {
+        text: "Aceptar",
+        onPress: () =>
+          showAnalysisAlert(
+            scenario.supportMessage,
+            null,
+            scenario.comparisonResult
+          ),
+      },
+    ]);
+  };
+
+  const showResultAlert = (tip, imageAnalysis, hasSelfie) => {
     Alert.alert("Registro completado", buildTipMessage(tip), [
       {
         text: "Aceptar",
         onPress: () => {
-          if (hasSelfie && supportMessage) {
-            showAnalysisAlert(supportMessage);
+          if (hasSelfie && imageAnalysis?.supportMessage) {
+            showAnalysisAlert(
+              imageAnalysis.supportMessage,
+              () => navigation.navigate("HomeMood"),
+              imageAnalysis.comparisonResult
+            );
             return;
           }
 
@@ -264,6 +467,11 @@ const MoodTrack = ({ route, navigation }) => {
 
   const openSelfieCamera = async () => {
     if (isOpeningCamera || isSavingMood) {
+      return;
+    }
+
+    if (showAnalysisPreviewInsteadOfCamera) {
+      showAnalysisPreviewScenario(analysisPreviewScenarios[0]);
       return;
     }
 
@@ -309,6 +517,7 @@ const MoodTrack = ({ route, navigation }) => {
       return;
     }
 
+    shouldScrollToSelfieRef.current = false;
     setIsCameraOpen(false);
     setIsCameraReady(false);
     setIsFaceDetected(false);
@@ -366,6 +575,7 @@ const MoodTrack = ({ route, navigation }) => {
         throw new Error("No se obtuvo una URI válida para la selfie.");
       }
 
+      shouldScrollToSelfieRef.current = true;
       setSelectedImage({ uri: photo.uri });
       setIsCameraOpen(false);
       setIsCameraReady(false);
@@ -459,7 +669,7 @@ const MoodTrack = ({ route, navigation }) => {
         }
       );
 
-      const supportMessage = moodResponse.data?.imageAnalysis?.supportMessage;
+      const imageAnalysis = moodResponse.data?.imageAnalysis;
       let tip = "Tu estado de ánimo fue registrado correctamente.";
 
       try {
@@ -479,7 +689,7 @@ const MoodTrack = ({ route, navigation }) => {
         });
       }
 
-      showResultAlert(tip, supportMessage, hasSelfie);
+      showResultAlert(tip, imageAnalysis, hasSelfie);
     } catch (error) {
       console.error("Error al guardar el estado de ánimo:", {
         message: error.message,
@@ -618,7 +828,7 @@ const MoodTrack = ({ route, navigation }) => {
       case 15:
         return "heart";
       case 16:
-        return "dots-horizontal";
+        return "shape-plus";
       default:
         return "circle";
     }
@@ -635,89 +845,208 @@ const MoodTrack = ({ route, navigation }) => {
         <Text style={FormStyle.title}>{mood}</Text>
       </View>
 
+      {showMoodSupportAlert && !isMoodSupportAlertMinimized ? (
+        <View style={styles.moodSupportAlertContainer}>
+          <View style={styles.moodSupportAlertHeader}>
+            <MaterialCommunityIcons
+              name="alert-circle-outline"
+              size={18}
+              color="#e53935"
+              style={styles.moodSupportAlertHeaderIcon}
+            />
+            <Text style={styles.moodSupportAlertTitle}>Atención</Text>
+            <TouchableOpacity
+              onPress={() => setShowMoodSupportConfirmModal(true)}
+              style={styles.moodSupportAlertIconButton}
+            >
+              <MaterialCommunityIcons name="close" size={12} color="#e53935" />
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.moodSupportAlertMessage}>
+            Hemos detectado que podrías estar atravesando una situación difícil.
+          </Text>
+
+          <Text style={styles.moodSupportAlertSubMessage}>
+            Por favor, contáctanos a través de una de las siguientes opciones:
+          </Text>
+
+          <View style={styles.moodSupportAlertActions}>
+            <TouchableOpacity
+              onPress={callMoodSupport}
+              style={styles.moodSupportSmallButton}
+            >
+              <MaterialCommunityIcons
+                name="phone"
+                size={14}
+                color="#fff"
+                style={styles.moodSupportSmallButtonIcon}
+              />
+              <Text style={styles.moodSupportSmallButtonText}>Llamar</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={sendMoodSupportWhatsApp}
+              style={styles.moodSupportSmallButton}
+            >
+              <MaterialCommunityIcons
+                name="whatsapp"
+                size={14}
+                color="#fff"
+                style={styles.moodSupportSmallButtonIcon}
+              />
+              <Text style={styles.moodSupportSmallButtonText}>Mensaje</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={sendMoodSupportEmail}
+              style={[
+                styles.moodSupportSmallButton,
+                styles.moodSupportEmailButton,
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="email"
+                size={14}
+                color="#fff"
+                style={styles.moodSupportSmallButtonIcon}
+              />
+              <Text style={styles.moodSupportSmallButtonText}>Correo</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      ) : null}
+
+      {showMoodSupportAlert && isMoodSupportAlertMinimized ? (
+        <TouchableOpacity
+          onPress={expandMoodSupportAlert}
+          style={styles.moodSupportMinimizedContainer}
+        >
+          <MaterialCommunityIcons
+            name="alert-circle-outline"
+            size={15}
+            color="#e53935"
+            style={styles.moodSupportAlertHeaderIcon}
+          />
+          <Text style={styles.moodSupportMinimizedText}>Ver alerta</Text>
+          <MaterialCommunityIcons name="chevron-down" size={16} color="#e53935" />
+        </TouchableOpacity>
+      ) : null}
+
       <KeyboardAvoidingView
         behavior="padding"
         keyboardVerticalOffset={keyboardVerticalOffset}
         style={{ flex: 1 }}
       >
-        <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 24 }}>
+        <ScrollView
+          ref={scrollViewRef}
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: 24 }}
+          scrollEventThrottle={16}
+          onScroll={(event) => {
+            lastScrollOffsetRef.current = event.nativeEvent.contentOffset.y;
+          }}
+        >
           <View style={FormStyle.formContainer}>
-            <View style={styles.questionWrapper}>
-              <Text style={[GlobalStyle.subtitle, styles.questionText]}>
-                ¿Cómo te sientes ahora mismo?
-              </Text>
-            </View>
+            <View>
+              <View style={styles.questionWrapper}>
+                <Text
+                  style={[
+                    GlobalStyle.subtitle,
+                    styles.questionText,
+                    styles.moodQuestionText,
+                  ]}
+                >
+                  ¿Cómo te sientes ahora mismo?
+                </Text>
+              </View>
 
-            <View style={styles.activitiesListContainer}>
-              <FlatList
-                data={activities}
-                scrollEnabled={false}
-                numColumns={activityColumns}
-                key={activityColumns}
-                keyExtractor={(item) => item.id.toString()}
-                columnWrapperStyle={styles.activitiesRow}
-                renderItem={({ item }) => (
-                  <View
-                    style={[
-                      styles.activityItemWrapper,
-                      activityColumns === 4
-                        ? styles.activityItemWrapperFourColumns
-                        : styles.activityItemWrapperThreeColumns,
-                    ]}
-                  >
-                    <TouchableOpacity onPress={() => selectHandler(item)}>
-                      <View
-                        style={[
-                          styles.activityCard,
-                          {
-                            backgroundColor: item.selected
-                              ? "white"
-                              : "transparent",
-                          },
-                        ]}
-                      >
-                        <MaterialCommunityIcons
-                          name={getIconName(item.id)}
-                          size={24}
-                          color={item.selected ? "#5da5a9" : "#f2f2f2"}
-                          style={styles.activityIcon}
-                        />
-                        <Text
-                          numberOfLines={3}
+              <View style={styles.activitiesListContainer}>
+                <FlatList
+                  data={activities}
+                  scrollEnabled={false}
+                  numColumns={activityColumns}
+                  key={activityColumns}
+                  keyExtractor={(item) => item.id.toString()}
+                  columnWrapperStyle={styles.activitiesRow}
+                  renderItem={({ item }) => (
+                    <View
+                      style={[
+                        styles.activityItemWrapper,
+                        activityColumns === 4
+                          ? styles.activityItemWrapperFourColumns
+                          : styles.activityItemWrapperThreeColumns,
+                      ]}
+                    >
+                      <TouchableOpacity onPress={() => selectHandler(item)}>
+                        <View
                           style={[
-                            styles.activityText,
+                            styles.activityCard,
                             {
-                              color: item.selected ? "#5da5a9" : "#f2f2f2",
+                              backgroundColor: item.selected
+                                ? "white"
+                                : "transparent",
                             },
                           ]}
                         >
-                          {item.activity}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  </View>
-                )}
-              />
+                          <MaterialCommunityIcons
+                            name={getIconName(item.id)}
+                            size={24}
+                            color={item.selected ? "#5da5a9" : "#f2f2f2"}
+                            style={styles.activityIcon}
+                          />
+                          <Text
+                            numberOfLines={3}
+                            style={[
+                              styles.activityText,
+                              {
+                                color: item.selected ? "#5da5a9" : "#f2f2f2",
+                              },
+                            ]}
+                          >
+                            {item.activity}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                />
+              </View>
             </View>
 
             <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-              <View style={FormStyle.inputContainer}>
-                <Text style={FormStyle.text}>Mi día hasta ahora</Text>
+              <View style={[styles.sectionCard, styles.contextSectionCard]}>
+                <Text
+                  style={[
+                    GlobalStyle.subtitle,
+                    styles.questionText,
+                    styles.inputIntroText,
+                  ]}
+                >
+                  Si quieres, a continuación puedes dejar más contexto sobre tu día
+                </Text>
+
+                <Text style={[FormStyle.text, styles.contextLabel]}>
+                  Mi día hasta ahora
+                </Text>
                 <InputButton
-                  placeholder="Describe cómo ha sido tu día hasta este momento... (Opcional)."
+                  placeholder="Describe cómo ha sido tu día hasta este momento."
                   onChangeText={(textValue) => {
                     setTitle(textValue);
                   }}
                   autoCorrect={false}
+                  value={title}
                 />
 
-                <Text style={FormStyle.text}>Detalles importantes</Text>
+                <Text style={[FormStyle.text, styles.contextLabel]}>
+                  Detalles importantes
+                </Text>
                 <InputButton
-                  placeholder="Agrega información adicional o reflexiones sobre tu día... (Opcional)."
+                  placeholder="Agrega información adicional o reflexiones sobre tu día."
                   onChangeText={(textValue) => {
                     setQuickNote(textValue);
                   }}
                   autoCorrect={false}
+                  value={quickNote}
                 />
               </View>
             </TouchableWithoutFeedback>
@@ -861,6 +1190,27 @@ const MoodTrack = ({ route, navigation }) => {
                 El análisis será solo referencial.
               </Text>
             )}
+
+            {showAnalysisPreviewInsteadOfCamera ? (
+              <View style={styles.analysisPreviewPanel}>
+                <Text style={styles.analysisPreviewTitle}>
+                  Simular análisis complementario
+                </Text>
+                <View style={styles.analysisPreviewGrid}>
+                  {analysisPreviewScenarios.map((scenario) => (
+                    <TouchableOpacity
+                      key={scenario.key}
+                      style={styles.analysisPreviewChip}
+                      onPress={() => showAnalysisPreviewScenario(scenario)}
+                    >
+                      <Text style={styles.analysisPreviewChipText}>
+                        {scenario.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            ) : null}
           </View>
 
           <View style={[FormStyle.buttonContainer, { marginTop: 20 }]}>
@@ -877,6 +1227,109 @@ const MoodTrack = ({ route, navigation }) => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <Modal
+        animationType="fade"
+        transparent
+        visible={showMoodSupportConfirmModal}
+        onRequestClose={() => setShowMoodSupportConfirmModal(false)}
+      >
+        <View style={styles.moodSupportModalOverlay}>
+          <View style={styles.moodSupportConfirmModal}>
+            <Text style={styles.moodSupportConfirmTitle}>
+              Opciones de alerta
+            </Text>
+
+            <Text style={styles.moodSupportConfirmMessage}>
+              ¿Estás seguro de que quieres cerrar esta alerta?
+            </Text>
+
+            <View style={styles.moodSupportConfirmActions}>
+              <TouchableOpacity
+                style={[
+                  styles.moodSupportConfirmButton,
+                  styles.moodSupportMinimizeButton,
+                ]}
+                onPress={minimizeMoodSupportAlert}
+              >
+                <Text
+                  style={[
+                    styles.moodSupportConfirmButtonText,
+                    styles.moodSupportMinimizeButtonText,
+                  ]}
+                >
+                  Minimizar
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.moodSupportConfirmButton,
+                  styles.moodSupportCloseButton,
+                ]}
+                onPress={closeMoodSupportAlert}
+              >
+                <Text style={styles.moodSupportConfirmButtonText}>
+                  Cerrar alerta
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.moodSupportConfirmButton,
+                  styles.moodSupportCancelButton,
+                ]}
+                onPress={() => setShowMoodSupportConfirmModal(false)}
+              >
+                <Text
+                  style={[
+                    styles.moodSupportConfirmButtonText,
+                    styles.moodSupportCancelButtonText,
+                  ]}
+                >
+                  Cancelar
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        animationType="fade"
+        transparent
+        visible={analysisDialog.visible}
+        onRequestClose={closeAnalysisDialog}
+      >
+        <View style={styles.analysisDialogOverlay}>
+          <View style={styles.analysisDialogCard}>
+            <Text style={styles.analysisDialogTitle}>
+              Análisis complementario
+            </Text>
+
+            <Text style={styles.analysisDialogMessage}>
+              {analysisDialog.supportMessage}
+            </Text>
+
+            <Text style={styles.analysisDialogImportant}>
+              <Text style={styles.analysisDialogImportantLabel}>
+                Importante:{" "}
+              </Text>
+              Este resultado no representa un diagnóstico.
+            </Text>
+
+            <View style={styles.analysisDialogActions}>
+              <TouchableOpacity
+                style={styles.analysisDialogButton}
+                onPress={closeAnalysisDialog}
+              >
+                <Text style={styles.analysisDialogButtonText}>ACEPTAR</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 };
@@ -884,19 +1337,214 @@ const MoodTrack = ({ route, navigation }) => {
 export default MoodTrack;
 
 const styles = StyleSheet.create({
+  moodSupportAlertContainer: {
+    position: "absolute",
+    top: 72,
+    left: 64,
+    right: 16,
+    zIndex: 20,
+    elevation: 8,
+    backgroundColor: "#fff3e0",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#ffd699",
+    padding: 10,
+  },
+  moodSupportAlertHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  moodSupportAlertHeaderIcon: {
+    marginRight: 5,
+  },
+  moodSupportAlertTitle: {
+    color: "#e53935",
+    fontWeight: "bold",
+    fontSize: 16,
+    lineHeight: 22,
+    flex: 1,
+  },
+  moodSupportAlertIconButton: {
+    marginLeft: 6,
+    backgroundColor: "white",
+    borderRadius: 8,
+    width: 22,
+    height: 22,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 2,
+  },
+  moodSupportAlertMessage: {
+    color: "#e53935",
+    fontSize: 14,
+    lineHeight: 18,
+    textAlign: "justify",
+    marginTop: 8,
+    marginBottom: 5,
+    fontWeight: "bold",
+  },
+  moodSupportAlertSubMessage: {
+    color: "#333",
+    fontSize: 14,
+    lineHeight: 16,
+    textAlign: "justify",
+    marginTop: 5,
+    marginBottom: 10,
+  },
+  moodSupportAlertActions: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    flexWrap: "wrap",
+  },
+  moodSupportSmallButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#4CAF50",
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    marginHorizontal: 2,
+    marginTop: 4,
+    elevation: 3,
+  },
+  moodSupportEmailButton: {
+    backgroundColor: "#2196F3",
+  },
+  moodSupportSmallButtonIcon: {
+    marginRight: 3,
+  },
+  moodSupportSmallButtonText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  moodSupportMinimizedContainer: {
+    position: "absolute",
+    top: 76,
+    right: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 248, 238, 0.96)",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#ffd699",
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    maxWidth: 170,
+    zIndex: 20,
+    elevation: 5,
+  },
+  moodSupportMinimizedText: {
+    color: "#e53935",
+    fontSize: 13,
+    fontWeight: "600",
+    marginRight: 4,
+    flexShrink: 1,
+  },
+  moodSupportModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.45)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+  moodSupportConfirmModal: {
+    width: "100%",
+    maxWidth: 360,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 20,
+    alignItems: "center",
+    elevation: 10,
+  },
+  moodSupportConfirmTitle: {
+    color: "#e53935",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  moodSupportConfirmMessage: {
+    color: "#333",
+    fontSize: 15,
+    lineHeight: 21,
+    textAlign: "center",
+    marginBottom: 18,
+  },
+  moodSupportConfirmActions: {
+    width: "100%",
+    alignItems: "stretch",
+  },
+  moodSupportConfirmButton: {
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginTop: 8,
+  },
+  moodSupportMinimizeButton: {
+    backgroundColor: "#F3E5AB",
+  },
+  moodSupportCloseButton: {
+    backgroundColor: "#E53935",
+  },
+  moodSupportCancelButton: {
+    backgroundColor: "#E0E0E0",
+  },
+  moodSupportConfirmButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+  moodSupportMinimizeButtonText: {
+    color: "#7A5C00",
+  },
+  moodSupportCancelButtonText: {
+    color: "#333",
+  },
+  sectionCard: {
+    alignSelf: "stretch",
+    marginHorizontal: 20,
+    padding: 18,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(242,242,242,0.18)",
+  },
+  contextSectionCard: {
+    marginTop: 18,
+  },
   questionWrapper: {
     alignItems: "center",
     justifyContent: "center",
+    width: "100%",
   },
   questionText: {
     textAlign: "center",
     fontSize: 18,
     fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
   },
+  moodQuestionText: {
+    color: "#dce5ff",
+    fontSize: 17,
+    lineHeight: 24,
+  },
+  inputIntroText: {
+    textAlign: "left",
+    paddingLeft: 0,
+    paddingRight: 0,
+    paddingTop: 0,
+    marginBottom: 14,
+    fontSize: 16,
+  },
+  contextLabel: {
+    marginTop: 8,
+  },
   activitiesListContainer: {
     width: "100%",
-    paddingHorizontal: 16,
-    marginTop: 8,
+    paddingHorizontal: 0,
+    marginTop: 14,
   },
   activitiesRow: {
     justifyContent: "space-between",
@@ -953,6 +1601,7 @@ const styles = StyleSheet.create({
     fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
     fontSize: 14,
     lineHeight: 21,
+    textAlign: "justify",
   },
   photoButton: {
     marginTop: 18,
@@ -1056,6 +1705,7 @@ const styles = StyleSheet.create({
     fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
     fontSize: 13,
     lineHeight: 19,
+    textAlign: "justify",
   },
   removeSelfieButton: {
     marginTop: 12,
@@ -1076,6 +1726,100 @@ const styles = StyleSheet.create({
     fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
     fontSize: 13,
     lineHeight: 19,
+  },
+  analysisPreviewPanel: {
+    marginTop: 16,
+    paddingTop: 14,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(242,242,242,0.14)",
+  },
+  analysisPreviewTitle: {
+    color: "#dce5ff",
+    fontFamily: "DoppioOne",
+    fontSize: 13,
+    marginBottom: 10,
+  },
+  analysisPreviewGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginHorizontal: -4,
+  },
+  analysisPreviewChip: {
+    margin: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 999,
+    backgroundColor: "rgba(242,242,242,0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(242,242,242,0.18)",
+  },
+  analysisPreviewChipText: {
+    color: "#f2f2f2",
+    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
+    fontSize: 12,
+  },
+  analysisDialogOverlay: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 28,
+    backgroundColor: "rgba(0,0,0,0.52)",
+  },
+  analysisDialogCard: {
+    width: "100%",
+    maxWidth: 420,
+    paddingTop: 26,
+    paddingHorizontal: 26,
+    paddingBottom: 12,
+    borderRadius: 4,
+    backgroundColor: "#f8f8f8",
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+  },
+  analysisDialogTitle: {
+    color: "#1f1f1f",
+    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
+    fontSize: 21,
+    fontWeight: "700",
+    marginBottom: 18,
+  },
+  analysisDialogMessage: {
+    color: "#1f1f1f",
+    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
+    fontSize: 17,
+    lineHeight: 25,
+    textAlign: "justify",
+  },
+  analysisDialogImportant: {
+    marginTop: 16,
+    color: "#1f1f1f",
+    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
+    fontSize: 17,
+    lineHeight: 25,
+    textAlign: "justify",
+  },
+  analysisDialogImportantLabel: {
+    fontWeight: "700",
+  },
+  analysisDialogActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    flexWrap: "wrap",
+    alignItems: "flex-end",
+    marginTop: 24,
+  },
+  analysisDialogButton: {
+    paddingVertical: 9,
+    paddingHorizontal: 8,
+  },
+  analysisDialogButtonText: {
+    color: "#1f1f1f",
+    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
+    fontSize: 16,
+    fontWeight: "700",
   },
   cameraScreen: {
     flex: 1,
@@ -1139,7 +1883,7 @@ const styles = StyleSheet.create({
     fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
     fontSize: 14,
     lineHeight: 21,
-    textAlign: "center",
+    textAlign: "justify",
   },
   cameraDetectionBadge: {
     marginTop: 14,
