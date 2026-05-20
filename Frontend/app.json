@@ -41,7 +41,14 @@
     },
     "plugins": [
       "expo-font",
-      "expo-image-picker"
+      "expo-image-picker",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permite que $(PRODUCT_NAME) acceda a tu c\u00e1mara para tomar una selfie opcional.",
+          "recordAudioAndroid": false
+        }
+      ]
     ],
     "updates": {
       "url": "https://u.expo.dev/5640adae-eeb5-444b-bc8c-7f844cf16b9c"

@@ -4,6 +4,23 @@ apply plugin: "com.facebook.react"
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
+def runNodeCommand(List<String> args) {
+  def standardOutput = new ByteArrayOutputStream()
+  def errorOutput = new ByteArrayOutputStream()
+  def process = args.execute(null, rootDir)
+  process.waitForProcessOutput(standardOutput, errorOutput)
+
+  if (process.exitValue() != 0) {
+    throw new GradleException(errorOutput.toString("UTF-8").trim())
+  }
+
+  return standardOutput.toString("UTF-8").trim()
+}
+
+def resolveNodePath(String expression) {
+  return runNodeCommand(["node", "--print", expression])
+}
+
 static def versionToNumber(major, minor, patch) {
   return patch * 100 + minor * 10000 + major * 1000000
 }
@@ -30,14 +47,14 @@ def rnVersion = getRNVersion()
  * By default you don't need to apply any configuration, just uncomment the lines you need.
  */
 react {
-    entryFile = file(["node", "-e", "require('expo/scripts/resolveAppEntry')", projectRoot, "android", "absolute"].execute(null, rootDir).text.trim())
-    reactNativeDir = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
-    hermesCommand = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim()).getParentFile().getAbsolutePath() + "/sdks/hermesc/%OS-BIN%/hermesc"
-    codegenDir = new File(["node", "--print", "require.resolve('@react-native/codegen/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
+    entryFile = file(runNodeCommand(["node", "-e", "require('expo/scripts/resolveAppEntry')", projectRoot, "android", "absolute"]))
+    reactNativeDir = new File(resolveNodePath("require.resolve('react-native/package.json')")).getParentFile().getAbsoluteFile()
+    hermesCommand = new File(resolveNodePath("require.resolve('react-native/package.json')")).getParentFile().getAbsolutePath() + "/sdks/hermesc/%OS-BIN%/hermesc"
+    codegenDir = new File(resolveNodePath("require.resolve('@react-native/codegen/package.json', { paths: [require.resolve('react-native/package.json')] })")).getParentFile().getAbsoluteFile()
 
     // Use Expo CLI to bundle the app, this ensures the Metro config
     // works correctly with Expo projects.
-    cliFile = new File(["node", "--print", "require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })"].execute(null, rootDir).text.trim())
+    cliFile = new File(resolveNodePath("require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })"))
     bundleCommand = "export:embed"
 
     /* Folders */
@@ -196,6 +213,6 @@ dependencies {
 }
 
 if (rnVersion < versionToNumber(0, 75, 0)) {
-    apply from: new File(["node", "--print", "require.resolve('@react-native-community/cli-platform-android/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim(), "../native_modules.gradle");
+    apply from: new File(resolveNodePath("require.resolve('@react-native-community/cli-platform-android/package.json', { paths: [require.resolve('react-native/package.json')] })"), "../native_modules.gradle");
     applyNativeModulesAppBuildGradle(project)
 }
