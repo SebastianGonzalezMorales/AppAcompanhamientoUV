@@ -15,6 +15,7 @@ const authRoutes = require("./auth");
 const passwordRoutes = require("./password");
 const tokenRoutes = require("./token");
 const userRoutes = require("./user");
+const notificationsRoutes = require("./notifications");
 const rekognitionRoutes = require("./Aws/rekognitionRoutes");
 
 module.exports = (app) => {
@@ -38,6 +39,7 @@ module.exports = (app) => {
   app.use(`${api}/password`, passwordRoutes); // Recuperación y restablecimiento de contraseñas
   app.use(`${api}/tokens`, tokenRoutes); // Verificación y decodificación de tokens
   app.use(`${api}/user-management`, userRoutes); // Gestión de usuarios
+  app.use(`${api}/notifications`, notificationsRoutes); // Notificaciones push con Amazon SNS
 
   // app.use(`${api}/users`, usersRoutes);
 };

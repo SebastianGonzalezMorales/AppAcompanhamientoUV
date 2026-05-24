@@ -21,6 +21,13 @@ const usersSchema = new mongoose.Schema({
   policyAccepted: { type: Boolean, default: false },
   policyAcceptedAt: { type: Date, default: null },
   phoneNumber: { type: String, required: true },
+  pushNotifications: {
+    enabled: { type: Boolean, default: false },
+    platform: { type: String, default: null },
+    deviceToken: { type: String, default: null },
+    snsEndpointArn: { type: String, default: null },
+    updatedAt: { type: Date, default: null },
+  },
 });
 
 /**
