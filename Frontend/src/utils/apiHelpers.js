@@ -30,8 +30,6 @@ export const fetchWithToken = async (
     };
 
     const response = await axios(config);
-    console.log("Respuesta completa de la API:", response);
-
     return response.data;
   } catch (error) {
     console.error("Error al realizar la solicitud:", error);

@@ -208,8 +208,6 @@ const HomeMood = ({ route, navigation }) => {
 
       const moodData = moodDataResponse.data;
 
-      console.log("Datos recibidos de la API:", moodData);
-
       let mal = 0;
       let regular = 0;
       let bien = 0;
@@ -223,8 +221,6 @@ const HomeMood = ({ route, navigation }) => {
         const entryYear = entryDate.getFullYear(); // Extraer año de la fecha
 
         if (entryMonth === currentMonth && entryYear === currentYear) {
-          console.log(`Estado de ánimo detectado (${entryDate}):`, moodState);
-
           switch (moodState) {
             case "Mal":
               mal++;
@@ -239,7 +235,6 @@ const HomeMood = ({ route, navigation }) => {
               excelente++;
               break;
             default:
-              console.log("Estado de ánimo desconocido:", moodState);
               break;
           }
         }
@@ -276,8 +271,6 @@ const HomeMood = ({ route, navigation }) => {
           legendFontSize: 14,
         },
       ];
-
-      console.log("Datos procesados para el gráfico:", data);
       setPieChartData(data);
       setLoading(false);
     } catch (error) {

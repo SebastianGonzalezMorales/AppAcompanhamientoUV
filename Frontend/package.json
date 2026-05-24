@@ -26,6 +26,7 @@
     "expo-face-detector": "~12.7.1",
     "expo-font": "~12.0.10",
     "expo-image-picker": "~15.1.0",
+    "expo-notifications": "~0.28.19",
     "expo-splash-screen": "~0.27.7",
     "expo-status-bar": "~1.12.1",
     "expo-updates": "~0.25.28",

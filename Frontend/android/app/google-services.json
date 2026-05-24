@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "77187463103",
+    "project_id": "appacompaws",
+    "storage_bucket": "appacompaws.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:77187463103:android:531dce9bf29dae69e3d30a",
+        "android_client_info": {
+          "package_name": "com.sebastian2040.AppAcompanhamientoUVdevelopment_build"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2cUmmiliyp_igSDER3RCSrQNroe69Ink"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -29,7 +29,8 @@
       ],
       "usesCleartextTraffic": true,
       "package": "com.sebastian2040.AppAcompanhamientoUVdevelopment_build",
-      "runtimeVersion": "1.0.0"
+      "runtimeVersion": "1.0.0",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./src/assets/images/Icon_Application_Blue.png"
@@ -42,6 +43,7 @@
     "plugins": [
       "expo-font",
       "expo-image-picker",
+      "expo-notifications",
       [
         "expo-camera",
         {
