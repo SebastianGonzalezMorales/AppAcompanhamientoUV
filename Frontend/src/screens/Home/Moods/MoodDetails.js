@@ -11,6 +11,7 @@ import {
   View,
   ActivityIndicator,
   ScrollView, // Importamos ScrollView
+  StyleSheet,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 
@@ -34,6 +35,17 @@ const { API_URL } = Constants.expoConfig?.extra || {};
 // Import activities from Activities.js
 import Activity from "../Activities";
 
+const emotionLabels = {
+  HAPPY: "alegría",
+  CALM: "tranquilidad",
+  SAD: "tristeza",
+  ANGRY: "enojo o tensión",
+  FEAR: "preocupación o temor",
+  CONFUSED: "confusión",
+  DISGUSTED: "incomodidad",
+  SURPRISED: "sorpresa",
+};
+
 const MoodDetails = ({ route, navigation }) => {
   // Obtener el ID del estado de ánimo desde la ruta
   const { moodId } = route.params;
@@ -43,6 +55,7 @@ const MoodDetails = ({ route, navigation }) => {
   const [title, setTitle] = useState("");
   const [comments, setComments] = useState("");
   const [activities, setActivities] = useState(Activity);
+  const [imageAnalysis, setImageAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const fontScale = PixelRatio.getFontScale();
@@ -77,6 +90,8 @@ const MoodDetails = ({ route, navigation }) => {
         } else {
           setComments("No se agregaron detalles importantes.");
         }
+
+        setImageAnalysis(data.imageAnalysis || null);
 
         // Actualizar las actividades seleccionadas
         const updatedActivities = Activity.map((activity) => {
@@ -122,6 +137,33 @@ const MoodDetails = ({ route, navigation }) => {
       </View>
     );
   }
+
+  const getImageAnalysisText = () => {
+    if (!imageAnalysis?.hasImage) {
+      return "No se registró una imagen complementaria en este estado de ánimo.";
+    }
+
+    if (imageAnalysis.faceDetected === false) {
+      return "Este registro incluyó una imagen complementaria, pero no se detectó un rostro con suficiente claridad.";
+    }
+
+    if (imageAnalysis.dominantEmotion) {
+      const emotion =
+        emotionLabels[imageAnalysis.dominantEmotion] ||
+        "una expresión no identificada con claridad";
+
+      return `Este registro incluyó una imagen para complementar tu reflexión emocional. La imagen mostró una expresión asociada a ${emotion}.`;
+    }
+
+    return "Este registro incluyó una imagen complementaria, pero no fue posible obtener un análisis de expresión.";
+  };
+
+  const imageAnalysisIcon = imageAnalysis?.hasImage
+    ? "face-recognition"
+    : "image-off-outline";
+  const imageAnalysisStatus = imageAnalysis?.hasImage
+    ? "Imagen registrada"
+    : "Sin imagen registrada";
 
   return (
     <SafeAreaView style={[FormStyle.container, GlobalStyle.androidSafeArea]}>
@@ -272,9 +314,11 @@ const MoodDetails = ({ route, navigation }) => {
 
             {/* Inputs */}
             <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-              <View style={FormStyle.inputContainer}>
+              <View style={[styles.sectionCard, styles.contextSectionCard]}>
                 {/* Título */}
-                <Text style={FormStyle.text}>Mi día hasta ahora</Text>
+                <Text style={[FormStyle.text, styles.contextLabel]}>
+                  Mi día hasta ahora
+                </Text>
                 <View pointerEvents="none">
                   <InputButton
                     value={title}
@@ -284,7 +328,9 @@ const MoodDetails = ({ route, navigation }) => {
                 </View>
 
                 {/* Nota */}
-                <Text style={FormStyle.text}>Detalles importantes</Text>
+                <Text style={[FormStyle.text, styles.contextLabel]}>
+                  Detalles importantes
+                </Text>
                 <View pointerEvents="none">
                   <InputButton
                     value={comments}
@@ -294,6 +340,62 @@ const MoodDetails = ({ route, navigation }) => {
                 </View>
               </View>
             </TouchableWithoutFeedback>
+
+            <View style={styles.imageAnalysisCard}>
+              <View style={styles.imageAnalysisHeader}>
+                <View style={styles.imageAnalysisIconFrame}>
+                  <MaterialCommunityIcons
+                    name={imageAnalysisIcon}
+                    size={34}
+                    color="#9fd7ff"
+                  />
+                </View>
+
+                <View style={styles.imageAnalysisHeaderText}>
+                  <Text style={styles.imageAnalysisTitle}>
+                    Imagen complementaria
+                  </Text>
+                  <View
+                    style={[
+                      styles.imageAnalysisStatusPill,
+                      imageAnalysis?.hasImage
+                        ? styles.imageAnalysisStatusPillActive
+                        : styles.imageAnalysisStatusPillEmpty,
+                    ]}
+                  >
+                    <MaterialCommunityIcons
+                      name={
+                        imageAnalysis?.hasImage
+                          ? "check-circle"
+                          : "close-circle"
+                      }
+                      size={16}
+                      color={imageAnalysis?.hasImage ? "#7ce0b8" : "#ff8f8f"}
+                      style={styles.imageAnalysisStatusIcon}
+                    />
+                    <Text
+                      style={[
+                        styles.imageAnalysisStatusText,
+                        imageAnalysis?.hasImage
+                          ? styles.imageAnalysisStatusTextActive
+                          : styles.imageAnalysisStatusTextEmpty,
+                      ]}
+                    >
+                      {imageAnalysisStatus}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              <Text style={styles.imageAnalysisText}>
+                {getImageAnalysisText()}
+              </Text>
+
+              <Text style={styles.imageAnalysisNote}>
+                Este análisis no representa un diagnóstico. Tu registro manual
+                sigue siendo el dato principal.
+              </Text>
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -302,3 +404,103 @@ const MoodDetails = ({ route, navigation }) => {
 };
 
 export default MoodDetails;
+
+const styles = StyleSheet.create({
+  sectionCard: {
+    alignSelf: "stretch",
+    marginHorizontal: 20,
+    padding: 18,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(242,242,242,0.18)",
+  },
+  contextSectionCard: {
+    marginTop: 18,
+  },
+  contextLabel: {
+    marginTop: 8,
+  },
+  imageAnalysisCard: {
+    marginTop: 18,
+    marginHorizontal: 20,
+    padding: 18,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(242,242,242,0.18)",
+  },
+  imageAnalysisHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  imageAnalysisIconFrame: {
+    width: 58,
+    height: 58,
+    borderRadius: 16,
+    backgroundColor: "#071149",
+    borderWidth: 1,
+    borderColor: "rgba(159,215,255,0.24)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  imageAnalysisHeaderText: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  imageAnalysisTitle: {
+    color: "#f2f2f2",
+    fontFamily: "DoppioOne",
+    fontSize: 16,
+  },
+  imageAnalysisStatusPill: {
+    alignSelf: "flex-start",
+    marginTop: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
+  imageAnalysisStatusPillActive: {
+    backgroundColor: "rgba(124,224,184,0.14)",
+    borderColor: "rgba(124,224,184,0.28)",
+  },
+  imageAnalysisStatusPillEmpty: {
+    backgroundColor: "rgba(255,143,143,0.14)",
+    borderColor: "rgba(255,143,143,0.32)",
+  },
+  imageAnalysisStatusIcon: {
+    marginRight: 6,
+  },
+  imageAnalysisStatusText: {
+    color: "#dce5ff",
+    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  imageAnalysisStatusTextActive: {
+    color: "#7ce0b8",
+  },
+  imageAnalysisStatusTextEmpty: {
+    color: "#ff8f8f",
+  },
+  imageAnalysisText: {
+    marginTop: 14,
+    color: "#dce5ff",
+    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
+    fontSize: 14,
+    lineHeight: 21,
+    textAlign: "justify",
+  },
+  imageAnalysisNote: {
+    marginTop: 10,
+    color: "#f2f2f2",
+    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
+    fontSize: 13,
+    lineHeight: 19,
+    textAlign: "justify",
+    opacity: 0.86,
+  },
+});

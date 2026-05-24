@@ -9,6 +9,9 @@ import {
   StyleSheet,
   ScrollView,
   Platform,
+  TouchableOpacity,
+  Linking,
+  Alert,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -34,13 +37,21 @@ import Constants from "expo-constants";
 
 // Asigna API_URL desde la configuración
 const { API_URL } = Constants.expoConfig?.extra || {};
+const supportPhoneNumber = "+56968301655";
+const supportWhatsAppNumber = "56968301655";
+const supportEmail = "dae@uv.cl";
 
-const HomeMood = ({ navigation }) => {
+const HomeMood = ({ route, navigation }) => {
   // Estados
   const [name, setName] = useState("");
   const [moods, setMoods] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
+  const [showMoodSupportAlert, setShowMoodSupportAlert] = useState(false);
+  const [isMoodSupportAlertMinimized, setIsMoodSupportAlertMinimized] =
+    useState(false);
+  const [showMoodSupportConfirmModal, setShowMoodSupportConfirmModal] =
+    useState(false);
   const [selectedId, setSelectedId] = useState("");
   const [motivationalQuote, setMotivationalQuote] = useState("");
   const [pieChartData, setPieChartData] = useState([]);
@@ -73,6 +84,62 @@ const HomeMood = ({ navigation }) => {
     navigation.navigate("MoodTrack", {
       mood: mood, // Estado de ánimo seleccionado
       value: value, // Valor de la intensidad del estado de ánimo
+    });
+  };
+
+  const minimizeMoodSupportAlert = () => {
+    setShowMoodSupportConfirmModal(false);
+    setIsMoodSupportAlertMinimized(true);
+  };
+
+  const expandMoodSupportAlert = () => {
+    setIsMoodSupportAlertMinimized(false);
+    setShowMoodSupportAlert(true);
+  };
+
+  const closeMoodSupportAlert = () => {
+    setShowMoodSupportConfirmModal(false);
+    setShowMoodSupportAlert(false);
+    setIsMoodSupportAlertMinimized(false);
+  };
+
+  const callMoodSupport = () => {
+    Linking.openURL(`tel:${supportPhoneNumber}`).catch(() => {
+      Alert.alert(
+        "No se pudo llamar",
+        "No se pudo abrir la aplicación de teléfono."
+      );
+    });
+  };
+
+  const sendMoodSupportWhatsApp = () => {
+    const message =
+      "Hola, estoy usando la app de acompañamiento UV y me gustaría solicitar orientación o apoyo emocional. Muchas gracias.";
+    const url = `https://wa.me/${supportWhatsAppNumber}?text=${encodeURIComponent(
+      message
+    )}`;
+
+    Linking.openURL(url).catch(() => {
+      Alert.alert(
+        "No se pudo abrir WhatsApp",
+        "Asegúrate de tener WhatsApp instalado en tu dispositivo."
+      );
+    });
+  };
+
+  const sendMoodSupportEmail = () => {
+    const subject = "[Apoyo emocional - AppAcompañamientoUV]";
+    const body =
+      "Hola,\n\nEstoy usando la app de acompañamiento UV y me gustaría solicitar orientación o apoyo emocional.\n\nMuchas gracias.";
+    const url = `mailto:${supportEmail}?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+
+    Linking.openURL(url).catch(() => {
+      Alert.alert(
+        "No se pudo abrir el correo",
+        "No se pudo abrir el cliente de correo."
+      );
     });
   };
 
@@ -330,6 +397,16 @@ const HomeMood = ({ navigation }) => {
     fetchUserData();
   }, []);
 
+  useEffect(() => {
+    if (!route?.params?.showMoodSupportAlert) {
+      return;
+    }
+
+    setShowMoodSupportAlert(true);
+    setIsMoodSupportAlertMinimized(false);
+    navigation.setParams({ showMoodSupportAlert: false });
+  }, [navigation, route?.params?.showMoodSupportAlert]);
+
   /*
    * ****************
    * **** Screen ****
@@ -338,6 +415,94 @@ const HomeMood = ({ navigation }) => {
 
   return (
     <SafeAreaView style={[GlobalStyle.container, GlobalStyle.androidSafeArea]}>
+      {showMoodSupportAlert && !isMoodSupportAlertMinimized ? (
+        <View style={styles.moodSupportAlertContainer}>
+          <View style={styles.moodSupportAlertHeader}>
+            <MaterialCommunityIcons
+              name="alert-circle-outline"
+              size={18}
+              color="#e53935"
+              style={styles.moodSupportAlertHeaderIcon}
+            />
+            <Text style={styles.moodSupportAlertTitle}>Atención</Text>
+            <TouchableOpacity
+              onPress={() => setShowMoodSupportConfirmModal(true)}
+              style={styles.moodSupportAlertIconButton}
+            >
+              <MaterialCommunityIcons name="close" size={12} color="#e53935" />
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.moodSupportAlertMessage}>
+            Hemos detectado que podrías estar atravesando una situación difícil.
+          </Text>
+
+          <Text style={styles.moodSupportAlertSubMessage}>
+            Por favor, contáctanos a través de una de las siguientes opciones:
+          </Text>
+
+          <View style={styles.moodSupportAlertActions}>
+            <TouchableOpacity
+              onPress={callMoodSupport}
+              style={styles.moodSupportSmallButton}
+            >
+              <MaterialCommunityIcons
+                name="phone"
+                size={14}
+                color="#fff"
+                style={styles.moodSupportSmallButtonIcon}
+              />
+              <Text style={styles.moodSupportSmallButtonText}>Llamar</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={sendMoodSupportWhatsApp}
+              style={styles.moodSupportSmallButton}
+            >
+              <MaterialCommunityIcons
+                name="whatsapp"
+                size={14}
+                color="#fff"
+                style={styles.moodSupportSmallButtonIcon}
+              />
+              <Text style={styles.moodSupportSmallButtonText}>Mensaje</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={sendMoodSupportEmail}
+              style={[
+                styles.moodSupportSmallButton,
+                styles.moodSupportEmailButton,
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="email"
+                size={14}
+                color="#fff"
+                style={styles.moodSupportSmallButtonIcon}
+              />
+              <Text style={styles.moodSupportSmallButtonText}>Correo</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      ) : null}
+
+      {showMoodSupportAlert && isMoodSupportAlertMinimized ? (
+        <TouchableOpacity
+          onPress={expandMoodSupportAlert}
+          style={styles.moodSupportMinimizedContainer}
+        >
+          <MaterialCommunityIcons
+            name="alert-circle-outline"
+            size={15}
+            color="#e53935"
+            style={styles.moodSupportAlertHeaderIcon}
+          />
+          <Text style={styles.moodSupportMinimizedText}>Ver alerta</Text>
+          <MaterialCommunityIcons name="chevron-down" size={16} color="#e53935" />
+        </TouchableOpacity>
+      ) : null}
+
       {/*
        * *****************
        * ***** Modal *****
@@ -369,6 +534,73 @@ const HomeMood = ({ navigation }) => {
             </View>
             <Text style={ModalStyle.smallModalText}>1.</Text>
             <Text style={ModalStyle.smallModalTextTwo}>2.</Text>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        transparent={true}
+        animationType="fade"
+        visible={showMoodSupportConfirmModal}
+        onRequestClose={() => setShowMoodSupportConfirmModal(false)}
+      >
+        <View style={styles.moodSupportModalOverlay}>
+          <View style={styles.moodSupportConfirmModal}>
+            <Text style={styles.moodSupportConfirmTitle}>
+              Opciones de alerta
+            </Text>
+
+            <Text style={styles.moodSupportConfirmMessage}>
+              ¿Estás seguro de que quieres cerrar esta alerta?
+            </Text>
+
+            <View style={styles.moodSupportConfirmActions}>
+              <TouchableOpacity
+                style={[
+                  styles.moodSupportConfirmButton,
+                  styles.moodSupportMinimizeButton,
+                ]}
+                onPress={minimizeMoodSupportAlert}
+              >
+                <Text
+                  style={[
+                    styles.moodSupportConfirmButtonText,
+                    styles.moodSupportMinimizeButtonText,
+                  ]}
+                >
+                  Minimizar
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.moodSupportConfirmButton,
+                  styles.moodSupportCloseButton,
+                ]}
+                onPress={closeMoodSupportAlert}
+              >
+                <Text style={styles.moodSupportConfirmButtonText}>
+                  Cerrar alerta
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.moodSupportConfirmButton,
+                  styles.moodSupportCancelButton,
+                ]}
+                onPress={() => setShowMoodSupportConfirmModal(false)}
+              >
+                <Text
+                  style={[
+                    styles.moodSupportConfirmButtonText,
+                    styles.moodSupportCancelButtonText,
+                  ]}
+                >
+                  Cancelar
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -553,6 +785,172 @@ const HomeMood = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  moodSupportAlertContainer: {
+    position: "absolute",
+    top: 72,
+    left: 64,
+    right: 16,
+    zIndex: 20,
+    elevation: 8,
+    backgroundColor: "#fff3e0",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#ffd699",
+    padding: 10,
+  },
+  moodSupportAlertHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  moodSupportAlertHeaderIcon: {
+    marginRight: 5,
+  },
+  moodSupportAlertTitle: {
+    color: "#e53935",
+    fontWeight: "bold",
+    fontSize: 16,
+    lineHeight: 22,
+    flex: 1,
+  },
+  moodSupportAlertIconButton: {
+    marginLeft: 6,
+    backgroundColor: "white",
+    borderRadius: 8,
+    width: 22,
+    height: 22,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 2,
+  },
+  moodSupportAlertMessage: {
+    color: "#e53935",
+    fontSize: 14,
+    lineHeight: 18,
+    textAlign: "justify",
+    marginTop: 8,
+    marginBottom: 5,
+    fontWeight: "bold",
+  },
+  moodSupportAlertSubMessage: {
+    color: "#333",
+    fontSize: 14,
+    lineHeight: 16,
+    textAlign: "justify",
+    marginTop: 5,
+    marginBottom: 10,
+  },
+  moodSupportAlertActions: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    flexWrap: "wrap",
+  },
+  moodSupportSmallButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#4CAF50",
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    marginHorizontal: 2,
+    marginTop: 4,
+    elevation: 3,
+  },
+  moodSupportEmailButton: {
+    backgroundColor: "#2196F3",
+  },
+  moodSupportSmallButtonIcon: {
+    marginRight: 3,
+  },
+  moodSupportSmallButtonText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  moodSupportMinimizedContainer: {
+    position: "absolute",
+    top: 48,
+    right: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 248, 238, 0.96)",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#ffd699",
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    maxWidth: 170,
+    zIndex: 20,
+    elevation: 5,
+  },
+  moodSupportMinimizedText: {
+    color: "#e53935",
+    fontSize: 13,
+    fontWeight: "600",
+    marginRight: 4,
+    flexShrink: 1,
+  },
+  moodSupportModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.45)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+  moodSupportConfirmModal: {
+    width: "100%",
+    maxWidth: 360,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 20,
+    alignItems: "center",
+    elevation: 10,
+  },
+  moodSupportConfirmTitle: {
+    color: "#e53935",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  moodSupportConfirmMessage: {
+    color: "#333",
+    fontSize: 15,
+    lineHeight: 21,
+    textAlign: "center",
+    marginBottom: 18,
+  },
+  moodSupportConfirmActions: {
+    width: "100%",
+    alignItems: "stretch",
+  },
+  moodSupportConfirmButton: {
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginTop: 8,
+  },
+  moodSupportMinimizeButton: {
+    backgroundColor: "#F3E5AB",
+  },
+  moodSupportCloseButton: {
+    backgroundColor: "#E53935",
+  },
+  moodSupportCancelButton: {
+    backgroundColor: "#E0E0E0",
+  },
+  moodSupportConfirmButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+  moodSupportMinimizeButtonText: {
+    color: "#7A5C00",
+  },
+  moodSupportCancelButtonText: {
+    color: "#333",
+  },
   scrollContent: {
     flexGrow: 1,
   },

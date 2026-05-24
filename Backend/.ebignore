@@ -1,0 +1,17 @@
+node_modules/
+
+.env
+.env.development
+.env.testing
+.env.production
+*.env
+
+.git/
+.gitignore
+.elasticbeanstalk/
+
+.expo/
+.vscode/
+
+npm-debug.log
+yarn-error.log

@@ -4,7 +4,7 @@
   "description": "Backend for the My-App application, including API endpoints, database integration, and authentication.",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "cross-env NODE_ENV=production node app.js",
     "dev": "cross-env NODE_ENV=development nodemon app.js",
     "test": "jest"
   },

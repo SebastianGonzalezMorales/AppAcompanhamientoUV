@@ -93,7 +93,7 @@ const getRequestCameraPermissionsAsync = () => {
   return null;
 };
 
-const buildTipMessage = (tip) => `Consejo para ti:\n\n${tip}`;
+const buildTipMessage = (tip) => `Consejo para ti\n\n${tip}`;
 
 const analysisPreviewTip =
   "Tómate un momento para respirar y reconocer cómo te sientes. Registrar tu estado de ánimo ya es un paso importante.";
@@ -344,9 +344,16 @@ const MoodTrack = ({ route, navigation }) => {
     navigation.goBack();
   }
 
+  const navigateToHomeMood = (params) => {
+    navigation.navigate("Home", {
+      screen: "HomeMood",
+      params,
+    });
+  };
+
   const showAnalysisAlert = (
     supportMessage,
-    onAccept = () => navigation.navigate("HomeMood"),
+    onAccept = () => navigateToHomeMood(),
     comparisonResult = null
   ) => {
     setAnalysisDialog({
@@ -370,8 +377,9 @@ const MoodTrack = ({ route, navigation }) => {
     });
 
     if (shouldShowSupportAlert) {
-      setIsMoodSupportAlertMinimized(false);
-      setShowMoodSupportAlert(true);
+      setTimeout(() => {
+        navigateToHomeMood({ showMoodSupportAlert: true });
+      }, 500);
       return;
     }
 
@@ -394,7 +402,7 @@ const MoodTrack = ({ route, navigation }) => {
     setShowMoodSupportConfirmModal(false);
     setShowMoodSupportAlert(false);
     setIsMoodSupportAlertMinimized(false);
-    navigation.navigate("HomeMood");
+    navigateToHomeMood();
   };
 
   const callMoodSupport = () => {
@@ -453,13 +461,13 @@ const MoodTrack = ({ route, navigation }) => {
           if (hasSelfie && imageAnalysis?.supportMessage) {
             showAnalysisAlert(
               imageAnalysis.supportMessage,
-              () => navigation.navigate("HomeMood"),
+              () => navigateToHomeMood(),
               imageAnalysis.comparisonResult
             );
             return;
           }
 
-          navigation.navigate("HomeMood");
+          navigateToHomeMood();
         },
       },
     ]);
@@ -662,6 +670,7 @@ const MoodTrack = ({ route, navigation }) => {
         `${API_URL}/moodState/post-moodState-with-image`,
         formData,
         {
+          timeout: 60000,
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
@@ -718,7 +727,7 @@ const MoodTrack = ({ route, navigation }) => {
           <Text style={styles.cameraHeaderActionText}>Cancelar</Text>
         </TouchableOpacity>
 
-        <Text style={styles.cameraHeaderTitle}>Selfie opcional</Text>
+        <Text style={styles.cameraHeaderTitle}>Captura de imagen</Text>
 
         <View style={styles.cameraHeaderSpacer} />
       </View>
@@ -747,7 +756,7 @@ const MoodTrack = ({ route, navigation }) => {
       </View>
 
       <Text style={styles.cameraHelperText}>
-        Tómate un momento y captura tu selfie cuando te sientas listo.
+        Tómate un momento y captura una imagen cuando te sientas listo.
       </Text>
 
       <View
@@ -764,7 +773,7 @@ const MoodTrack = ({ route, navigation }) => {
         />
         <Text style={styles.cameraDetectionText}>
           {isFaceDetected
-            ? "Rostro detectado. Ya puedes capturar tu selfie."
+            ? "Rostro detectado. Ya puedes capturar la imagen."
             : "Alinea tu rostro dentro del encuadre para habilitar la captura."}
         </Text>
       </View>
@@ -785,7 +794,7 @@ const MoodTrack = ({ route, navigation }) => {
             style={styles.cameraCaptureIcon}
           />
           <Text style={styles.cameraCaptureText}>
-            {isCapturingSelfie ? "Tomando selfie..." : "Capturar selfie"}
+            {isCapturingSelfie ? "Capturando imagen..." : "Capturar imagen"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -1063,9 +1072,8 @@ const MoodTrack = ({ route, navigation }) => {
             </View>
 
             <Text style={styles.selfieDescription}>
-              Puedes tomar una selfie opcional para complementar tu registro
-              emocional. Tu registro manual seguirá siendo el dato
-              principal.
+              Puedes agregar una imagen para complementar tu registro emocional.
+              Tu registro manual seguirá siendo el dato principal.
             </Text>
 
             <TouchableOpacity
@@ -1086,7 +1094,7 @@ const MoodTrack = ({ route, navigation }) => {
                 {isOpeningCamera
                   ? "Abriendo cámara..."
                   : isSelfieReady
-                  ? "Cambiar selfie"
+                  ? "Cambiar imagen"
                   : "Tomar selfie"}
               </Text>
             </TouchableOpacity>
@@ -1157,15 +1165,15 @@ const MoodTrack = ({ route, navigation }) => {
                       />
                       <Text style={styles.selfieStatusText}>
                         {isAnalyzingSelfie
-                          ? "Analizando selfie..."
-                          : "Selfie agregada correctamente"}
+                          ? "Analizando imagen..."
+                          : "Imagen agregada correctamente"}
                       </Text>
                     </View>
 
                     <Text style={styles.selfieStatusDescription}>
                       {isAnalyzingSelfie
                         ? "Estamos complementando tu registro emocional de forma referencial."
-                        : "Tu selfie quedó lista para acompañar este registro."}
+                        : "La imagen quedó lista para acompañar este registro."}
                     </Text>
                   </View>
                 </View>
@@ -1181,13 +1189,13 @@ const MoodTrack = ({ route, navigation }) => {
                       isSavingMood ? styles.disabledText : null,
                     ]}
                   >
-                    Eliminar selfie
+                    Eliminar imagen
                   </Text>
                 </TouchableOpacity>
               </View>
             ) : (
               <Text style={styles.selfieHint}>
-                El análisis será solo referencial.
+                La imagen se usará solo como complemento referencial.
               </Text>
             )}
 
