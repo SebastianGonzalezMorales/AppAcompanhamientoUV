@@ -47,6 +47,8 @@ const HomeMood = ({ route, navigation }) => {
   const [moods, setMoods] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
+  const [phraseModalVisible, setPhraseModalVisible] = useState(false);
+  const [shouldOpenPhraseModal, setShouldOpenPhraseModal] = useState(false);
   const [showMoodSupportAlert, setShowMoodSupportAlert] = useState(false);
   const [isMoodSupportAlertMinimized, setIsMoodSupportAlertMinimized] =
     useState(false);
@@ -54,6 +56,8 @@ const HomeMood = ({ route, navigation }) => {
     useState(false);
   const [selectedId, setSelectedId] = useState("");
   const [motivationalQuote, setMotivationalQuote] = useState("");
+  const [motivationalQuoteText, setMotivationalQuoteText] = useState("");
+  const [motivationalQuoteAuthor, setMotivationalQuoteAuthor] = useState("");
   const [pieChartData, setPieChartData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -309,6 +313,8 @@ const HomeMood = ({ route, navigation }) => {
         console.log(`Autor: ${author}`);
 
         const normalizedAuthor = author?.trim();
+        setMotivationalQuoteText(message);
+        setMotivationalQuoteAuthor(normalizedAuthor || "");
         setMotivationalQuote(
           normalizedAuthor ? `${message} - ${normalizedAuthor}` : message
         );
@@ -399,6 +405,35 @@ const HomeMood = ({ route, navigation }) => {
     setIsMoodSupportAlertMinimized(false);
     navigation.setParams({ showMoodSupportAlert: false });
   }, [navigation, route?.params?.showMoodSupportAlert]);
+
+  useEffect(() => {
+    if (!route?.params?.showPhraseModal) {
+      return;
+    }
+
+    setShouldOpenPhraseModal(true);
+    fetchMotivationalQuote();
+    navigation.setParams({ showPhraseModal: false });
+  }, [navigation, route?.params?.showPhraseModal]);
+
+  useEffect(() => {
+    if (!shouldOpenPhraseModal) {
+      return;
+    }
+
+    const phraseText = (motivationalQuoteText || motivationalQuote || "").trim();
+
+    if (!phraseText) {
+      return;
+    }
+
+    setPhraseModalVisible(true);
+    setShouldOpenPhraseModal(false);
+  }, [
+    motivationalQuote,
+    motivationalQuoteText,
+    shouldOpenPhraseModal,
+  ]);
 
   /*
    * ****************
@@ -527,6 +562,36 @@ const HomeMood = ({ route, navigation }) => {
             </View>
             <Text style={ModalStyle.smallModalText}>1.</Text>
             <Text style={ModalStyle.smallModalTextTwo}>2.</Text>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={phraseModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setPhraseModalVisible(false)}
+      >
+        <View style={styles.phraseModalOverlay}>
+          <View style={styles.phraseModalCard}>
+            <Text style={styles.phraseModalTitle}>Frase del día</Text>
+
+            <Text style={styles.phraseModalQuote}>
+              “{motivationalQuoteText || motivationalQuote}”
+            </Text>
+
+            {motivationalQuoteAuthor ? (
+              <Text style={styles.phraseModalAuthor}>
+                — {motivationalQuoteAuthor}
+              </Text>
+            ) : null}
+
+            <TouchableOpacity
+              style={styles.phraseModalButton}
+              onPress={() => setPhraseModalVisible(false)}
+            >
+              <Text style={styles.phraseModalButtonText}>Continuar</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -943,6 +1008,59 @@ const styles = StyleSheet.create({
   },
   moodSupportCancelButtonText: {
     color: "#333",
+  },
+  phraseModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.45)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 16,
+  },
+  phraseModalCard: {
+    width: "100%",
+    maxWidth: 392,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 18,
+    alignItems: "center",
+    elevation: 10,
+    transform: [{ translateY: -72 }],
+  },
+  phraseModalTitle: {
+    color: "#102a43",
+    fontFamily: "DoppioOne",
+    fontSize: 20,
+    textAlign: "center",
+    marginBottom: 12,
+  },
+  phraseModalQuote: {
+    color: "#243b53",
+    fontFamily: "DoppioOne",
+    fontSize: 16,
+    lineHeight: 24,
+    textAlign: "center",
+    marginBottom: 12,
+  },
+  phraseModalAuthor: {
+    color: "#486581",
+    fontFamily: "DoppioOne",
+    fontSize: 13,
+    fontStyle: "italic",
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  phraseModalButton: {
+    alignSelf: "flex-end",
+    marginTop: 4,
+    paddingTop: 4,
+    paddingHorizontal: 6,
+  },
+  phraseModalButtonText: {
+    color: "#000C7B",
+    fontSize: 15,
+    fontWeight: "600",
+    textAlign: "right",
   },
   scrollContent: {
     flexGrow: 1,

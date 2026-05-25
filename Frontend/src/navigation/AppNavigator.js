@@ -1,10 +1,14 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { NavigationContainer } from '@react-navigation/native';
+import {
+  NavigationContainer,
+  createNavigationContainerRef,
+} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
+import * as Notifications from 'expo-notifications';
 
 // Importa el AuthContext
 import { AuthContext } from '../context/AuthContext';
@@ -60,14 +64,28 @@ import AreaDeporteyRecreacion from '../screens/InformacionUv/ServiciosyApoyoEstu
 import Tne from '../screens/InformacionUv/ServiciosyApoyoEstudiantil/Tne';
 import Baes from '../screens/InformacionUv/ServiciosyApoyoEstudiantil/Baes';
 import AreaDeAtencionArancelaria from '../screens/InformacionUv/ServiciosyApoyoEstudiantil/AreaDeAtencionArancelaria';
+import NotificationPreferences from '../screens/UserProfile/NotificationPreferences';
 
 const Stack = createNativeStackNavigator();
+const navigationRef = createNavigationContainerRef();
+
+const getNotificationData = (response) =>
+  response?.notification?.request?.content?.data || {};
+
+const isDailyPhraseNotification = (data) =>
+  data?.screen === 'HomeMood' || data?.type === 'daily_phrase';
+
+const shouldShowPhraseModal = (data) =>
+  data?.showPhraseModal === true || data?.showPhraseModal === 'true';
 
 const AppNavigator = () => {
   const { userToken, isLoading } = useContext(AuthContext);
   const [viewedOnboarding, setViewedOnboarding] = useState(false);
   const [resumePasswordRecovery, setResumePasswordRecovery] = useState(false);
   const [isRecoveryStateLoading, setIsRecoveryStateLoading] = useState(true);
+  const [isNavigationReady, setIsNavigationReady] = useState(false);
+  const [pendingNotificationData, setPendingNotificationData] = useState(null);
+  const handledNotificationIdRef = useRef(null);
 
   // Pre-loading fonts
   const [fontsLoaded] = useFonts({
@@ -139,12 +157,97 @@ const AppNavigator = () => {
     loadRecoveryState();
   }, [userToken]);
 
+  useEffect(() => {
+    const navigateToHomeMood = (data) => {
+      if (!navigationRef.isReady()) {
+        return false;
+      }
+
+      navigationRef.navigate('Home', {
+        screen: 'HomeMood',
+        params: {
+          showPhraseModal: shouldShowPhraseModal(data),
+        },
+      });
+
+      return true;
+    };
+
+    const handleNotificationResponse = (response) => {
+      const notificationId = response?.notification?.request?.identifier;
+
+      if (
+        notificationId &&
+        handledNotificationIdRef.current === notificationId
+      ) {
+        return;
+      }
+
+      const data = getNotificationData(response);
+
+      if (!isDailyPhraseNotification(data)) {
+        return;
+      }
+
+      if (notificationId) {
+        handledNotificationIdRef.current = notificationId;
+      }
+
+      if (!userToken || !navigateToHomeMood(data)) {
+        setPendingNotificationData(data);
+      }
+    };
+
+    const subscription =
+      Notifications.addNotificationResponseReceivedListener(
+        handleNotificationResponse
+      );
+
+    Notifications.getLastNotificationResponseAsync()
+      .then((response) => {
+        if (response) {
+          handleNotificationResponse(response);
+        }
+      })
+      .catch((error) => {
+        console.error(
+          'Error al recuperar la respuesta inicial de notificacion:',
+          error
+        );
+      });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [userToken, isNavigationReady]);
+
+  useEffect(() => {
+    if (
+      !userToken ||
+      !isNavigationReady ||
+      !isDailyPhraseNotification(pendingNotificationData)
+    ) {
+      return;
+    }
+
+    navigationRef.navigate('Home', {
+      screen: 'HomeMood',
+      params: {
+        showPhraseModal: shouldShowPhraseModal(pendingNotificationData),
+      },
+    });
+    setPendingNotificationData(null);
+  }, [isNavigationReady, pendingNotificationData, userToken]);
+
   if (!fontsLoaded || isLoading || isRecoveryStateLoading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer
+      ref={navigationRef}
+      onReady={() => setIsNavigationReady(true)}
+    >
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!userToken ? (
           <>
@@ -210,6 +313,7 @@ const AppNavigator = () => {
             <Stack.Screen name="Tne" component={Tne} />
             <Stack.Screen name="Baes" component={Baes} />
             <Stack.Screen name="AreaDeAtencionArancelaria" component={AreaDeAtencionArancelaria} />
+            <Stack.Screen name="NotificationPreferences" component={NotificationPreferences} />
           </>
         )}
       </Stack.Navigator>

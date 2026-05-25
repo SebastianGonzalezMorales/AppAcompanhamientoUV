@@ -5,10 +5,12 @@ import {
   Alert,
   ScrollView,
   StyleSheet,
+  TouchableOpacity,
 } from "react-native";
 import React, { useState, useContext, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/FontAwesome";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { ProgressBar } from "react-native-paper";
 import api from "../../utils/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -22,6 +24,9 @@ const { API_URL } = Constants.expoConfig?.extra || {};
 import AuthButton from "../../components/buttons/AuthButton";
 
 import GlobalStyle from "../../assets/styles/GlobalStyle";
+
+const formatEmailForDisplay = (value = "") =>
+  value.replace(/([@._-])/g, "$1\u200B");
 
 function UserProfile({ navigation }) {
   const { logout } = useContext(AuthContext);
@@ -133,30 +138,65 @@ function UserProfile({ navigation }) {
         </View>
 
         <View style={styles.infoCard}>
-          <Text style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Nombre: </Text>
-            {name}
-          </Text>
-          <Text style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Rut: </Text>
-            {rut}
-          </Text>
-          <Text style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Email: </Text>
-            {email}
-          </Text>
-          <Text style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Teléfono: </Text>
-            {phone}
-          </Text>
-          <Text style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Carrera: </Text>
-            {career}
-          </Text>
-          <Text style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Fecha de nacimiento: </Text>
-            {birthdate}
-          </Text>
+          <View style={styles.sectionPanel}>
+            <Text style={styles.sectionHeading}>Datos del usuario</Text>
+            <Text style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Nombre: </Text>
+              {name}
+            </Text>
+            <Text style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Rut: </Text>
+              {rut}
+            </Text>
+            <Text style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Email: </Text>
+              {formatEmailForDisplay(email)}
+            </Text>
+            <Text style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Teléfono: </Text>
+              {phone}
+            </Text>
+            <Text style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Carrera: </Text>
+              {career}
+            </Text>
+            <Text style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Fecha de nacimiento: </Text>
+              {birthdate}
+            </Text>
+          </View>
+
+          <View style={[styles.sectionPanel, styles.settingsPanel]}>
+            <Text style={styles.settingsHeading}>Configuración de la app</Text>
+            <TouchableOpacity
+              style={styles.preferencesShortcutCard}
+              onPress={() => navigation.navigate("NotificationPreferences")}
+              activeOpacity={0.85}
+            >
+              <View style={styles.preferencesShortcutIcon}>
+                <MaterialCommunityIcons
+                  name="cog-outline"
+                  size={24}
+                  color="#000C7B"
+                />
+              </View>
+
+              <View style={styles.preferencesShortcutContent}>
+                <Text style={styles.preferencesShortcutTitle}>
+                  Configuración
+                </Text>
+                <Text style={styles.preferencesShortcutSubtitle}>
+                  Notificaciones, recordatorios y avisos de la aplicación.
+                </Text>
+              </View>
+
+              <MaterialCommunityIcons
+                name="chevron-right"
+                size={24}
+                color="#8a94a6"
+              />
+            </TouchableOpacity>
+          </View>
 
           <View style={styles.logoutWrapper}>
             <AuthButton
@@ -210,21 +250,81 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    paddingHorizontal: 30,
+    paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 50,
     flexGrow: 1,
   },
   infoRow: {
     ...GlobalStyle.statsTitle,
-    marginVertical: 2,
-    lineHeight: 24,
+    marginVertical: 0,
+    paddingTop: 14,
+    lineHeight: 22,
   },
   infoLabel: {
     fontWeight: "bold",
     fontSize: 17,
   },
+  sectionPanel: {
+    backgroundColor: "#f8fbff",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#dfe8f5",
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+    marginTop: 18,
+  },
+  settingsPanel: {
+    backgroundColor: "#f6fbfb",
+    borderColor: "#d7eceb",
+  },
+  sectionHeading: {
+    color: "#243b53",
+    fontFamily: "DoppioOne",
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  settingsHeading: {
+    color: "#0f5f5d",
+    fontFamily: "DoppioOne",
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  preferencesShortcutCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#d5e2e0",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  preferencesShortcutIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: "#e8edff",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  preferencesShortcutContent: {
+    flex: 1,
+    paddingRight: 12,
+  },
+  preferencesShortcutTitle: {
+    color: "#243b53",
+    fontFamily: "DoppioOne",
+    fontSize: 15,
+    marginBottom: 4,
+  },
+  preferencesShortcutSubtitle: {
+    color: "#5c6169",
+    fontSize: 13,
+    lineHeight: 18,
+  },
   logoutWrapper: {
-    marginTop: 14,
+    marginTop: 24,
   },
 });
