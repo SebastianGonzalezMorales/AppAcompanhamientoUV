@@ -836,8 +836,6 @@ const MoodTrack = ({ route, navigation }) => {
         return "arm-flex";
       case 15:
         return "heart";
-      case 16:
-        return "shape-plus";
       default:
         return "circle";
     }

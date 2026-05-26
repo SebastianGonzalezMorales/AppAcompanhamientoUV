@@ -23,9 +23,12 @@ const usersSchema = new mongoose.Schema({
   phoneNumber: { type: String, required: true },
   pushNotifications: {
     enabled: { type: Boolean, default: false },
+    active: { type: Boolean, default: false },
     platform: { type: String, default: null },
     deviceToken: { type: String, default: null },
     snsEndpointArn: { type: String, default: null },
+    disabledAt: { type: Date, default: null },
+    lastError: { type: String, default: null },
     updatedAt: { type: Date, default: null },
   },
 });

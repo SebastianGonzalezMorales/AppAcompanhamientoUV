@@ -1,56 +1,85 @@
-// React imports
 import {
+  ActivityIndicator,
   FlatList,
   Keyboard,
   KeyboardAvoidingView,
-  PixelRatio,
   Platform,
   SafeAreaView,
+  ScrollView,
+  StyleSheet,
   Text,
   TouchableWithoutFeedback,
   View,
-  ActivityIndicator,
-  ScrollView, // Importamos ScrollView
-  StyleSheet,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 
-// Components
 import BackButton from "../../../components/buttons/BackButton";
 import InputButton from "../../../components/buttons/InputButton";
 
-// Customization
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import FormStyle from "../../../assets/styles/FormStyle";
 import GlobalStyle from "../../../assets/styles/GlobalStyle";
 
-// Import Axios for backend requests
 import api from "../../../utils/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 
-// Asigna API_URL desde la configuración
-const { API_URL } = Constants.expoConfig?.extra || {};
-
-// Import activities from Activities.js
 import Activity from "../Activities";
 
+const { API_URL } = Constants.expoConfig?.extra || {};
+
 const emotionLabels = {
-  HAPPY: "alegría",
+  HAPPY: "alegria",
   CALM: "tranquilidad",
   SAD: "tristeza",
-  ANGRY: "enojo o tensión",
-  FEAR: "preocupación o temor",
-  CONFUSED: "confusión",
+  ANGRY: "enojo o tension",
+  FEAR: "preocupacion o temor",
+  CONFUSED: "confusion",
   DISGUSTED: "incomodidad",
   SURPRISED: "sorpresa",
 };
 
-const MoodDetails = ({ route, navigation }) => {
-  // Obtener el ID del estado de ánimo desde la ruta
-  const { moodId } = route.params;
+const getIconName = (id) => {
+  switch (id) {
+    case 1:
+      return "thought-bubble";
+    case 2:
+      return "emoticon-confused";
+    case 3:
+      return "account-group";
+    case 4:
+      return "emoticon-sad";
+    case 5:
+      return "book-check";
+    case 6:
+      return "tea";
+    case 7:
+      return "school";
+    case 8:
+      return "run";
+    case 9:
+      return "briefcase-check";
+    case 10:
+      return "calendar-clock";
+    case 11:
+      return "lightbulb-on";
+    case 12:
+      return "home-heart";
+    case 13:
+      return "emoticon-happy";
+    case 14:
+      return "arm-flex";
+      case 15:
+        return "heart";
+      default:
+        return "circle";
+    }
+  };
 
-  // Estados
+const MoodDetails = ({ route, navigation }) => {
+  const { moodId } = route.params;
+  const activityColumns = 3;
+
   const [mood, setMood] = useState("");
   const [title, setTitle] = useState("");
   const [comments, setComments] = useState("");
@@ -58,70 +87,82 @@ const MoodDetails = ({ route, navigation }) => {
   const [imageAnalysis, setImageAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const fontScale = PixelRatio.getFontScale();
-  const activityColumns = fontScale > 1.15 ? 3 : 4;
 
-  // Cargar los datos desde el backend
   useEffect(() => {
     const fetchMoodDetails = async () => {
       try {
-        const token = await AsyncStorage.getItem("token"); // Obtener token del almacenamiento
+        const token = await AsyncStorage.getItem("token");
+
         if (!token) {
-          setErrorMessage("Token no encontrado. Por favor, inicia sesión.");
+          setErrorMessage("Token no encontrado. Por favor, inicia sesion.");
           return;
         }
 
-        // Solicitar detalles del estado de ánimo
         const response = await api.get(
           `${API_URL}/moodState/get-MoodStatesById/${moodId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
+
         const data = response.data.data;
+        const storedActivities = Array.isArray(data.activities)
+          ? data.activities
+          : [];
 
-        // Establecer los datos obtenidos
         setMood(data.moodState || "Estado no definido");
-        setTitle(data.title || "No registraste información sobre tu día.");
-
-        // Verificar campo de comentarios
-        if (data.comments) {
-          setComments(data.comments);
-        } else {
-          setComments("No se agregaron detalles importantes.");
-        }
-
+        setTitle(data.title || "No registraste informacion sobre tu dia.");
+        setComments(data.comments || "No se agregaron detalles importantes.");
         setImageAnalysis(data.imageAnalysis || null);
 
-        // Actualizar las actividades seleccionadas
-        const updatedActivities = Activity.map((activity) => {
-          if (data.activities.includes(activity.activity)) {
-            return { ...activity, selected: true };
-          }
-          return { ...activity, selected: false };
-        });
+        const updatedActivities = Activity.map((activity) => ({
+          ...activity,
+          selected: storedActivities.includes(activity.activity),
+        }));
+
         setActivities(updatedActivities);
       } catch (error) {
         console.error("Error al cargar los datos del mood:", error);
         setErrorMessage(
-          "Error al cargar los datos del estado de ánimo. Por favor, inténtalo de nuevo."
+          "Error al cargar los datos del estado de animo. Por favor, intentalo de nuevo."
         );
       } finally {
-        setIsLoading(false); // Ocultar indicador de carga
+        setIsLoading(false);
       }
     };
 
     fetchMoodDetails();
   }, [moodId]);
 
-  // keyboard offset
   const keyboardVerticalOffset = Platform.OS === "ios" ? 80 : 0;
 
-  /*
-   * ****************
-   * **** Screen ****
-   * ****************
-   */
+  const getImageAnalysisText = () => {
+    if (!imageAnalysis?.hasImage) {
+      return "No se registro una imagen complementaria en este estado de animo.";
+    }
+
+    if (imageAnalysis.faceDetected === false) {
+      return "Este registro incluyo una imagen complementaria, pero no se detecto un rostro con suficiente claridad.";
+    }
+
+    if (imageAnalysis.dominantEmotion) {
+      const emotion =
+        emotionLabels[imageAnalysis.dominantEmotion] ||
+        "una expresion no identificada con claridad";
+
+      return `Este registro incluyo una imagen para complementar tu reflexion emocional. La imagen mostro una expresion asociada a ${emotion}.`;
+    }
+
+    return "Este registro incluyo una imagen complementaria, pero no fue posible obtener un analisis de expresion.";
+  };
+
+  const imageAnalysisIcon = imageAnalysis?.hasImage
+    ? "face-recognition"
+    : "image-off-outline";
+  const imageAnalysisStatus = imageAnalysis?.hasImage
+    ? "Imagen registrada"
+    : "Sin imagen registrada";
+
   if (isLoading) {
     return (
       <View style={[FormStyle.container, GlobalStyle.androidSafeArea]}>
@@ -138,36 +179,8 @@ const MoodDetails = ({ route, navigation }) => {
     );
   }
 
-  const getImageAnalysisText = () => {
-    if (!imageAnalysis?.hasImage) {
-      return "No se registró una imagen complementaria en este estado de ánimo.";
-    }
-
-    if (imageAnalysis.faceDetected === false) {
-      return "Este registro incluyó una imagen complementaria, pero no se detectó un rostro con suficiente claridad.";
-    }
-
-    if (imageAnalysis.dominantEmotion) {
-      const emotion =
-        emotionLabels[imageAnalysis.dominantEmotion] ||
-        "una expresión no identificada con claridad";
-
-      return `Este registro incluyó una imagen para complementar tu reflexión emocional. La imagen mostró una expresión asociada a ${emotion}.`;
-    }
-
-    return "Este registro incluyó una imagen complementaria, pero no fue posible obtener un análisis de expresión.";
-  };
-
-  const imageAnalysisIcon = imageAnalysis?.hasImage
-    ? "face-recognition"
-    : "image-off-outline";
-  const imageAnalysisStatus = imageAnalysis?.hasImage
-    ? "Imagen registrada"
-    : "Sin imagen registrada";
-
   return (
     <SafeAreaView style={[FormStyle.container, GlobalStyle.androidSafeArea]}>
-      {/* Header */}
       <View style={FormStyle.flexContainer}>
         <BackButton onPress={() => navigation.goBack()} />
         <Text style={FormStyle.title}>{mood}</Text>
@@ -178,146 +191,67 @@ const MoodDetails = ({ route, navigation }) => {
         keyboardVerticalOffset={keyboardVerticalOffset}
         style={{ flex: 1 }}
       >
-        {/* Se agrega ScrollView para permitir desplazarse hasta abajo */}
         <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}>
           <View style={FormStyle.formContainer}>
-            {/* Activities */}
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View style={styles.questionWrapper}>
               <Text
                 style={[
                   GlobalStyle.subtitle,
-                  {
-                    textAlign: "justify",
-                    fontFamily: "CustomFontForQuestion", // Estilo específico para el signo de pregunta
-                  },
+                  styles.questionText,
+                  styles.moodQuestionText,
                 ]}
               >
-                ¿
-              </Text>
-              <Text
-                style={[
-                  GlobalStyle.subtitle, // Manteniendo el estilo original
-                  {
-                    textAlign: "justify",
-                    marginLeft: -60, // Ajuste fino para eliminar el espacio grande
-                  },
-                ]}
-              >
-                Qué has estado haciendo?
+                Que has estado haciendo?
               </Text>
             </View>
 
-            <View style={FormStyle.flatListContainer}>
+            <View style={styles.activitiesListContainer}>
               <FlatList
                 data={activities}
                 scrollEnabled={false}
                 numColumns={activityColumns}
                 key={activityColumns}
                 keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => {
-                  let iconName = "";
-                  // Asignar iconos basados en el id de la actividad
-                  switch (item.id) {
-                    case 1:
-                      iconName = "thought-bubble";
-                      break;
-                    case 2:
-                      iconName = "emoticon-confused";
-                      break;
-                    case 3:
-                      iconName = "account-group";
-                      break;
-                    case 4:
-                      iconName = "emoticon-sad";
-                      break;
-                    case 5:
-                      iconName = "book-check";
-                      break;
-                    case 6:
-                      iconName = "tea";
-                      break;
-                    case 7:
-                      iconName = "school";
-                      break;
-                    case 8:
-                      iconName = "run";
-                      break;
-                    case 9:
-                      iconName = "briefcase-check";
-                      break;
-                    case 10:
-                      iconName = "calendar-clock";
-                      break;
-                    case 11:
-                      iconName = "lightbulb-on";
-                      break;
-                    case 12:
-                      iconName = "home-heart";
-                      break;
-                    case 13:
-                      iconName = "emoticon-happy";
-                      break;
-                    case 14:
-                      iconName = "arm-flex";
-                      break;
-                    case 15:
-                      iconName = "heart";
-                      break;
-                    case 16:
-                      iconName = "dots-horizontal";
-                      break;
-                    default:
-                      iconName = "alert-circle";
-                      break;
-                  }
-
-                  return (
-                    <View style={FormStyle.activitiesContainer}>
-                      <View
+                columnWrapperStyle={styles.activitiesRow}
+                renderItem={({ item }) => (
+                  <View style={styles.activityItemWrapper}>
+                    <View
+                      style={[
+                        styles.activityCard,
+                        {
+                          backgroundColor: item.selected
+                            ? "white"
+                            : "transparent",
+                        },
+                      ]}
+                    >
+                      <MaterialCommunityIcons
+                        name={getIconName(item.id)}
+                        size={24}
+                        color={item.selected ? "#5da5a9" : "#f2f2f2"}
+                        style={styles.activityIcon}
+                      />
+                      <Text
+                        numberOfLines={3}
                         style={[
-                          FormStyle.activityContainer,
+                          styles.activityText,
                           {
-                            backgroundColor: item.selected
-                              ? "white"
-                              : "transparent",
+                            color: item.selected ? "#5da5a9" : "#f2f2f2",
                           },
                         ]}
                       >
-                        <MaterialCommunityIcons
-                          name={iconName}
-                          size={24}
-                          style={[
-                            FormStyle.activityIcon,
-                            {
-                              color: item.selected ? "#5da5a9" : "#f2f2f2",
-                            },
-                          ]}
-                        />
-                        <Text
-                          style={[
-                            FormStyle.activityText,
-                            {
-                              color: item.selected ? "#5da5a9" : "#f2f2f2",
-                            },
-                          ]}
-                        >
-                          {item.activity}
-                        </Text>
-                      </View>
+                        {item.activity}
+                      </Text>
                     </View>
-                  );
-                }}
+                  </View>
+                )}
               />
             </View>
 
-            {/* Se ha eliminado el texto "Desliza para ver más" */}
-
-            {/* Inputs */}
             <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
               <View style={[styles.sectionCard, styles.contextSectionCard]}>
-                {/* Título */}
                 <Text style={[FormStyle.text, styles.contextLabel]}>
-                  Mi día hasta ahora
+                  Mi dia hasta ahora
                 </Text>
                 <View pointerEvents="none">
                   <InputButton
@@ -327,7 +261,6 @@ const MoodDetails = ({ route, navigation }) => {
                   />
                 </View>
 
-                {/* Nota */}
                 <Text style={[FormStyle.text, styles.contextLabel]}>
                   Detalles importantes
                 </Text>
@@ -392,7 +325,7 @@ const MoodDetails = ({ route, navigation }) => {
               </Text>
 
               <Text style={styles.imageAnalysisNote}>
-                Este análisis no representa un diagnóstico. Tu registro manual
+                Este analisis no representa un diagnostico. Tu registro manual
                 sigue siendo el dato principal.
               </Text>
             </View>
@@ -406,6 +339,51 @@ const MoodDetails = ({ route, navigation }) => {
 export default MoodDetails;
 
 const styles = StyleSheet.create({
+  questionWrapper: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+  },
+  questionText: {
+    textAlign: "center",
+    fontSize: 18,
+    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
+  },
+  moodQuestionText: {
+    color: "#dce5ff",
+    fontSize: 17,
+    lineHeight: 24,
+  },
+  activitiesListContainer: {
+    width: "100%",
+    paddingHorizontal: 0,
+    marginTop: 14,
+  },
+  activitiesRow: {
+    justifyContent: "space-between",
+  },
+  activityItemWrapper: {
+    width: "31%",
+    marginBottom: 12,
+  },
+  activityCard: {
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 10,
+    minHeight: 104,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+  },
+  activityIcon: {
+    marginBottom: 10,
+  },
+  activityText: {
+    color: "#f2f2f2",
+    fontFamily: "DoppioOne",
+    fontSize: 13,
+    textAlign: "center",
+    lineHeight: 16,
+  },
   sectionCard: {
     alignSelf: "stretch",
     marginHorizontal: 20,

@@ -74,11 +74,6 @@ const Activity = [
     activity: 'Disfrutando algo que me gusta',
     selected: false,
   },
-  {
-    id: 16,
-    activity: 'Realizando otra actividad',
-    selected: false,
-  },
 ];
 
 export default Activity;
