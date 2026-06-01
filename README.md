@@ -1,7 +1,7 @@
 # App Acompañamiento UV
 
 <p align="center">
-  <img src="docs/images/app-icon.png" alt="Logo de App Acompañamiento UV" width="220" />
+  <img src="docs/images/app-icon.png" alt="Logo de App Acompañamiento UV" width="160" />
   <img src="docs/images/aws-cloud.png" alt="AWS" width="220" />
 </p>
 
