@@ -5,6 +5,8 @@ node_modules/
 .env.testing
 
 .expo/
+app.json
+eas.json
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/config.yml
