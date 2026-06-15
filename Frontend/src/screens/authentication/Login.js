@@ -7,7 +7,7 @@ import {
   View,
   Alert,
 } from 'react-native';
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Svg, { Circle } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -25,9 +25,7 @@ const expoExtra =
   Constants.manifest2?.extra?.expoClient?.extra ||
   Constants.manifest?.extra ||
   {};
-const { API_URL, BASE_URL, BUILD_DIAGNOSTIC_ID } = expoExtra;
-const DIAGNOSTIC_BACKEND_URL =
-  'http://appacomp-aws-env.eba-7qp3kchh.us-east-1.elasticbeanstalk.com/';
+const { API_URL } = expoExtra;
 
 // components
 import AuthButton from '../../components/buttons/AuthButton';
@@ -48,26 +46,6 @@ const Login = ({ navigation }) => {
   const [hasPasswordRecoveryToResume, setHasPasswordRecoveryToResume] = useState(false);
   const sanitizePasswordEdges = (value) => value.replace(/^\s+|\s+$/g, '');
   const handlePasswordChange = (value) => setPassword(sanitizePasswordEdges(value));
-
-  useEffect(() => {
-    console.log('[DIAGNOSTIC CONFIG] API_URL:', API_URL);
-    console.log('[DIAGNOSTIC CONFIG] BASE_URL:', BASE_URL);
-    console.log('[DIAGNOSTIC CONFIG] BUILD_DIAGNOSTIC_ID:', BUILD_DIAGNOSTIC_ID);
-
-    fetch(DIAGNOSTIC_BACKEND_URL)
-      .then((res) => {
-        console.log('[DIAGNOSTIC FETCH] status:', res.status);
-        return res.text();
-      })
-      .then((text) => {
-        console.log('[DIAGNOSTIC FETCH] text:', text);
-      })
-      .catch((error) => {
-        console.log('[DIAGNOSTIC FETCH] error name:', error?.name);
-        console.log('[DIAGNOSTIC FETCH] error message:', error?.message);
-        console.log('[DIAGNOSTIC FETCH] error:', error);
-      });
-  }, []);
 
   /*
    * *******************

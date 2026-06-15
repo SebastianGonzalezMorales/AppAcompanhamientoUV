@@ -3,6 +3,28 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
+const normalizeAssistantImageUrl = (imageUrl) => {
+  if (!imageUrl || !process.env.BASE_URL) {
+    return imageUrl;
+  }
+
+  try {
+    const parsedUrl = new URL(imageUrl);
+
+    if (parsedUrl.pathname.startsWith("/uploads/")) {
+      return `${process.env.BASE_URL}${parsedUrl.pathname}`;
+    }
+
+    return imageUrl;
+  } catch (error) {
+    if (imageUrl.startsWith("/uploads/")) {
+      return `${process.env.BASE_URL}${imageUrl}`;
+    }
+
+    return imageUrl;
+  }
+};
+
 // Verificar y crear la carpeta "uploads/AssistantsSocials" si no existe
 const uploadDir = path.join(__dirname, "../uploads/AssistantsSocials"); // Ruta relativa
 if (!fs.existsSync(uploadDir)) {
@@ -58,10 +80,13 @@ const getAssistantByCarrera = async (req, res) => {
       });
     }
 
+    const assistantData = assistant.toObject();
+    assistantData.imageUrl = normalizeAssistantImageUrl(assistantData.imageUrl);
+
     res.status(200).json({
       success: true,
       message: "Asistente encontrado con éxito.",
-      assistant,
+      assistant: assistantData,
     });
   } catch (error) {
     console.error("Error al obtener asistente:", error);
@@ -83,6 +108,7 @@ const addAsistente = async (req, res) => {
     }
 
     const { nombre, email, telefono, careers, location } = req.body;
+    const imageUrl = req.body.imageUrl || req.body.imagen;
 
     // Validar que todos los campos estén presentes
     if (!nombre || !email || !telefono || !careers || !location) {
@@ -97,9 +123,9 @@ const addAsistente = async (req, res) => {
         email,
         phone: telefono,
         careers: careers.split(",").map((carrera) => carrera.trim()), // Elimina espacios extra en las carreras
-        imagen: req.file
+        imageUrl: req.file
           ? `${process.env.BASE_URL}/uploads/AssistantsSocials/${req.file.filename}` // Generar la URL completa desde BASE_URL
-          : req.body.imagen, // Usar URL proporcionada si no se sube archivo
+          : imageUrl, // Usar URL proporcionada si no se sube archivo
         location,
       });
 

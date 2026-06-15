@@ -5,9 +5,26 @@ const hasPlugin = (plugins = [], pluginName) =>
     Array.isArray(plugin) ? plugin[0] === pluginName : plugin === pluginName
   );
 
+const normalizeBaseUrl = (value) =>
+  value ? value.trim().replace(/\/+$/, "") : value;
+
+const normalizeApiUrl = (value) => {
+  if (!value) {
+    return value;
+  }
+
+  return value.trim().replace(/\/+$/, "");
+};
+
 export default ({ config }) => {
   const existingPlugins = config.plugins || [];
   const existingPermissions = config.android?.permissions || [];
+  const apiUrl = normalizeApiUrl(process.env.API_URL);
+  const baseUrl = normalizeBaseUrl(process.env.BASE_URL);
+  const allowCleartextTraffic =
+    process.env.ALLOW_CLEARTEXT_TRAFFIC === "true" ||
+    /^http:\/\//i.test(apiUrl || "") ||
+    /^http:\/\//i.test(baseUrl || "");
 
   const plugins = [...existingPlugins];
 
@@ -16,7 +33,7 @@ export default ({ config }) => {
       "expo-build-properties",
       {
         android: {
-          usesCleartextTraffic: true,
+          usesCleartextTraffic: allowCleartextTraffic,
         },
       },
     ]);
@@ -30,15 +47,14 @@ export default ({ config }) => {
     ...config,
     android: {
       ...config.android,
-      usesCleartextTraffic: true,
+      usesCleartextTraffic: allowCleartextTraffic,
       permissions: Array.from(new Set([...existingPermissions, "INTERNET"])),
     },
     plugins,
     extra: {
       ...config.extra,
-      API_URL: process.env.API_URL,
-      BASE_URL: process.env.BASE_URL,
-      BUILD_DIAGNOSTIC_ID: new Date().toISOString(),
+      API_URL: apiUrl,
+      BASE_URL: baseUrl,
     },
   };
 };

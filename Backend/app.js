@@ -10,6 +10,18 @@ const dotenv = require('dotenv');
 const chalk = require('chalk');
 const listEndpoints = require('express-list-endpoints');
 
+const normalizeBaseUrl = (value) =>
+  value ? value.trim().replace(/\/+$/, '') : value;
+
+const normalizeApiUrl = (value) => {
+  if (!value) {
+    return value;
+  }
+
+  const trimmedValue = value.trim().replace(/\/+$/, '');
+  return trimmedValue.startsWith('/') ? trimmedValue : `/${trimmedValue}`;
+};
+
 
 // Cargar variables de entorno desde el archivo correspondiente
 const env = process.env.NODE_ENV || 'development';
@@ -32,7 +44,7 @@ if (result.error) {
 if (env === 'production') {
   console.log();
   console.log(chalk.blue.bold('==== Entorno de producción detectado ===='));
-  console.log(chalk.blue('Usando variables configuradas en Heroku.'));
+  console.log(chalk.blue('Usando variables configuradas en el entorno de despliegue.'));
   console.log();
 }
 
@@ -47,6 +59,11 @@ console.log(chalk.magenta.bold('====================================='));
 process.env.BASE_URL = process.env.NODE_ENV === 'production'
   ? process.env.BASE_URL_PROD
   : process.env.BASE_URL_DEV;
+
+process.env.API_URL = normalizeApiUrl(process.env.API_URL);
+process.env.BASE_URL_DEV = normalizeBaseUrl(process.env.BASE_URL_DEV);
+process.env.BASE_URL_PROD = normalizeBaseUrl(process.env.BASE_URL_PROD);
+process.env.BASE_URL = normalizeBaseUrl(process.env.BASE_URL);
 
 // Middlewares personalizados
 const authJwt = require('./middlewares/jwt');

@@ -4,25 +4,40 @@
     "appVersionSource": "remote"
   },
   "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal",
-      "android": {
-        "buildType": "apk"
-      } 
-    },
-    "preview": {
-      "distribution": "internal",
-      "android": {
-        "buildType": "apk"
-      }
-    },
-    "production": {
-      "autoIncrement": true,
-      "distribution": "store",
-      "android": {
-        "buildType": "app-bundle"
-      }
+      "development": {
+        "developmentClient": true,
+        "distribution": "internal",
+        "env": {
+        "API_URL": "http://api.appacompuv.xyz/api/v1",
+        "BASE_URL": "http://api.appacompuv.xyz",
+        "ALLOW_CLEARTEXT_TRAFFIC": "true"
+        },
+        "android": {
+          "buildType": "apk"
+        } 
+      },
+      "preview": {
+        "distribution": "internal",
+        "env": {
+        "API_URL": "http://api.appacompuv.xyz/api/v1",
+        "BASE_URL": "http://api.appacompuv.xyz",
+        "ALLOW_CLEARTEXT_TRAFFIC": "true"
+        },
+        "android": {
+          "buildType": "apk"
+        }
+      },
+      "production": {
+        "autoIncrement": true,
+        "distribution": "store",
+        "env": {
+        "API_URL": "http://api.appacompuv.xyz/api/v1",
+        "BASE_URL": "http://api.appacompuv.xyz",
+        "ALLOW_CLEARTEXT_TRAFFIC": "true"
+        },
+        "android": {
+          "buildType": "app-bundle"
+        }
     }
     //Production tiene que ser aab(Android App Bundle) para subirse a google play, luego google play genera un apk optimizado.
     //Production tiene que distribution:Store, si se deja como distribution:internal, se toma por omisión
