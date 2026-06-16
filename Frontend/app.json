@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "AppAcompañamientoUV",
+    "name": "AppAcompañamientoUV Original",
     "slug": "appacompanhamiento",
     "owner": "appacompanhamiento",
     "version": "1.0.0",
@@ -28,7 +28,7 @@
         "INTERNET"
       ],
       "usesCleartextTraffic": true,
-      "package": "com.sebastian2040.AppAcompanhamientoUVdevelopment_build",
+      "package": "com.sebastian2040.appacompanhamientouv.legacy",
       "runtimeVersion": "1.0.0"
     },
     "web": {

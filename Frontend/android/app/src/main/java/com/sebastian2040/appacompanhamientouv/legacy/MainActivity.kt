@@ -1,4 +1,4 @@
-package com.sebastian2040.AppAcompanhamientoUVdevelopment_build
+package com.sebastian2040.appacompanhamientouv.legacy
 
 import android.os.Build
 import android.os.Bundle
