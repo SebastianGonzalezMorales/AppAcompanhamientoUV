@@ -9,4 +9,5 @@ Esta carpeta reúne la documentación técnica de App Acompañamiento UV.
 ## Contacto
 
 Sebastián González Morales  
-sgonzalezm9045@gmail.com
+- Correo institucional: sebastian.gonzalez@estudiantes.uv.cl
+- Correo personal: sgonzalezm9045@gmail.com
