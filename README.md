@@ -1,5 +1,9 @@
 # App Acompañamiento UV
 
+<p align="center">
+  <img src="docs/images/app-icon.png" alt="Ícono de App Acompañamiento UV" width="180">
+</p>
+
 Aplicación móvil orientada al seguimiento del bienestar emocional de estudiantes de primer año de la Universidad de Valparaíso.
 
 ## Estructura
@@ -10,4 +14,3 @@ Aplicación móvil orientada al seguimiento del bienestar emocional de estudiant
 ## Documentación
 
 La documentación técnica del proyecto se encuentra en la carpeta [`docs/`](docs/README.md).
-
